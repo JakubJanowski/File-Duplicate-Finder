@@ -1,0 +1,384 @@
+﻿<Window x:Class="File_Duplicate_Finder.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Closing="WindowClosing"
+        Title="MainWindow" Height="720" Width="1280">
+    <Window.Resources>
+        <Style x:Key="emptyDirectoriesPrimaryListViewItemWithButtonStyle" TargetType="ListViewItem">
+            <Setter Property="SnapsToDevicePixels" Value="true"/>
+            <Setter Property="OverridesDefaultStyle" Value="true"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListViewItem">
+                        <Border Name="Border" Padding="2" SnapsToDevicePixels="true" Background="Transparent">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="{Binding}"/>
+                                <Button Grid.Column="1" Click="EmptyDirectoriesPrimaryRemoveFile">Remove file</Button>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="emptyFilesPrimaryListViewItemWithButtonStyle" TargetType="ListViewItem">
+            <Setter Property="SnapsToDevicePixels" Value="true"/>
+            <Setter Property="OverridesDefaultStyle" Value="true"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListViewItem">
+                        <Border Name="Border" Padding="2" SnapsToDevicePixels="true" Background="Transparent">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="{Binding}"/>
+                                <Button Grid.Column="1" Click="EmptyFilesPrimaryRemoveFile">Remove file</Button>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="emptyDirectoriesSecondaryListViewItemWithButtonStyle" TargetType="ListViewItem">
+            <Setter Property="SnapsToDevicePixels" Value="true"/>
+            <Setter Property="OverridesDefaultStyle" Value="true"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListViewItem">
+                        <Border Name="Border" Padding="2" SnapsToDevicePixels="true" Background="Transparent">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="{Binding}"/>
+                                <Button Grid.Column="1" Click="EmptyDirectoriesSecondaryRemoveFile">Remove file</Button>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="emptyFilesSecondaryListViewItemWithButtonStyle" TargetType="ListViewItem">
+            <Setter Property="SnapsToDevicePixels" Value="true"/>
+            <Setter Property="OverridesDefaultStyle" Value="true"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListViewItem">
+                        <Border Name="Border" Padding="2" SnapsToDevicePixels="true" Background="Transparent">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="{Binding}"/>
+                                <Button Grid.Column="1" Click="EmptyFilesSecondaryRemoveFile">Remove file</Button>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="duplicatedFilesPrimaryListViewItemWithButtonStyle" TargetType="ListViewItem">
+            <Setter Property="SnapsToDevicePixels" Value="true"/>
+            <Setter Property="OverridesDefaultStyle" Value="true"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListViewItem">
+                        <Border Name="Border" Padding="2" SnapsToDevicePixels="true" Background="Transparent">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="{Binding}"/>
+                                <Button Grid.Column="1" Click="DuplicatedFilesPrimaryRemoveFile">Remove file</Button>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="duplicatedFilesSecondaryListViewItemWithButtonStyle" TargetType="ListViewItem">
+            <Setter Property="SnapsToDevicePixels" Value="true"/>
+            <Setter Property="OverridesDefaultStyle" Value="true"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListViewItem">
+                        <Border Name="Border" Padding="2" SnapsToDevicePixels="true" Background="Transparent">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="{Binding}"/>
+                                <Button Grid.Column="1" Click="DuplicatedFilesSecondaryRemoveFile">Remove file</Button>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="duplicateFileListViewStyle" TargetType="ListViewItem">
+            <Setter Property="SnapsToDevicePixels" Value="true"/>
+            <Setter Property="OverridesDefaultStyle" Value="true"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListViewItem">
+                        <Border Name="Border" Padding="2" SnapsToDevicePixels="true" Background="Transparent">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <ListView ItemContainerStyle="{StaticResource duplicatedFilesPrimaryListViewItemWithButtonStyle}" Grid.Column="0" ItemsSource="{Binding Item1}"/>
+                                <ListView ItemContainerStyle="{StaticResource duplicatedFilesSecondaryListViewItemWithButtonStyle}" Grid.Column="1" ItemsSource="{Binding Item2}"/>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="duplicatedFilesPrimaryOnlyListViewItemWithButtonStyle" TargetType="ListViewItem">
+            <Setter Property="SnapsToDevicePixels" Value="true"/>
+            <Setter Property="OverridesDefaultStyle" Value="true"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListViewItem">
+                        <Border Name="Border" Padding="2" SnapsToDevicePixels="true" Background="Transparent">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="{Binding}"/>
+                                <Button Grid.Column="1" Click="DuplicatedFilesPrimaryOnlyRemoveFile">Remove file</Button>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="duplicatedFilesPrimaryOnlyListViewStyle" TargetType="ListViewItem">
+            <Setter Property="SnapsToDevicePixels" Value="true"/>
+            <Setter Property="OverridesDefaultStyle" Value="true"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListViewItem">
+                        <Border Name="Border" Padding="2" SnapsToDevicePixels="true" Background="Transparent">
+                            <ListView ItemContainerStyle="{StaticResource duplicatedFilesPrimaryOnlyListViewItemWithButtonStyle}" ItemsSource="{Binding}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Border Grid.Row="0" Grid.Column="0" Background="LightGreen">
+                    <TextBlock Margin="20,5,5,5">Primary directory</TextBlock>
+                </Border>
+                <Grid Grid.Row="0" Grid.Column="1" Background="LightGreen">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox x:Name="primaryDirectoryTextBox" Margin="0,5,0,5" HorizontalAlignment="Stretch" Grid.Column="0"/>
+                    <Button Margin="0,5,5,5" Width="18" Grid.Column="1" Click="PrimaryDirectoryDialog">...</Button>
+                </Grid>
+                <TextBlock Margin="5" Grid.Row="1" Grid.Column="0">Secondary directory</TextBlock>
+                <Grid Grid.Row="1" Grid.Column="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox x:Name="secondaryDirectoryTextBox" Margin="0,5,0,5" HorizontalAlignment="Stretch" Grid.Column="0"/>
+                    <Button Margin="0,5,5,5" Width="18" Grid.Column="1" Click="SecondaryDirectoryDialog">...</Button>
+                </Grid>
+            </Grid>
+            <Grid Margin="5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+                    <CheckBox x:Name="primaryOnlyCheckBox" Checked="PrimaryOnlyChecked" Unchecked="PrimaryOnlyUnchecked">Find duplicated files in primary directory only</CheckBox>
+                    <Separator Margin="0,10,0,5"/>
+                    <CheckBox IsEnabled="false" x:Name="removeByPathAndContentCheckBox" Checked="RemoveByPathAndContentChecked" Unchecked="RemoveByPathAndContentUnchecked">Remove files with identical path and content from secondary directory</CheckBox>
+                    <CheckBox IsEnabled="false" x:Name="removeByContentCheckBox" Checked="RemoveByContentChecked" Unchecked="RemoveByContentUnchecked">Remove files with identical content from secondary directory</CheckBox>
+                    <CheckBox IsEnabled="false" x:Name="removeEmptyDirectoriesFromPrimaryCheckBox" Checked="RemoveEmptyDirectoriesFromPrimaryChecked" Unchecked="RemoveEmptyDirectoriesFromPrimaryUnchecked">Remove empty folders from primary directory</CheckBox>
+                    <CheckBox IsEnabled="false" x:Name="removeEmptyDirectoriesFromSecondaryCheckBox" Checked="RemoveEmptyDirectoriesFromSecondaryChecked" Unchecked="RemoveEmptyDirectoriesFromSecondaryUnchecked">Remove empty folders from secondary directory</CheckBox>
+                    <CheckBox IsEnabled="false" x:Name="removeEmptyFilesFromPrimaryCheckBox" Checked="RemoveEmptyFilesFromPrimaryChecked" Unchecked="RemoveEmptyFilesFromPrimaryUnchecked">Remove empty files from primary directory</CheckBox>
+                    <CheckBox IsEnabled="false" x:Name="removeEmptyFilesFromSecondaryCheckBox" Checked="RemoveEmptyFilesFromSecondaryChecked" Unchecked="RemoveEmptyFilesFromSecondaryUnchecked">Remove empty files from secondary directory</CheckBox>
+                    <CheckBox IsEnabled="false" x:Name="keepFilesCheckBox" Checked="KeepFilesChecked" Unchecked="KeepFilesUnchecked">Keep all files</CheckBox>
+                    <Separator Margin="0,10,0,5"/>
+                    <CheckBox Checked="ShowBasePathsChecked" Unchecked="ShowBasePathsUnchecked">Show base paths</CheckBox>
+                    <CheckBox x:Name="backupFilesCheckBox" Checked="BackupFilesChecked" Unchecked="BackupFilesUnchecked" IsChecked="True">Store backup files</CheckBox>
+                    <CheckBox x:Name="askLargeCheckBox" Checked="AskLargeChecked" Unchecked="AskLargeUnchecked" IsChecked="True">Ask when deleting large files without backup</CheckBox>
+                    <Button x:Name="restoreButton" IsEnabled="False" Width="100" HorizontalAlignment="Left" Click="RestoreFiles">Restore files</Button>
+                </StackPanel>
+                <Button x:Name="findButton" Margin="10,0,0,0" Grid.Column="1" Click="FindDuplicatedFiles">Find duplicated files</Button>
+            </Grid>
+        </StackPanel>
+        <TabControl x:Name="tabControlPrimaryOnly" Visibility="Collapsed"  Margin="5" Grid.Row="1">
+            <TabItem Header="Log">
+                <ListView x:Name="logListViewPrimaryOnly" VerticalAlignment="Stretch"/>
+            </TabItem>
+            <TabItem Header="Empty Directories">
+                <ListView x:Name="emptyDirectoriesPrimaryOnlyListView" ItemContainerStyle="{StaticResource emptyDirectoriesPrimaryListViewItemWithButtonStyle}" VerticalAlignment="Stretch"/>
+            </TabItem>
+            <TabItem Header="Empty Files">
+                <ListView x:Name="emptyFilesPrimaryOnlyListView" ItemContainerStyle="{StaticResource emptyFilesPrimaryListViewItemWithButtonStyle}" VerticalAlignment="Stretch"/>
+            </TabItem>
+            <TabItem Header="Duplicated Files">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <StackPanel Margin="5" Orientation="Horizontal" Grid.Row="0">
+                        <CheckBox Checked="IdenticalSubpathChecked" Unchecked="IdenticalSubpathUnchecked" IsEnabled="False">Identical subpath only</CheckBox>
+                        <RadioButton x:Name="sortAlphabeticallyPrimaryOnlyRadioButton" GroupName="sortPrimaryOnly" Margin="5,0,5,0" Checked="SortAlphabeticallyPrimaryOnly">Sort alphabetically</RadioButton>
+                        <RadioButton x:Name="sortBySizePrimaryOnlyRadioButton" GroupName="sortPrimaryOnly" Checked="SortBySizePrimaryOnly" IsChecked="True">Sort by size</RadioButton>
+                    </StackPanel>
+                    <ListView x:Name="duplicatedFilesPrimaryOnlyListView" ItemContainerStyle="{StaticResource duplicatedFilesPrimaryOnlyListViewStyle}" VerticalAlignment="Stretch" Grid.Row="1"/>
+                </Grid>
+            </TabItem>
+        </TabControl>
+        <TabControl x:Name="tabControlBoth" Margin="5" Grid.Row="1">
+            <TabItem Header="Log">
+                <ListView x:Name="logListView" VerticalAlignment="Stretch"/>
+            </TabItem>
+            <TabItem Header="Empty Directories">
+                <TabControl>
+                    <TabItem Header="Primary directory">
+                        <ListView x:Name="emptyDirectoriesPrimaryListView" ItemContainerStyle="{StaticResource emptyDirectoriesPrimaryListViewItemWithButtonStyle}" VerticalAlignment="Stretch"/>
+                    </TabItem>
+                    <TabItem Header="Secondary directory">
+                        <ListView x:Name="emptyDirectoriesSecondaryListView" ItemContainerStyle="{StaticResource emptyDirectoriesSecondaryListViewItemWithButtonStyle}" VerticalAlignment="Stretch"/>
+                    </TabItem>
+                </TabControl>
+            </TabItem>
+            <TabItem Header="Empty Files" Height="22" VerticalAlignment="Bottom">
+                <TabControl>
+                    <TabItem Header="Primary directory">
+                        <ListView x:Name="emptyFilesPrimaryListView" ItemContainerStyle="{StaticResource emptyFilesPrimaryListViewItemWithButtonStyle}" VerticalAlignment="Stretch"/>
+                    </TabItem>
+                    <TabItem Header="Secondary directory">
+                        <ListView x:Name="emptyFilesSecondaryListView" ItemContainerStyle="{StaticResource emptyFilesSecondaryListViewItemWithButtonStyle}" VerticalAlignment="Stretch"/>
+                    </TabItem>
+                </TabControl>
+            </TabItem>
+            <TabItem Header="Duplicated Files">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <StackPanel Margin="5" Orientation="Horizontal" Grid.Row="0">
+                        <CheckBox Checked="IdenticalSubpathChecked" Unchecked="IdenticalSubpathUnchecked" IsEnabled="False">Identical subpath only</CheckBox>
+                        <RadioButton x:Name="sortAlphabeticallyRadioButton" GroupName="sort" Margin="5,0,5,0" Checked="SortAlphabetically">Sort alphabetically</RadioButton>
+                        <RadioButton x:Name="sortBySizeRadioButton" GroupName="sort" Checked="SortBySize" IsChecked="True">Sort by size</RadioButton>
+                    </StackPanel>
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0">Primary directory</TextBlock>
+                        <TextBlock Grid.Column="1">Secondary directory</TextBlock>
+                    </Grid>
+                    <ListView x:Name="duplicatedFilesListView" ItemContainerStyle="{StaticResource duplicateFileListViewStyle}" Grid.Row="2" VerticalAlignment="Stretch"/>
+                </Grid>
+            </TabItem>
+        </TabControl>
+        <StatusBar Height="21" Grid.Row="2">
+            <StatusBar.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="auto"/>
+                        </Grid.ColumnDefinitions>
+                    </Grid>
+                </ItemsPanelTemplate>
+            </StatusBar.ItemsPanel>
+            <StatusBarItem Grid.Column="0">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock x:Name="stateTextBlock">Ready</TextBlock>
+                </StackPanel>
+            </StatusBarItem>
+            <StatusBarItem Grid.Column="1">
+                <ProgressBar x:Name="progressBar" Margin="5,0" Height="16" Width="150" Visibility="Hidden"/>
+            </StatusBarItem>
+        </StatusBar>
+    </Grid>
+</Window>
