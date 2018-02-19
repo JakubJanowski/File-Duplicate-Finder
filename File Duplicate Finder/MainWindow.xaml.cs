@@ -2,7 +2,9 @@
 //recognize identical subpath
 //open in explorer button
 // show file size checkbox
-// add ignore button
+// remove/ignore/show in explorer on restore list
+//cancel
+
 
 using Microsoft.WindowsAPICodePack.Dialogs;
 using System;
@@ -176,6 +178,7 @@ namespace File_Duplicate_Finder {
 
             primaryDirectoryTextBox.Focus();
         }
+
         private void SecondaryDirectoryDialog(object sender, RoutedEventArgs e) {
             var dialog = new CommonOpenFileDialog { IsFolderPicker = true };
             CommonFileDialogResult result = dialog.ShowDialog();
@@ -273,7 +276,7 @@ namespace File_Duplicate_Finder {
                         if (length == otherLength) {
                             do {
                                 for (otherIndex = index + 1, groupIndex = -1; otherIndex < primaryFiles.Count && new FileInfo(primaryDirectory + primaryFiles[otherIndex]).Length == length; otherIndex++) {
-                                    if(groupIndex != -1) {
+                                    if (groupIndex != -1) {
                                         if (CompareFileContent(primaryDirectory + primaryFiles[index], primaryDirectory + primaryFiles[otherIndex], length)) {
                                             duplicatedFilesPrimaryOnly[groupIndex].Add(primaryFiles[otherIndex]);
                                             duplicateIndexingPrimary[otherIndex] = groupIndex;
@@ -295,7 +298,7 @@ namespace File_Duplicate_Finder {
                             duplicateIndexingPrimary.Clear();
                             Dispatcher.Invoke(() => duplicatedFilesPrimaryOnlyListView.Items.Refresh());
                         }
-                        
+
                         Dispatcher.Invoke(() => {
                             progressBar.Value = (otherIndex * 89) / primaryFiles.Count + 11;
                         });
@@ -441,13 +444,9 @@ namespace File_Duplicate_Finder {
                             indexSecondary++;
 
                         if (primaryFiles.Count < secondaryFiles.Count)
-                            Dispatcher.Invoke(() => {
-                                progressBar.Value = (indexPrimary * 89) / primaryFiles.Count + 11;
-                            });
+                            Dispatcher.Invoke(() => progressBar.Value = (indexPrimary * 89) / primaryFiles.Count + 11);
                         else
-                            Dispatcher.Invoke(() => {
-                                progressBar.Value = (indexSecondary * 89) / secondaryFiles.Count + 11;
-                            });
+                            Dispatcher.Invoke(() => progressBar.Value = (indexSecondary * 89) / secondaryFiles.Count + 11);
                     }
 
                     if (!sortBySize)
@@ -463,11 +462,23 @@ namespace File_Duplicate_Finder {
             }
         }
 
-        // for big files first check random data fragment for equality
-        // rather than comparing the whole file greedily
         private bool CompareFileContent(string filePrimary, string fileSecondary, long fileLength) {
-            FileStream fileStreamPrimary = File.OpenRead(filePrimary);
-            FileStream fileStreamSecondary = File.OpenRead(fileSecondary);
+            FileStream fileStreamPrimary;
+            FileStream fileStreamSecondary;
+            try {
+                fileStreamPrimary = File.OpenRead(filePrimary);
+            }
+            catch (IOException) {
+                Dispatcher.Invoke(() => logListView.Items.Add("Could not access file " + filePrimary + " because it is being used by another process."));
+                return false;
+            }
+            try {
+                fileStreamSecondary = File.OpenRead(fileSecondary);
+            }
+            catch (IOException) {
+                Dispatcher.Invoke(() => logListView.Items.Add("Could not access file " + fileSecondary + " because it is being used by another process."));
+                return false;
+            }
             while (fileLength > 0) {
                 if (fileLength >= megaByte) {
                     fileStreamPrimary.Read(bufferPrimary, 0, megaByte);
@@ -503,6 +514,15 @@ namespace File_Duplicate_Finder {
             findButton.IsEnabled = false;
             primaryDirectoryTextBox.IsEnabled = false;
             secondaryDirectoryTextBox.IsEnabled = false;
+            emptyDirectoriesPrimaryButton.IsEnabled = false;
+            emptyDirectoriesSecondaryButton.IsEnabled = false;
+            emptyFilesPrimaryButton.IsEnabled = false;
+            emptyFilesSecondaryButton.IsEnabled = false;
+            duplicatedFilesPrimaryButton.IsEnabled = false;
+            duplicatedFilesSecondaryButton.IsEnabled = false;
+            emptyFilesPrimaryOnlyButton.IsEnabled = false;
+            emptyDirectoriesPrimaryOnlyButton.IsEnabled = false;
+            duplicatedFilesPrimaryOnlyButton.IsEnabled = false;
         }
 
         private void UnlockGUI() {
@@ -514,6 +534,15 @@ namespace File_Duplicate_Finder {
             findButton.IsEnabled = true;
             primaryDirectoryTextBox.IsEnabled = true;
             secondaryDirectoryTextBox.IsEnabled = true;
+            emptyDirectoriesPrimaryButton.IsEnabled = true;
+            emptyDirectoriesSecondaryButton.IsEnabled = true;
+            emptyFilesPrimaryButton.IsEnabled = true;
+            emptyFilesSecondaryButton.IsEnabled = true;
+            duplicatedFilesPrimaryButton.IsEnabled = true;
+            duplicatedFilesSecondaryButton.IsEnabled = true;
+            emptyFilesPrimaryOnlyButton.IsEnabled = true;
+            emptyDirectoriesPrimaryOnlyButton.IsEnabled = true;
+            duplicatedFilesPrimaryOnlyButton.IsEnabled = true;
         }
 
 
@@ -539,120 +568,180 @@ namespace File_Duplicate_Finder {
 
         private void EmptyDirectoriesPrimaryRemoveFile(object sender, RoutedEventArgs e) {
             string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[0]).Text;
-            RemoveFile(path, () => {
-                emptyDirectoriesPrimary.Remove(path);
-                emptyDirectoriesPrimaryListView.Items.Refresh();
-            });
+            RemoveFile(path, primaryDirectory);
+            EmptyDirectoriesPrimaryIgnoreFile(path);
+        }
+
+        private void EmptyDirectoriesPrimaryIgnoreFile(object sender, RoutedEventArgs e) {
+            string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[0]).Text;
+            EmptyDirectoriesPrimaryIgnoreFile(path);
+        }
+
+        private void EmptyDirectoriesPrimaryIgnoreFile(string path) {
+            emptyDirectoriesPrimary.Remove(path);
+            emptyDirectoriesPrimaryListView.Items.Refresh();
         }
 
         private void EmptyFilesPrimaryRemoveFile(object sender, RoutedEventArgs e) {
             string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[0]).Text;
-            RemoveFile(path, () => {
-                emptyFilesPrimary.Remove(path);
-                emptyFilesPrimaryListView.Items.Refresh();
-            });
+            RemoveFile(path, primaryDirectory);
+            EmptyFilesPrimaryIgnoreFile(path);
+        }
+
+        private void EmptyFilesPrimaryIgnoreFile(object sender, RoutedEventArgs e) {
+            string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[0]).Text;
+            EmptyFilesPrimaryIgnoreFile(path);
+        }
+
+        private void EmptyFilesPrimaryIgnoreFile(string path) {
+            emptyFilesPrimary.Remove(path);
+            emptyFilesPrimaryListView.Items.Refresh();
         }
 
         private void EmptyDirectoriesSecondaryRemoveFile(object sender, RoutedEventArgs e) {
             string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[0]).Text;
-            RemoveFile(path, () => {
-                emptyDirectoriesSecondary.Remove(path);
-                emptyDirectoriesSecondaryListView.Items.Refresh();
-            });
+            RemoveFile(path, secondaryDirectory);
+            EmptyDirectoriesSecondaryIgnoreFile(path);
+        }
+
+        private void EmptyDirectoriesSecondaryIgnoreFile(object sender, RoutedEventArgs e) {
+            string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[0]).Text;
+            EmptyDirectoriesSecondaryIgnoreFile(path);
+        }
+
+        private void EmptyDirectoriesSecondaryIgnoreFile(string path) {
+            emptyDirectoriesSecondary.Remove(path);
+            emptyDirectoriesSecondaryListView.Items.Refresh();
         }
 
         private void EmptyFilesSecondaryRemoveFile(object sender, RoutedEventArgs e) {
             string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[0]).Text;
-            RemoveFile(path, () => {
-                emptyFilesSecondary.Remove(path);
-                emptyFilesSecondaryListView.Items.Refresh();
-            });
+            RemoveFile(path, secondaryDirectory);
+            EmptyFilesSecondaryIgnoreFile(path);
+        }
+
+        private void EmptyFilesSecondaryIgnoreFile(object sender, RoutedEventArgs e) {
+            string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[0]).Text;
+            EmptyFilesSecondaryIgnoreFile(path);
+        }
+
+        private void EmptyFilesSecondaryIgnoreFile(string path) {
+            emptyFilesSecondary.Remove(path);
+            emptyFilesSecondaryListView.Items.Refresh();
         }
 
         private void DuplicatedFilesPrimaryRemoveFile(object sender, RoutedEventArgs e) {
             string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[0]).Text;
-            RemoveFile(path, () => {
-                for (int i = 0; i < duplicatedFiles.Count; i++) {
-                    for (int j = 0; j < duplicatedFiles[i].Item1.Count; j++) {
-                        if (duplicatedFiles[i].Item1[j].Equals(path)) {
-                            duplicatedFiles[i].Item1.RemoveAt(j);
-                            if (duplicatedFiles[i].Item1.Count == 0 && duplicatedFiles[i].Item2.Count == 0)
-                                duplicatedFiles.RemoveAt(i);
-                            duplicatedFilesListView.Items.Refresh();
-                            break;
-                        }
+            RemoveFile(path, primaryDirectory);
+            DuplicatedFilesPrimaryIgnoreFile(path);
+        }
+
+        private void DuplicatedFilesPrimaryIgnoreFile(object sender, RoutedEventArgs e) {
+            string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[0]).Text;
+            DuplicatedFilesPrimaryIgnoreFile(path);
+        }
+
+        private void DuplicatedFilesPrimaryIgnoreFile(string path) {
+            for (int i = 0; i < duplicatedFiles.Count; i++) {
+                for (int j = 0; j < duplicatedFiles[i].Item1.Count; j++) {
+                    if (duplicatedFiles[i].Item1[j].Equals(path)) {
+                        duplicatedFiles[i].Item1.RemoveAt(j);
+                        if (duplicatedFiles[i].Item1.Count == 0 && duplicatedFiles[i].Item2.Count == 0)
+                            duplicatedFiles.RemoveAt(i);
+                        duplicatedFilesListView.Items.Refresh();
+                        break;
                     }
                 }
-            });
+            }
         }
 
         private void DuplicatedFilesSecondaryRemoveFile(object sender, RoutedEventArgs e) {
             string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[0]).Text;
-            RemoveFile(path, () => {
-                for (int i = 0; i < duplicatedFiles.Count; i++) {
-                    for (int j = 0; j < duplicatedFiles[i].Item2.Count; j++) {
-                        if (duplicatedFiles[i].Item2[j].Equals(path)) {
-                            duplicatedFiles[i].Item2.RemoveAt(j);
-                            if (duplicatedFiles[i].Item1.Count == 0 && duplicatedFiles[i].Item2.Count == 0)
-                                duplicatedFiles.RemoveAt(i);
-                            duplicatedFilesListView.Items.Refresh();
-                            break;
-                        }
+            RemoveFile(path, secondaryDirectory);
+            DuplicatedFilesSecondaryIgnoreFile(path);
+        }
+
+        private void DuplicatedFilesSecondaryIgnoreFile(object sender, RoutedEventArgs e) {
+            string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[0]).Text;
+            DuplicatedFilesSecondaryIgnoreFile(path);
+        }
+
+        private void DuplicatedFilesSecondaryIgnoreFile(string path) {
+            for (int i = 0; i < duplicatedFiles.Count; i++) {
+                for (int j = 0; j < duplicatedFiles[i].Item2.Count; j++) {
+                    if (duplicatedFiles[i].Item2[j].Equals(path)) {
+                        duplicatedFiles[i].Item2.RemoveAt(j);
+                        if (duplicatedFiles[i].Item1.Count == 0 && duplicatedFiles[i].Item2.Count == 0)
+                            duplicatedFiles.RemoveAt(i);
+                        duplicatedFilesListView.Items.Refresh();
+                        break;
                     }
                 }
-            });
+            }
         }
 
         private void DuplicatedFilesPrimaryOnlyRemoveFile(object sender, RoutedEventArgs e) {
             string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[0]).Text;
-            RemoveFile(path, () => {
-                for (int i = 0; i < duplicatedFilesPrimaryOnly.Count; i++) {
-                    for (int j = 0; j < duplicatedFilesPrimaryOnly[i].Count; j++) {
-                        if (duplicatedFilesPrimaryOnly[i][j].Equals(path)) {
-                            duplicatedFilesPrimaryOnly[i].RemoveAt(j);
-                            if (duplicatedFilesPrimaryOnly[i].Count == 0)
-                                duplicatedFilesPrimaryOnly.RemoveAt(i);
-                            duplicatedFilesPrimaryOnlyListView.Items.Refresh();
-                            break;
+            RemoveFile(path, primaryDirectory);
+            DuplicatedFilesPrimaryOnlyIgnoreFile(path);
+        }
+
+        private void DuplicatedFilesPrimaryOnlyIgnoreFile(object sender, RoutedEventArgs e) {
+            string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[0]).Text;
+            DuplicatedFilesPrimaryOnlyIgnoreFile(path);
+        }
+
+        private void DuplicatedFilesPrimaryOnlyIgnoreFile(string path) {
+            for (int i = 0; i < duplicatedFilesPrimaryOnly.Count; i++) {
+                for (int j = 0; j < duplicatedFilesPrimaryOnly[i].Count; j++) {
+                    if (duplicatedFilesPrimaryOnly[i][j].Equals(path)) {
+                        duplicatedFilesPrimaryOnly[i].RemoveAt(j);
+                        if (duplicatedFilesPrimaryOnly[i].Count == 0)
+                            duplicatedFilesPrimaryOnly.RemoveAt(i);
+                        duplicatedFilesPrimaryOnlyListView.Items.Refresh();
+                        break;
+                    }
+                }
+            }
+        }
+
+        private void RemoveFile(string path, string baseDirectory) {
+            if (!showBasePaths)
+                path = baseDirectory + path;
+            try {
+                if (File.GetAttributes(path).HasFlag(FileAttributes.Directory)) {
+                    DirectoryInfo directoryInfo = new DirectoryInfo(path);
+                    if (backupFiles) {
+                        storedFiles.Add(Tuple.Create(path, ""));
+                        restoreButton.IsEnabled = true;
+                    }
+                    directoryInfo.Delete();
+                }
+                else {  // file
+                    FileInfo fileInfo = new FileInfo(path);
+                    if (fileInfo.Length < 2 * megaByte) {   // don't move large files
+                        if (backupFiles) {
+                            Guid guid = Guid.NewGuid();
+                            fileInfo.MoveTo(tmpDirectory + guid.ToString());
+                            storedFiles.Add(Tuple.Create(path, guid.ToString()));
+                            restoreButton.IsEnabled = true;
+                        }
+                        else {
+                            fileInfo.Delete();
+                        }
+                    }
+                    else {
+                        if (!askLarge || MessageBox.Show("You will permanently delete file " + path) == MessageBoxResult.OK) {
+                            fileInfo.Delete();
                         }
                     }
                 }
-            });
-        }
-
-        private void RemoveFile(string path, Action action) {
-            if (!showBasePaths)
-                path = primaryDirectory + path;
-            if (File.GetAttributes(path).HasFlag(FileAttributes.Directory)) {
-                DirectoryInfo directoryInfo = new DirectoryInfo(path);
-                if (backupFiles) {
-                    storedFiles.Add(Tuple.Create(path, ""));
-                    restoreButton.IsEnabled = true;
-                }
-                action();
-                directoryInfo.Delete();
             }
-            else {  // file
-                FileInfo fileInfo = new FileInfo(path);
-                if (fileInfo.Length < 2 * megaByte) {   // don't copy large files
-                    if (backupFiles) {
-                        Guid guid = Guid.NewGuid();
-                        fileInfo.MoveTo(tmpDirectory + guid.ToString());
-                        storedFiles.Add(Tuple.Create(path, guid.ToString()));
-                        restoreButton.IsEnabled = true;
-                        action();
-                    }
-                    else {
-                        action();
-                        fileInfo.Delete();
-                    }
-                }
-                else {
-                    if (!askLarge || MessageBox.Show("You will permanently delete file " + path) == MessageBoxResult.OK) {
-                        action();
-                        fileInfo.Delete();
-                    }
-                }
+            catch (IOException) {
+                Dispatcher.Invoke(() => logListView.Items.Add("File " + path + " no longer exists."));
+            }
+            catch (UnauthorizedAccessException) {
+                Dispatcher.Invoke(() => logListView.Items.Add("Access denied for " + path));
             }
         }
 
@@ -704,7 +793,7 @@ namespace File_Duplicate_Finder {
             for (int i = 0; i < emptyFilesSecondary.Count; i++)
                 emptyFilesSecondary[i] = new string(emptyFilesSecondary[i].Skip(secondaryDirectory.Length).ToArray());
             emptyFilesSecondaryListView.Items.Refresh();
-            
+
             for (int i = 0; i < duplicatedFilesPrimaryOnly.Count; i++)
                 for (int p = 0; p < duplicatedFilesPrimaryOnly[i].Count; p++)
                     duplicatedFilesPrimaryOnly[i][p] = new string(duplicatedFilesPrimaryOnly[i][p].Skip(primaryDirectory.Length).ToArray());
@@ -791,6 +880,217 @@ namespace File_Duplicate_Finder {
             secondaryDirectoryTextBox.IsEnabled = true;
             tabControlBoth.Visibility = Visibility.Visible;
             tabControlPrimaryOnly.Visibility = Visibility.Collapsed;
+        }
+
+        private void RemoveAllEmptyDirectoriesPrimary(object sender, RoutedEventArgs e) {
+            if (MessageBox.Show("Are you sure you want to delete all files from " + primaryDirectory + "? Backup files will not be stored.", "Warning", MessageBoxButton.YesNo) == MessageBoxResult.No)
+                return;
+            bool saveStateOfBackupFiles = backupFiles;
+            bool saveStateOfAskLarge = askLarge;
+            backupFiles = false;
+            askLarge = false;
+            progressBar.Value = 0;
+            progressBar.Visibility = Visibility.Visible;
+            LockGUI();
+            stateTextBlock.Text = "Removing files...";
+            new Thread(() => {
+                for (int i = 0; i < emptyDirectoriesPrimary.Count; i++) {
+                    RemoveFile(emptyDirectoriesPrimary[i], primaryDirectory);
+                    Dispatcher.Invoke(() => progressBar.Value = i * 100f / emptyDirectoriesPrimary.Count);
+                }
+                emptyDirectoriesPrimary.Clear();
+                backupFiles = saveStateOfBackupFiles;
+                askLarge = saveStateOfAskLarge;
+                Dispatcher.Invoke(() => {
+                    progressBar.Visibility = Visibility.Hidden;
+                    emptyDirectoriesPrimaryListView.Items.Refresh();
+                    UnlockGUI();
+                    stateTextBlock.Text = "Done";
+                });
+            }).Start();
+        }
+
+        private void RemoveAllEmptyDirectoriesSecondary(object sender, RoutedEventArgs e) {
+            if (MessageBox.Show("Are you sure you want to delete all files from " + secondaryDirectory + "? Backup files will not be stored.", "Warning", MessageBoxButton.YesNo) == MessageBoxResult.No)
+                return;
+            bool saveStateOfBackupFiles = backupFiles;
+            bool saveStateOfAskLarge = askLarge;
+            backupFiles = false;
+            askLarge = false;
+            progressBar.Value = 0;
+            progressBar.Visibility = Visibility.Visible;
+            LockGUI();
+            stateTextBlock.Text = "Removing files...";
+            new Thread(() => {
+                for (int i = 0; i < emptyDirectoriesSecondary.Count; i++) {
+                    RemoveFile(emptyDirectoriesSecondary[i], secondaryDirectory);
+                    Dispatcher.Invoke(() => progressBar.Value = i * 100f / emptyDirectoriesSecondary.Count);
+                }
+                emptyDirectoriesSecondary.Clear();
+                backupFiles = saveStateOfBackupFiles;
+                askLarge = saveStateOfAskLarge;
+                Dispatcher.Invoke(() => {
+                    progressBar.Visibility = Visibility.Hidden;
+                    emptyDirectoriesSecondaryListView.Items.Refresh();
+                    UnlockGUI();
+                    stateTextBlock.Text = "Done";
+                });
+            }).Start();
+        }
+
+        private void RemoveAllEmptyFilesPrimary(object sender, RoutedEventArgs e) {
+            if (MessageBox.Show("Are you sure you want to delete all files from " + primaryDirectory + "? Backup files will not be stored.", "Warning", MessageBoxButton.YesNo) == MessageBoxResult.No)
+                return;
+            bool saveStateOfBackupFiles = backupFiles;
+            bool saveStateOfAskLarge = askLarge;
+            backupFiles = false;
+            askLarge = false;
+            progressBar.Value = 0;
+            progressBar.Visibility = Visibility.Visible;
+            LockGUI();
+            stateTextBlock.Text = "Removing files...";
+            new Thread(() => {
+                for (int i = 0; i < emptyFilesPrimary.Count; i++) {
+                    RemoveFile(emptyFilesPrimary[i], primaryDirectory);
+                    Dispatcher.Invoke(() => progressBar.Value = i * 100f / emptyFilesPrimary.Count);
+                }
+                emptyFilesPrimary.Clear();
+                backupFiles = saveStateOfBackupFiles;
+                askLarge = saveStateOfAskLarge;
+                Dispatcher.Invoke(() => {
+                    progressBar.Visibility = Visibility.Hidden;
+                    emptyFilesPrimaryListView.Items.Refresh();
+                    UnlockGUI();
+                    stateTextBlock.Text = "Done";
+                });
+            }).Start();
+        }
+
+        private void RemoveAllEmptyFilesSecondary(object sender, RoutedEventArgs e) {
+            if (MessageBox.Show("Are you sure you want to delete all files from " + secondaryDirectory + "? Backup files will not be stored.", "Warning", MessageBoxButton.YesNo) == MessageBoxResult.No)
+                return;
+            bool saveStateOfBackupFiles = backupFiles;
+            bool saveStateOfAskLarge = askLarge;
+            backupFiles = false;
+            askLarge = false;
+            progressBar.Value = 0;
+            progressBar.Visibility = Visibility.Visible;
+            LockGUI();
+            stateTextBlock.Text = "Removing files...";
+            new Thread(() => {
+                for (int i = 0; i < emptyFilesSecondary.Count; i++) {
+                    RemoveFile(emptyFilesSecondary[i], secondaryDirectory);
+                    Dispatcher.Invoke(() => progressBar.Value = i * 100f / emptyFilesSecondary.Count);
+                }
+                emptyFilesSecondary.Clear();
+                backupFiles = saveStateOfBackupFiles;
+                askLarge = saveStateOfAskLarge;
+                Dispatcher.Invoke(() => {
+                    progressBar.Visibility = Visibility.Hidden;
+                    emptyFilesSecondaryListView.Items.Refresh();
+                    UnlockGUI();
+                    stateTextBlock.Text = "Done";
+                });
+            }).Start();
+        }
+
+        private void RemoveAllPrimary(object sender, RoutedEventArgs e) {
+            if (MessageBox.Show("Are you sure you want to delete all files from " + primaryDirectory + "? Backup files will not be stored.", "Warning", MessageBoxButton.YesNo) == MessageBoxResult.No)
+                return;
+            bool saveStateOfBackupFiles = backupFiles;
+            bool saveStateOfAskLarge = askLarge;
+            backupFiles = false;
+            askLarge = false;
+            progressBar.Value = 0;
+            progressBar.Visibility = Visibility.Visible;
+            LockGUI();
+            stateTextBlock.Text = "Removing files...";
+            new Thread(() => {
+                for (int i = 0; i < duplicatedFiles.Count;) {
+                    for (int j = 0; j < duplicatedFiles[i].Item1.Count; j++)
+                        RemoveFile(duplicatedFiles[i].Item1[j], primaryDirectory);
+                    if (duplicatedFiles[i].Item2.Count == 0) {
+                        duplicatedFiles.RemoveAt(i);
+                    }
+                    else {
+                        duplicatedFiles[i].Item1.Clear();
+                        i++;
+                    }
+                    Dispatcher.Invoke(() => progressBar.Value = i * 100f / duplicatedFiles.Count);
+                }
+                Dispatcher.Invoke(() => {
+                    progressBar.Visibility = Visibility.Hidden;
+                    backupFiles = saveStateOfBackupFiles;
+                    askLarge = saveStateOfAskLarge;
+                    duplicatedFilesListView.Items.Refresh();
+                    UnlockGUI();
+                    stateTextBlock.Text = "Done";
+                });
+            }).Start();
+        }
+
+        private void RemoveAllSecondary(object sender, RoutedEventArgs e) {
+            if (MessageBox.Show("Are you sure you want to delete all files from " + secondaryDirectory + "? Backup files will not be stored.", "Warning", MessageBoxButton.YesNo) == MessageBoxResult.No)
+                return;
+            bool saveStateOfBackupFiles = backupFiles;
+            bool saveStateOfAskLarge = askLarge;
+            backupFiles = false;
+            askLarge = false;
+            progressBar.Value = 0;
+            progressBar.Visibility = Visibility.Visible;
+            LockGUI();
+            stateTextBlock.Text = "Removing files...";
+            new Thread(() => {
+                for (int i = 0; i < duplicatedFiles.Count;) {
+                    for (int j = 0; j < duplicatedFiles[i].Item2.Count; j++)
+                        RemoveFile(duplicatedFiles[i].Item2[j], secondaryDirectory);
+                    if (duplicatedFiles[i].Item1.Count == 0) {
+                        duplicatedFiles.RemoveAt(i);
+                    }
+                    else {
+                        duplicatedFiles[i].Item2.Clear();
+                        i++;
+                    }
+                    Dispatcher.Invoke(() => progressBar.Value = i * 100f / duplicatedFiles.Count);
+                }
+                Dispatcher.Invoke(() => {
+                    progressBar.Visibility = Visibility.Hidden;
+                    backupFiles = saveStateOfBackupFiles;
+                    askLarge = saveStateOfAskLarge;
+                    duplicatedFilesListView.Items.Refresh();
+                    UnlockGUI();
+                    stateTextBlock.Text = "Done";
+                });
+            }).Start();
+        }
+
+        private void RemoveAllPrimarOnly(object sender, RoutedEventArgs e) {
+            if (MessageBox.Show("Are you sure you want to delete all files from " + primaryDirectory + "? Backup files will not be stored.", "Warning", MessageBoxButton.YesNo) == MessageBoxResult.No)
+                return;
+            bool saveStateOfBackupFiles = backupFiles;
+            bool saveStateOfAskLarge = askLarge;
+            backupFiles = false;
+            askLarge = false;
+            progressBar.Value = 0;
+            progressBar.Visibility = Visibility.Visible;
+            LockGUI();
+            stateTextBlock.Text = "Removing files...";
+            new Thread(() => {
+                for (int i = 0; i < duplicatedFiles.Count; i++) {
+                    for (int j = 0; j < duplicatedFiles[i].Item1.Count; j++)
+                        RemoveFile(duplicatedFilesPrimaryOnly[i][j], primaryDirectory);
+                    Dispatcher.Invoke(() => progressBar.Value = i * 100f / duplicatedFiles.Count);
+                }
+                duplicatedFilesPrimaryOnly.Clear();
+                Dispatcher.Invoke(() => {
+                    progressBar.Visibility = Visibility.Hidden;
+                    backupFiles = saveStateOfBackupFiles;
+                    askLarge = saveStateOfAskLarge;
+                    duplicatedFilesPrimaryOnlyListView.Items.Refresh();
+                    UnlockGUI();
+                    stateTextBlock.Text = "Done";
+                });
+            }).Start();
         }
     }
 }

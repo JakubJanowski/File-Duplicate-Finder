@@ -18,9 +18,11 @@
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="auto"/>
+                                    <ColumnDefinition Width="auto"/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Grid.Column="0" Text="{Binding}"/>
-                                <Button Grid.Column="1" Click="EmptyDirectoriesPrimaryRemoveFile">Remove file</Button>
+                                <Button Margin="5,0,5,0" Grid.Column="1" Click="EmptyDirectoriesPrimaryRemoveFile">Remove folder</Button>
+                                <Button Grid.Column="2" Click="EmptyDirectoriesPrimaryIgnoreFile">Ignore folder</Button>
                             </Grid>
                         </Border>
                         <ControlTemplate.Triggers>
@@ -43,9 +45,11 @@
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="auto"/>
+                                    <ColumnDefinition Width="auto"/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Grid.Column="0" Text="{Binding}"/>
-                                <Button Grid.Column="1" Click="EmptyFilesPrimaryRemoveFile">Remove file</Button>
+                                <Button Margin="5,0,5,0" Grid.Column="1" Click="EmptyFilesPrimaryRemoveFile">Remove file</Button>
+                                <Button Grid.Column="2" Click="EmptyFilesPrimaryIgnoreFile">Ignore file</Button>
                             </Grid>
                         </Border>
                         <ControlTemplate.Triggers>
@@ -68,9 +72,11 @@
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="auto"/>
+                                    <ColumnDefinition Width="auto"/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Grid.Column="0" Text="{Binding}"/>
-                                <Button Grid.Column="1" Click="EmptyDirectoriesSecondaryRemoveFile">Remove file</Button>
+                                <Button Margin="5,0,5,0" Grid.Column="1" Click="EmptyDirectoriesSecondaryRemoveFile">Remove folder</Button>
+                                <Button Grid.Column="2" Click="EmptyDirectoriesSecondaryIgnoreFile">Ignore folder</Button>
                             </Grid>
                         </Border>
                         <ControlTemplate.Triggers>
@@ -93,9 +99,11 @@
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="auto"/>
+                                    <ColumnDefinition Width="auto"/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Grid.Column="0" Text="{Binding}"/>
-                                <Button Grid.Column="1" Click="EmptyFilesSecondaryRemoveFile">Remove file</Button>
+                                <Button Margin="5,0,5,0" Grid.Column="1" Click="EmptyFilesSecondaryRemoveFile">Remove file</Button>
+                                <Button Grid.Column="2" Click="EmptyFilesSecondaryIgnoreFile">Ignore file</Button>
                             </Grid>
                         </Border>
                         <ControlTemplate.Triggers>
@@ -118,9 +126,11 @@
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="auto"/>
+                                    <ColumnDefinition Width="auto"/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Grid.Column="0" Text="{Binding}"/>
-                                <Button Grid.Column="1" Click="DuplicatedFilesPrimaryRemoveFile">Remove file</Button>
+                                <Button Margin="5,0,5,0" Grid.Column="1" Click="DuplicatedFilesPrimaryRemoveFile">Remove file</Button>
+                                <Button Grid.Column="2" Click="DuplicatedFilesPrimaryIgnoreFile">Ignore file</Button>
                             </Grid>
                         </Border>
                         <ControlTemplate.Triggers>
@@ -143,9 +153,11 @@
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="auto"/>
+                                    <ColumnDefinition Width="auto"/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Grid.Column="0" Text="{Binding}"/>
-                                <Button Grid.Column="1" Click="DuplicatedFilesSecondaryRemoveFile">Remove file</Button>
+                                <Button Margin="5,0,5,0" Grid.Column="1" Click="DuplicatedFilesSecondaryRemoveFile">Remove file</Button>
+                                <Button Grid.Column="2" Click="DuplicatedFilesSecondaryIgnoreFile">Ignore file</Button>
                             </Grid>
                         </Border>
                         <ControlTemplate.Triggers>
@@ -168,6 +180,7 @@
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="auto"/>
                                 </Grid.ColumnDefinitions>
                                 <ListView ItemContainerStyle="{StaticResource duplicatedFilesPrimaryListViewItemWithButtonStyle}" Grid.Column="0" ItemsSource="{Binding Item1}"/>
                                 <ListView ItemContainerStyle="{StaticResource duplicatedFilesSecondaryListViewItemWithButtonStyle}" Grid.Column="1" ItemsSource="{Binding Item2}"/>
@@ -193,9 +206,11 @@
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="auto"/>
+                                    <ColumnDefinition Width="auto"/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Grid.Column="0" Text="{Binding}"/>
                                 <Button Grid.Column="1" Click="DuplicatedFilesPrimaryOnlyRemoveFile">Remove file</Button>
+                                <Button Grid.Column="2" Click="DuplicatedFilesPrimaryOnlyIgnoreFile">Ignore file</Button>
                             </Grid>
                         </Border>
                         <ControlTemplate.Triggers>
@@ -271,14 +286,14 @@
                 <StackPanel Grid.Column="0">
                     <CheckBox x:Name="primaryOnlyCheckBox" Checked="PrimaryOnlyChecked" Unchecked="PrimaryOnlyUnchecked">Find duplicated files in primary directory only</CheckBox>
                     <Separator Margin="0,10,0,5"/>
-                    <CheckBox IsEnabled="false" x:Name="removeByPathAndContentCheckBox" Checked="RemoveByPathAndContentChecked" Unchecked="RemoveByPathAndContentUnchecked">Remove files with identical path and content from secondary directory</CheckBox>
-                    <CheckBox IsEnabled="false" x:Name="removeByContentCheckBox" Checked="RemoveByContentChecked" Unchecked="RemoveByContentUnchecked">Remove files with identical content from secondary directory</CheckBox>
-                    <CheckBox IsEnabled="false" x:Name="removeEmptyDirectoriesFromPrimaryCheckBox" Checked="RemoveEmptyDirectoriesFromPrimaryChecked" Unchecked="RemoveEmptyDirectoriesFromPrimaryUnchecked">Remove empty folders from primary directory</CheckBox>
-                    <CheckBox IsEnabled="false" x:Name="removeEmptyDirectoriesFromSecondaryCheckBox" Checked="RemoveEmptyDirectoriesFromSecondaryChecked" Unchecked="RemoveEmptyDirectoriesFromSecondaryUnchecked">Remove empty folders from secondary directory</CheckBox>
-                    <CheckBox IsEnabled="false" x:Name="removeEmptyFilesFromPrimaryCheckBox" Checked="RemoveEmptyFilesFromPrimaryChecked" Unchecked="RemoveEmptyFilesFromPrimaryUnchecked">Remove empty files from primary directory</CheckBox>
-                    <CheckBox IsEnabled="false" x:Name="removeEmptyFilesFromSecondaryCheckBox" Checked="RemoveEmptyFilesFromSecondaryChecked" Unchecked="RemoveEmptyFilesFromSecondaryUnchecked">Remove empty files from secondary directory</CheckBox>
-                    <CheckBox IsEnabled="false" x:Name="keepFilesCheckBox" Checked="KeepFilesChecked" Unchecked="KeepFilesUnchecked">Keep all files</CheckBox>
-                    <Separator Margin="0,10,0,5"/>
+                    <CheckBox Visibility="Collapsed" x:Name="removeByPathAndContentCheckBox" Checked="RemoveByPathAndContentChecked" Unchecked="RemoveByPathAndContentUnchecked">Remove files with identical path and content from secondary directory</CheckBox>
+                    <CheckBox Visibility="Collapsed" x:Name="removeByContentCheckBox" Checked="RemoveByContentChecked" Unchecked="RemoveByContentUnchecked">Remove files with identical content from secondary directory</CheckBox>
+                    <CheckBox Visibility="Collapsed" x:Name="removeEmptyDirectoriesFromPrimaryCheckBox" Checked="RemoveEmptyDirectoriesFromPrimaryChecked" Unchecked="RemoveEmptyDirectoriesFromPrimaryUnchecked">Remove empty folders from primary directory</CheckBox>
+                    <CheckBox Visibility="Collapsed" x:Name="removeEmptyDirectoriesFromSecondaryCheckBox" Checked="RemoveEmptyDirectoriesFromSecondaryChecked" Unchecked="RemoveEmptyDirectoriesFromSecondaryUnchecked">Remove empty folders from secondary directory</CheckBox>
+                    <CheckBox Visibility="Collapsed" x:Name="removeEmptyFilesFromPrimaryCheckBox" Checked="RemoveEmptyFilesFromPrimaryChecked" Unchecked="RemoveEmptyFilesFromPrimaryUnchecked">Remove empty files from primary directory</CheckBox>
+                    <CheckBox Visibility="Collapsed" x:Name="removeEmptyFilesFromSecondaryCheckBox" Checked="RemoveEmptyFilesFromSecondaryChecked" Unchecked="RemoveEmptyFilesFromSecondaryUnchecked">Remove empty files from secondary directory</CheckBox>
+                    <CheckBox Visibility="Collapsed" x:Name="keepFilesCheckBox" Checked="KeepFilesChecked" Unchecked="KeepFilesUnchecked">Keep all files</CheckBox>
+                    <Separator Visibility="Collapsed" Margin="0,10,0,5"/>
                     <CheckBox Checked="ShowBasePathsChecked" Unchecked="ShowBasePathsUnchecked">Show base paths</CheckBox>
                     <CheckBox x:Name="backupFilesCheckBox" Checked="BackupFilesChecked" Unchecked="BackupFilesUnchecked" IsChecked="True">Store backup files</CheckBox>
                     <CheckBox x:Name="askLargeCheckBox" Checked="AskLargeChecked" Unchecked="AskLargeUnchecked" IsChecked="True">Ask when deleting large files without backup</CheckBox>
@@ -292,14 +307,29 @@
                 <ListView x:Name="logListViewPrimaryOnly" VerticalAlignment="Stretch"/>
             </TabItem>
             <TabItem Header="Empty Directories">
-                <ListView x:Name="emptyDirectoriesPrimaryOnlyListView" ItemContainerStyle="{StaticResource emptyDirectoriesPrimaryListViewItemWithButtonStyle}" VerticalAlignment="Stretch"/>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Button x:Name="emptyDirectoriesPrimaryOnlyButton" Width="100" HorizontalAlignment="Left" Grid.Row="0" Click="RemoveAllEmptyDirectoriesPrimary">Remove all</Button>
+                    <ListView x:Name="emptyDirectoriesPrimaryOnlyListView" Grid.Row="1" ItemContainerStyle="{StaticResource emptyDirectoriesPrimaryListViewItemWithButtonStyle}" VerticalAlignment="Stretch"/>
+                </Grid>
             </TabItem>
             <TabItem Header="Empty Files">
-                <ListView x:Name="emptyFilesPrimaryOnlyListView" ItemContainerStyle="{StaticResource emptyFilesPrimaryListViewItemWithButtonStyle}" VerticalAlignment="Stretch"/>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Button x:Name="emptyFilesPrimaryOnlyButton" Width="100" HorizontalAlignment="Left" Grid.Row="0" Click="RemoveAllEmptyFilesPrimary">Remove all</Button>
+                    <ListView x:Name="emptyFilesPrimaryOnlyListView" Grid.Row="1" ItemContainerStyle="{StaticResource emptyFilesPrimaryListViewItemWithButtonStyle}" VerticalAlignment="Stretch"/>
+                </Grid>
             </TabItem>
             <TabItem Header="Duplicated Files">
                 <Grid>
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"/>
                         <RowDefinition Height="auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
@@ -308,7 +338,8 @@
                         <RadioButton x:Name="sortAlphabeticallyPrimaryOnlyRadioButton" GroupName="sortPrimaryOnly" Margin="5,0,5,0" Checked="SortAlphabeticallyPrimaryOnly">Sort alphabetically</RadioButton>
                         <RadioButton x:Name="sortBySizePrimaryOnlyRadioButton" GroupName="sortPrimaryOnly" Checked="SortBySizePrimaryOnly" IsChecked="True">Sort by size</RadioButton>
                     </StackPanel>
-                    <ListView x:Name="duplicatedFilesPrimaryOnlyListView" ItemContainerStyle="{StaticResource duplicatedFilesPrimaryOnlyListViewStyle}" VerticalAlignment="Stretch" Grid.Row="1"/>
+                    <Button x:Name="duplicatedFilesPrimaryOnlyButton" Margin="15,0,0,0" Width="100" Grid.Row="1" Click="RemoveAllPrimarOnly">Remove all</Button>
+                    <ListView x:Name="duplicatedFilesPrimaryOnlyListView" ItemContainerStyle="{StaticResource duplicatedFilesPrimaryOnlyListViewStyle}" VerticalAlignment="Stretch" Grid.Row="2"/>
                 </Grid>
             </TabItem>
         </TabControl>
@@ -319,20 +350,48 @@
             <TabItem Header="Empty Directories">
                 <TabControl>
                     <TabItem Header="Primary directory">
-                        <ListView x:Name="emptyDirectoriesPrimaryListView" ItemContainerStyle="{StaticResource emptyDirectoriesPrimaryListViewItemWithButtonStyle}" VerticalAlignment="Stretch"/>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <Button x:Name="emptyDirectoriesPrimaryButton" Width="100" HorizontalAlignment="Left" Grid.Row="0" Click="RemoveAllEmptyDirectoriesPrimary">Remove all</Button>
+                            <ListView x:Name="emptyDirectoriesPrimaryListView" Grid.Row="1" ItemContainerStyle="{StaticResource emptyDirectoriesPrimaryListViewItemWithButtonStyle}" VerticalAlignment="Stretch"/>
+                        </Grid>
                     </TabItem>
                     <TabItem Header="Secondary directory">
-                        <ListView x:Name="emptyDirectoriesSecondaryListView" ItemContainerStyle="{StaticResource emptyDirectoriesSecondaryListViewItemWithButtonStyle}" VerticalAlignment="Stretch"/>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <Button x:Name="emptyDirectoriesSecondaryButton" Width="100" HorizontalAlignment="Left" Grid.Row="0" Click="RemoveAllEmptyDirectoriesSecondary">Remove all</Button>
+                            <ListView x:Name="emptyDirectoriesSecondaryListView" Grid.Row="1" ItemContainerStyle="{StaticResource emptyDirectoriesSecondaryListViewItemWithButtonStyle}" VerticalAlignment="Stretch"/>
+                        </Grid>
                     </TabItem>
                 </TabControl>
             </TabItem>
             <TabItem Header="Empty Files" Height="22" VerticalAlignment="Bottom">
                 <TabControl>
                     <TabItem Header="Primary directory">
-                        <ListView x:Name="emptyFilesPrimaryListView" ItemContainerStyle="{StaticResource emptyFilesPrimaryListViewItemWithButtonStyle}" VerticalAlignment="Stretch"/>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <Button x:Name="emptyFilesPrimaryButton" Width="100" HorizontalAlignment="Left" Grid.Row="0" Click="RemoveAllEmptyDirectoriesPrimary">Remove all</Button>
+                            <ListView x:Name="emptyFilesPrimaryListView" Grid.Row="1" ItemContainerStyle="{StaticResource emptyFilesPrimaryListViewItemWithButtonStyle}" VerticalAlignment="Stretch"/>
+                        </Grid>
                     </TabItem>
                     <TabItem Header="Secondary directory">
-                        <ListView x:Name="emptyFilesSecondaryListView" ItemContainerStyle="{StaticResource emptyFilesSecondaryListViewItemWithButtonStyle}" VerticalAlignment="Stretch"/>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <Button x:Name="emptyFilesSecondaryButton" Width="100" HorizontalAlignment="Left" Grid.Row="0" Click="RemoveAllEmptyFilesPrimary">Remove all</Button>
+                            <ListView x:Name="emptyFilesSecondaryListView" Grid.Row="1" ItemContainerStyle="{StaticResource emptyFilesSecondaryListViewItemWithButtonStyle}" VerticalAlignment="Stretch"/>
+                        </Grid>
                     </TabItem>
                 </TabControl>
             </TabItem>
@@ -353,8 +412,14 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0">Primary directory</TextBlock>
-                        <TextBlock Grid.Column="1">Secondary directory</TextBlock>
+                        <StackPanel Orientation='Horizontal' Grid.Column="0">
+                            <TextBlock>Primary directory</TextBlock>
+                            <Button x:Name="duplicatedFilesPrimaryButton" Margin="15,0,0,0" Click="RemoveAllPrimary">Remove all</Button>
+                        </StackPanel>
+                        <StackPanel Orientation='Horizontal' Grid.Column="1">
+                            <TextBlock>Secondary directory</TextBlock>
+                            <Button x:Name="duplicatedFilesSecondaryButton" Margin="15,0,0,0" Click="RemoveAllSecondary">Remove all</Button>
+                        </StackPanel>
                     </Grid>
                     <ListView x:Name="duplicatedFilesListView" ItemContainerStyle="{StaticResource duplicateFileListViewStyle}" Grid.Row="2" VerticalAlignment="Stretch"/>
                 </Grid>
@@ -376,7 +441,7 @@
                     <TextBlock x:Name="stateTextBlock">Ready</TextBlock>
                 </StackPanel>
             </StatusBarItem>
-            <StatusBarItem Grid.Column="1">
+            <StatusBarItem Margin="0,2,5,3" Grid.Column="1">
                 <ProgressBar x:Name="progressBar" Margin="5,0" Height="16" Width="150" Visibility="Hidden"/>
             </StatusBarItem>
         </StatusBar>
