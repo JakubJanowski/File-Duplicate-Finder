@@ -8,20 +8,30 @@ namespace File_Duplicate_Finder {
     static class Utility {
 
         public static ListView listView;
+        public static TabItem logTabItem;
         public static void CheckDirectories(string primaryDirectory, string secondaryDirectory, ref bool error, Dispatcher dispatcher) {
             try {
                 Directory.GetAccessControl(primaryDirectory);
             }
             catch (UnauthorizedAccessException) {
                 error = true;
-                dispatcher.Invoke(() => listView.Items.Add("Primary directory is not accessible."));
+                dispatcher.Invoke(() => {
+                    listView.Items.Add("Primary directory is not accessible.");
+                    logTabItem.IsSelected = true;
+                });
             }
             catch {
                 error = true;
                 if (!Directory.Exists(primaryDirectory))
-                    dispatcher.Invoke(() => listView.Items.Add("Primary directory does not exist."));
+                    dispatcher.Invoke(() => {
+                        listView.Items.Add("Primary directory does not exist.");
+                        logTabItem.IsSelected = true;
+                    });
                 else
-                    dispatcher.Invoke(() => listView.Items.Add("Unknown error in primary directory."));
+                    dispatcher.Invoke(() => {
+                        listView.Items.Add("Unknown error in primary directory.");
+                        logTabItem.IsSelected = true;
+                    });
             }
 
             try {
@@ -29,14 +39,25 @@ namespace File_Duplicate_Finder {
             }
             catch (UnauthorizedAccessException) {
                 error = true;
-                dispatcher.Invoke(() => listView.Items.Add("Secondary directory is not accessible."));
+                dispatcher.Invoke(() => {
+                    listView.Items.Add("Secondary directory is not accessible.");
+                    logTabItem.IsSelected = true;
+                });
             }
             catch {
                 error = true;
-                if (!Directory.Exists(secondaryDirectory))
-                    dispatcher.Invoke(() => listView.Items.Add("Secondary directory does not exist."));
-                else
-                    dispatcher.Invoke(() => listView.Items.Add("Unknown error in secondary directory."));
+                if (!Directory.Exists(secondaryDirectory)) {
+                    dispatcher.Invoke(() => {
+                        listView.Items.Add("Secondary directory does not exist.");
+                        logTabItem.IsSelected = true;
+                    });
+                }
+                else {
+                    dispatcher.Invoke(() => {
+                        listView.Items.Add("Unknown error in secondary directory.");
+                        logTabItem.IsSelected = true;
+                    });
+                }
             }
         }
         public static bool IsSubDirectoryOf(this string candidate, string other) {
