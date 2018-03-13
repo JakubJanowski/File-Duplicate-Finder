@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Windows.Controls;
 using System.Windows.Threading;
 
 namespace File_Duplicate_Finder {
     static class Utility {
 
-        public static ListView listView;
+        public static ListView logListView;
         public static TabItem logTabItem;
         public static void CheckDirectories(string primaryDirectory, string secondaryDirectory, ref bool error, Dispatcher dispatcher) {
             try {
@@ -15,23 +16,14 @@ namespace File_Duplicate_Finder {
             }
             catch (UnauthorizedAccessException) {
                 error = true;
-                dispatcher.Invoke(() => {
-                    listView.Items.Add("Primary directory is not accessible.");
-                    logTabItem.IsSelected = true;
-                });
+                dispatcher.Invoke(() => Log("Primary directory is not accessible."));
             }
             catch {
                 error = true;
                 if (!Directory.Exists(primaryDirectory))
-                    dispatcher.Invoke(() => {
-                        listView.Items.Add("Primary directory does not exist.");
-                        logTabItem.IsSelected = true;
-                    });
+                    dispatcher.Invoke(() => Log("Primary directory does not exist."));
                 else
-                    dispatcher.Invoke(() => {
-                        listView.Items.Add("Unknown error in primary directory.");
-                        logTabItem.IsSelected = true;
-                    });
+                    dispatcher.Invoke(() => Log("Unknown error in primary directory."));
             }
 
             try {
@@ -39,24 +31,15 @@ namespace File_Duplicate_Finder {
             }
             catch (UnauthorizedAccessException) {
                 error = true;
-                dispatcher.Invoke(() => {
-                    listView.Items.Add("Secondary directory is not accessible.");
-                    logTabItem.IsSelected = true;
-                });
+                dispatcher.Invoke(() => Log("Secondary directory is not accessible."));
             }
             catch {
                 error = true;
                 if (!Directory.Exists(secondaryDirectory)) {
-                    dispatcher.Invoke(() => {
-                        listView.Items.Add("Secondary directory does not exist.");
-                        logTabItem.IsSelected = true;
-                    });
+                    dispatcher.Invoke(() => Log("Secondary directory does not exist."));
                 }
                 else {
-                    dispatcher.Invoke(() => {
-                        listView.Items.Add("Unknown error in secondary directory.");
-                        logTabItem.IsSelected = true;
-                    });
+                    dispatcher.Invoke(() => Log("Unknown error in secondary directory."));
                 }
             }
         }
@@ -84,11 +67,36 @@ namespace File_Duplicate_Finder {
 
         public static string NormalizePath(string path) {
             try {
-                return Path.GetFullPath(new Uri(path).LocalPath).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+                path = Path.GetFullPath(new Uri(path).LocalPath).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
             }
-            catch {
-                return path;
+            catch { }
+
+            if (path.Length > 0 && path.Last() == ':')
+                path += '\\';
+            return path;
+        }
+
+        public static void Log(string message) {
+            int i = logListView.Items.Add(message);
+            logListView.ScrollIntoView(logListView.Items[i]);
+            logTabItem.IsSelected = true;
+        }
+
+        public static string PrettyPrintSize(long bytes) {
+            string[] sizes = { "B", "KB", "MB", "GB", "TB", "PB" };
+            int order = 0;
+            int remainder = 0;
+            while (bytes >= 1024 * 1024 && order < sizes.Length - 1) {
+                order++;
+                bytes = bytes / 1024;
             }
+            if (bytes >= 1024 && order < sizes.Length - 1) {
+                order++;
+                remainder = (int)bytes % 1024;
+                bytes = bytes / 1024;
+            }
+            double size = bytes + ((double)remainder / 1024);
+            return String.Format("{0:0.##} {1}", size, sizes[order]);
         }
     }
 }
