@@ -1,4 +1,4 @@
-﻿namespace File_Duplicate_Finder {
+﻿namespace FileDuplicateFinder {
     public class FileEntry {
         public string Path { get; set; }
         public string Size { get; set; }

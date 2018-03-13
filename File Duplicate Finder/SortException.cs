@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace File_Duplicate_Finder {
+namespace FileDuplicateFinder {
     [Serializable]
     internal class SortException: Exception {
         public SortException() {

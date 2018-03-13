@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace File_Duplicate_Finder {
+namespace FileDuplicateFinder {
     /// <summary>
     /// Interaction logic for App.xaml
     /// </summary>

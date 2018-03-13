@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace File_Duplicate_Finder.Properties {
+namespace FileDuplicateFinder.Properties {
 
 
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]

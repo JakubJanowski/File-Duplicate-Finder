@@ -4,7 +4,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace File_Duplicate_Finder {
+namespace FileDuplicateFinder {
     /// <summary>
     /// Interaction logic for RestoreFileDialog.xaml
     /// </summary>

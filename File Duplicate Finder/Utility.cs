@@ -1,16 +1,19 @@
-﻿using System;
+﻿// log from thread
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Windows.Controls;
 using System.Windows.Threading;
 
-namespace File_Duplicate_Finder {
+namespace FileDuplicateFinder {
     static class Utility {
 
         public static ListView logListView;
         public static TabItem logTabItem;
-        public static void CheckDirectories(string primaryDirectory, string secondaryDirectory, ref bool error, Dispatcher dispatcher) {
+        public static Dispatcher dispatcher;
+
+        public static void CheckDirectories(string primaryDirectory, string secondaryDirectory, ref bool error) {
             try {
                 Directory.GetAccessControl(primaryDirectory);
             }
@@ -80,6 +83,14 @@ namespace File_Duplicate_Finder {
             int i = logListView.Items.Add(message);
             logListView.ScrollIntoView(logListView.Items[i]);
             logTabItem.IsSelected = true;
+        }
+
+        public static void LogFromNonGUIThread(string message) {
+            dispatcher.Invoke(() => {
+                int i = logListView.Items.Add(message);
+                logListView.ScrollIntoView(logListView.Items[i]);
+                logTabItem.IsSelected = true;
+            });
         }
 
         public static string PrettyPrintSize(long bytes) {

@@ -1,4 +1,4 @@
-﻿<Window x:Class="File_Duplicate_Finder.MainWindow"
+﻿<Window x:Class="FileDuplicateFinder.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -285,7 +285,7 @@
                         <ColumnDefinition Width="auto"/>
                     </Grid.ColumnDefinitions>
                     <TextBox x:Name="primaryDirectoryTextBox" Margin="0,5,0,5" HorizontalAlignment="Stretch" Grid.Column="0"/>
-                    <Button Margin="0,5,5,5" Width="18" Grid.Column="1" Click="PrimaryDirectoryDialog">...</Button>
+                    <Button x:Name="primaryDirectoryDialogButton" Margin="0,5,5,5" Width="18" Grid.Column="1" Click="PrimaryDirectoryDialog">...</Button>
                 </Grid>
                 <TextBlock Margin="5" Grid.Row="1" Grid.Column="0">Secondary directory</TextBlock>
                 <Grid Grid.Row="1" Grid.Column="1">
@@ -294,7 +294,7 @@
                         <ColumnDefinition Width="auto"/>
                     </Grid.ColumnDefinitions>
                     <TextBox x:Name="secondaryDirectoryTextBox" Margin="0,5,0,5" HorizontalAlignment="Stretch" Grid.Column="0"/>
-                    <Button Margin="0,5,5,5" Width="18" Grid.Column="1" Click="SecondaryDirectoryDialog">...</Button>
+                    <Button x:Name="secondaryDirectoryDialogButton" Margin="0,5,5,5" Width="18" Grid.Column="1" Click="SecondaryDirectoryDialog">...</Button>
                 </Grid>
             </Grid>
             <Grid Margin="5">
