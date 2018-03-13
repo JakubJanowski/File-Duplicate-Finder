@@ -211,89 +211,91 @@ namespace FileDuplicateFinder {
         private void FindDuplicatedFiles(object sender, RoutedEventArgs e) {
             InitializeDuplicateFinding();
 
-            if (primaryOnly) {
-                new Thread(() => {
-                    bool error = false;
-                    primaryDirectory = Utility.NormalizePath(primaryDirectory);
+            if (primaryOnly)
+                new Thread(FindDuplicatedFilesInPrimaryOnly).Start();
+            else
+                new Thread(FindDuplicatedFilesInBoth).Start();
+        }
 
-                    try {
-                        Directory.GetAccessControl(primaryDirectory);
-                    }
-                    catch (UnauthorizedAccessException) {
-                        error = true;
-                        Dispatcher.Invoke(() => Utility.Log("Primary directory is not accessible."));
-                    }
-                    catch {
-                        error = true;
-                        if (!Directory.Exists(primaryDirectory)) {
-                            Dispatcher.Invoke(() => Utility.Log("Primary directory does not exist."));
-                        }
-                        else {
-                            Dispatcher.Invoke(() => Utility.Log("Unknown error in primary directory."));
-                        }
-                    }
+        private void FindDuplicatedFilesInPrimaryOnly() {
+            bool error = false;
+            primaryDirectory = Utility.NormalizePath(primaryDirectory);
 
-                    if (error) {
-                        Dispatcher.Invoke(() => {
-                            stateTextBlock.Text = "Failed";
-                            progressBar.Visibility = Visibility.Hidden;
-                            UnlockGUI();
-                        });
-                        return;
-                    }
-                    Finder.FindDuplicatedFiles(primaryDirectory, showBasePaths);
-
-                    
-                    if (!sortBySizePrimaryOnly)
-                        Finder.duplicatedFilesPrimaryOnly.Sort((a, b) => a[0].Path.CompareTo(b[0].Path));
-
-                    Dispatcher.Invoke(() => {
-                        duplicatedFilesPrimaryOnlyListView.Items.Refresh();
-                        FinalizeDuplicateFinding();
-                    });
-                }).Start();
+            try {
+                Directory.GetAccessControl(primaryDirectory);
             }
-            else {
-                new Thread(() => {
-                    bool error = false;
-                    primaryDirectory = Utility.NormalizePath(primaryDirectory);
-                    secondaryDirectory = Utility.NormalizePath(secondaryDirectory);
-                    if (primaryDirectory.ToUpperInvariant() == secondaryDirectory.ToUpperInvariant()) {
-                        error = true;
-                        Utility.LogFromNonGUIThread("Primary and secondary directories must be different.");
-                    }
-
-                    Utility.CheckDirectories(primaryDirectory, secondaryDirectory, ref error);
-                    if (primaryDirectory.IsSubDirectoryOf(secondaryDirectory)) {
-                        error = true;
-                        Utility.LogFromNonGUIThread("Primary directory cannot be a subdirectory of secondary directory.");
-                    }
-                    if (secondaryDirectory.IsSubDirectoryOf(primaryDirectory)) {
-                        error = true;
-                        Utility.LogFromNonGUIThread("Secondary directory cannot be a subdirectory of primary directory.");
-                    }
-
-                    if (error) {
-                        Dispatcher.Invoke(() => {
-                            stateTextBlock.Text = "Failed";
-                            progressBar.Visibility = Visibility.Hidden;
-                            UnlockGUI();
-                        });
-                        return;
-                    }
-
-                    Finder.FindDuplicatedFiles(primaryDirectory, secondaryDirectory, showBasePaths);
-
-
-                    if (!sortBySize)
-                        Finder.duplicatedFiles.Sort((a, b) => a.Item1[0].Path.CompareTo(b.Item1[0].Path));
-
-                    Dispatcher.Invoke(() => {
-                        duplicatedFilesListView.Items.Refresh();
-                        FinalizeDuplicateFinding();
-                    });
-                }).Start();
+            catch (UnauthorizedAccessException) {
+                error = true;
+                Dispatcher.Invoke(() => Utility.Log("Primary directory is not accessible."));
             }
+            catch {
+                error = true;
+                if (!Directory.Exists(primaryDirectory)) {
+                    Dispatcher.Invoke(() => Utility.Log("Primary directory does not exist."));
+                }
+                else {
+                    Dispatcher.Invoke(() => Utility.Log("Unknown error in primary directory."));
+                }
+            }
+
+            if (error) {
+                Dispatcher.Invoke(() => {
+                    stateTextBlock.Text = "Failed";
+                    progressBar.Visibility = Visibility.Hidden;
+                    UnlockGUI();
+                });
+                return;
+            }
+
+            Finder.FindDuplicatedFiles(primaryDirectory, showBasePaths);
+            
+            if (!sortBySizePrimaryOnly)
+                Finder.duplicatedFilesPrimaryOnly.Sort((a, b) => a[0].Path.CompareTo(b[0].Path));
+
+            Dispatcher.Invoke(() => {
+                duplicatedFilesPrimaryOnlyListView.Items.Refresh();
+                FinalizeDuplicateFinding();
+            });
+        }
+
+        private void FindDuplicatedFilesInBoth() {
+            bool error = false;
+            primaryDirectory = Utility.NormalizePath(primaryDirectory);
+            secondaryDirectory = Utility.NormalizePath(secondaryDirectory);
+            if (primaryDirectory.ToUpperInvariant() == secondaryDirectory.ToUpperInvariant()) {
+                error = true;
+                Utility.LogFromNonGUIThread("Primary and secondary directories must be different.");
+            }
+
+            Utility.CheckDirectories(primaryDirectory, secondaryDirectory, ref error);
+            if (primaryDirectory.IsSubDirectoryOf(secondaryDirectory)) {
+                error = true;
+                Utility.LogFromNonGUIThread("Primary directory cannot be a subdirectory of secondary directory.");
+            }
+            if (secondaryDirectory.IsSubDirectoryOf(primaryDirectory)) {
+                error = true;
+                Utility.LogFromNonGUIThread("Secondary directory cannot be a subdirectory of primary directory.");
+            }
+
+            if (error) {
+                Dispatcher.Invoke(() => {
+                    stateTextBlock.Text = "Failed";
+                    progressBar.Visibility = Visibility.Hidden;
+                    UnlockGUI();
+                });
+                return;
+            }
+
+            Finder.FindDuplicatedFiles(primaryDirectory, secondaryDirectory, showBasePaths);
+
+
+            if (!sortBySize)
+                Finder.duplicatedFiles.Sort((a, b) => a.Item1[0].Path.CompareTo(b.Item1[0].Path));
+
+            Dispatcher.Invoke(() => {
+                duplicatedFilesListView.Items.Refresh();
+                FinalizeDuplicateFinding();
+            });
         }
 
         private void InitializeDuplicateFinding() {
