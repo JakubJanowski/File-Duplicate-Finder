@@ -9,9 +9,10 @@ using System.Windows.Threading;
 namespace FileDuplicateFinder {
     static class Utility {
 
-        public static ListView logListView;
-        public static TabItem logTabItem;
-        public static Dispatcher dispatcher;
+        internal static ListView logListView;
+        internal static TabItem logTabItem;
+        internal static Dispatcher dispatcher;
+        internal static TextBlock progressTextBlock;
 
         public static void CheckDirectories(string primaryDirectory, string secondaryDirectory, ref bool error) {
             try {
@@ -108,6 +109,10 @@ namespace FileDuplicateFinder {
             }
             double size = bytes + ((double)remainder / 1024);
             return String.Format("{0:0.##} {1}", size, sizes[order]);
+        }
+        
+        public static void SetProgress(int done, int outOf) {
+            progressTextBlock.Text = done + " / " + outOf;
         }
     }
 }

@@ -119,7 +119,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="FileEntry.cs" />
-    <Compile Include="Finder.cs" />
+    <Compile Include="FileManager.cs" />
     <Compile Include="RestoreFileDialog.xaml.cs">
       <DependentUpon>RestoreFileDialog.xaml</DependentUpon>
     </Compile>

@@ -375,7 +375,7 @@
                                 <RowDefinition Height="auto"/>
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
-                            <Button x:Name="emptyFilesSecondaryButton" Width="100" HorizontalAlignment="Left" Grid.Row="0" Click="RemoveAllEmptyFilesPrimary">Remove all</Button>
+                            <Button x:Name="emptyFilesSecondaryButton" Width="100" HorizontalAlignment="Left" Grid.Row="0" Click="RemoveAllEmptyFilesSecondary">Remove all</Button>
                             <ListView x:Name="emptyFilesSecondaryListView" ItemContainerStyle="{StaticResource emptyFilesSecondaryListViewItemWithButtonStyle}" ScrollViewer.HorizontalScrollBarVisibility="Disabled" Grid.Row="1"/>
                         </Grid>
                     </TabItem>
@@ -390,8 +390,8 @@
                     </Grid.RowDefinitions>
                     <StackPanel Margin="5" Orientation="Horizontal" Grid.Row="0">
                         <CheckBox Checked="IdenticalSubpathChecked" Unchecked="IdenticalSubpathUnchecked" IsEnabled="False">Identical subpath only</CheckBox>
-                        <RadioButton x:Name="sortAlphabeticallyRadioButton" GroupName="sort" Margin="5,0,5,0" Checked="SortAlphabetically">Sort alphabetically</RadioButton>
-                        <RadioButton x:Name="sortBySizeRadioButton" GroupName="sort" Checked="SortBySize" IsChecked="True">Sort by size</RadioButton>
+                        <RadioButton x:Name="sortAlphabeticallyRadioButton" GroupName="sort" Margin="5,0,5,0" Checked="SortAlphabeticallyButtonClick">Sort alphabetically</RadioButton>
+                        <RadioButton x:Name="sortBySizeRadioButton" GroupName="sort" Checked="SortBySizeButtonClick" IsChecked="True">Sort by size</RadioButton>
                     </StackPanel>
                     <Grid Grid.Row="1">
                         <Grid.ColumnDefinitions>
@@ -439,8 +439,8 @@
                     </Grid.RowDefinitions>
                     <StackPanel Margin="5" Orientation="Horizontal" Grid.Row="0">
                         <CheckBox Checked="IdenticalSubpathChecked" Unchecked="IdenticalSubpathUnchecked" IsEnabled="False">Identical subpath only</CheckBox>
-                        <RadioButton x:Name="sortAlphabeticallyPrimaryOnlyRadioButton" GroupName="sortPrimaryOnly" Margin="5,0,5,0" Checked="SortAlphabeticallyPrimaryOnly">Sort alphabetically</RadioButton>
-                        <RadioButton x:Name="sortBySizePrimaryOnlyRadioButton" GroupName="sortPrimaryOnly" Checked="SortBySizePrimaryOnly" IsChecked="True">Sort by size</RadioButton>
+                        <RadioButton x:Name="sortAlphabeticallyPrimaryOnlyRadioButton" GroupName="sortPrimaryOnly" Margin="5,0,5,0" Checked="SortAlphabeticallyPrimaryOnlyButtonClick">Sort alphabetically</RadioButton>
+                        <RadioButton x:Name="sortBySizePrimaryOnlyRadioButton" GroupName="sortPrimaryOnly" Checked="SortBySizePrimaryOnlyButtonClick" IsChecked="True">Sort by size</RadioButton>
                     </StackPanel>
                     <ListView x:Name="duplicatedFilesPrimaryOnlyListView" ItemContainerStyle="{StaticResource duplicatedFilesPrimaryOnlyListViewStyle}" ScrollViewer.HorizontalScrollBarVisibility="Disabled" Grid.Row="1"/>
                 </Grid>

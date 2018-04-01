@@ -7,7 +7,8 @@ using System.Windows.Controls;
 using System.Windows.Threading;
 
 namespace FileDuplicateFinder {
-    internal static class Finder {
+    internal static class FileManager {
+        public static string tmpDirectory;
         public const int megaByte = 1048576;//private
         private static byte[] bufferPrimary = new byte[megaByte];
         private static byte[] bufferSecondary = new byte[megaByte];
@@ -22,6 +23,7 @@ namespace FileDuplicateFinder {
         public static List<string> emptyDirectoriesSecondary = new List<string>();
         public static List<string> emptyFilesPrimary = new List<string>();
         public static List<string> emptyFilesSecondary = new List<string>();
+        public static List<Tuple<string, string>> storedFiles = new List<Tuple<string, string>>();
 
         internal static Dispatcher dispatcher;
         internal static TextBlock stateTextBlock;
@@ -90,7 +92,7 @@ namespace FileDuplicateFinder {
                 stateTextBlock.Text = "Searching for duplicates...";
                 progressBar.Value = 11;
                 progressTextBlock.Visibility = Visibility.Visible;
-                SetProgress(0, primaryFiles.Count);
+                Utility.SetProgress(0, primaryFiles.Count);
             });
 
             int index = 0;
@@ -153,7 +155,7 @@ namespace FileDuplicateFinder {
 
                 dispatcher.Invoke(() => {
                     progressBar.Value = (otherIndex * 89) / primaryFiles.Count + 11;
-                    SetProgress(otherIndex, primaryFiles.Count);
+                    Utility.SetProgress(otherIndex, primaryFiles.Count);
                 });
             }
         }
@@ -261,7 +263,7 @@ namespace FileDuplicateFinder {
                 stateTextBlock.Text = "Searching for duplicates...";
                 progressBar.Value = 11;
                 progressTextBlock.Visibility = Visibility.Visible;
-                SetProgress(0, primaryFiles.Count + secondaryFiles.Count);
+                Utility.SetProgress(0, primaryFiles.Count + secondaryFiles.Count);
             });
 
             int indexPrimary = 0;
@@ -272,13 +274,13 @@ namespace FileDuplicateFinder {
                 if (primaryFiles.Count < secondaryFiles.Count) {
                     dispatcher.Invoke(() => {
                         progressBar.Value = (indexPrimary * 89) / primaryFiles.Count + 11;
-                        SetProgress(indexPrimary + indexSecondary, primaryFiles.Count + secondaryFiles.Count);
+                        Utility.SetProgress(indexPrimary + indexSecondary, primaryFiles.Count + secondaryFiles.Count);
                     });
                 }
                 else {
                     dispatcher.Invoke(() => {
                         progressBar.Value = (indexSecondary * 89) / secondaryFiles.Count + 11;
-                        SetProgress(indexPrimary + indexSecondary, primaryFiles.Count + secondaryFiles.Count);
+                        Utility.SetProgress(indexPrimary + indexSecondary, primaryFiles.Count + secondaryFiles.Count);
                     });
                 }
 
@@ -436,8 +438,303 @@ namespace FileDuplicateFinder {
             return true;
         }
 
-        private static void SetProgress(int done, int outOf) {
-            progressTextBlock.Text = done + " / " + outOf;
+        internal static void EmptyDirectoriesPrimaryIgnoreFile(string path) {
+            emptyDirectoriesPrimary.Remove(path);
+            emptyDirectoriesPrimaryListView.Items.Refresh();
+        }
+
+        internal static void EmptyFilesPrimaryIgnoreFile(string path) {
+            emptyFilesPrimary.Remove(path);
+            emptyFilesPrimaryListView.Items.Refresh();
+        }
+
+        internal static void EmptyDirectoriesSecondaryIgnoreFile(string path) {
+            emptyDirectoriesSecondary.Remove(path);
+            emptyDirectoriesSecondaryListView.Items.Refresh();
+        }
+
+        internal static void EmptyFilesSecondaryIgnoreFile(string path) {
+            emptyFilesSecondary.Remove(path);
+            emptyFilesSecondaryListView.Items.Refresh();
+        }
+
+        internal static void DuplicatedFilesPrimaryIgnoreFile(string path) {
+            for (int i = 0; i < duplicatedFiles.Count; i++) {
+                for (int j = 0; j < duplicatedFiles[i].Item1.Count; j++) {
+                    if (duplicatedFiles[i].Item1[j].Path.Equals(path)) {
+                        duplicatedFiles[i].Item1.RemoveAt(j);
+                        if (duplicatedFiles[i].Item1.Count + duplicatedFiles[i].Item2.Count <= 1)
+                            duplicatedFiles.RemoveAt(i);
+                        duplicatedFilesListView.Items.Refresh();
+                        break;
+                    }
+                }
+            }
+        }
+
+        internal static void DuplicatedFilesSecondaryIgnoreFile(string path) {
+            for (int i = 0; i < duplicatedFiles.Count; i++) {
+                for (int j = 0; j < duplicatedFiles[i].Item2.Count; j++) {
+                    if (duplicatedFiles[i].Item2[j].Path.Equals(path)) {
+                        duplicatedFiles[i].Item2.RemoveAt(j);
+                        if (duplicatedFiles[i].Item1.Count + duplicatedFiles[i].Item2.Count <= 1)
+                            duplicatedFiles.RemoveAt(i);
+                        duplicatedFilesListView.Items.Refresh();
+                        break;
+                    }
+                }
+            }
+        }
+
+        internal static void DuplicatedFilesPrimaryOnlyIgnoreFile(string path) {
+            for (int i = 0; i < duplicatedFilesPrimaryOnly.Count; i++) {
+                for (int j = 0; j < duplicatedFilesPrimaryOnly[i].Count; j++) {
+                    if (duplicatedFilesPrimaryOnly[i][j].Path.Equals(path)) {
+                        duplicatedFilesPrimaryOnly[i].RemoveAt(j);
+                        if (duplicatedFilesPrimaryOnly[i].Count == 0)
+                            duplicatedFilesPrimaryOnly.RemoveAt(i);
+                        duplicatedFilesPrimaryOnlyListView.Items.Refresh();
+                        break;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="baseDirectory"></param>
+        /// <returns><see langword="true"/> if restoring the file will be possible, <see langword="false"/> otherwise</returns>
+        internal static bool RemoveFile(string path, string baseDirectory, bool backupFiles, bool askLarge) {
+            bool canRestoreFiles = false;
+            try {
+                if (File.GetAttributes(path).HasFlag(FileAttributes.Directory)) {
+                    DirectoryInfo directoryInfo = new DirectoryInfo(path);
+                    if (backupFiles) {
+                        storedFiles.Add(Tuple.Create(path, ""));
+                        canRestoreFiles = true;
+                    }
+                    directoryInfo.Delete();
+                }
+                else {  // file
+                    FileInfo fileInfo = new FileInfo(path);
+                    if (fileInfo.Length < 2 * megaByte) {   // don't move large files
+                        if (backupFiles) {
+                            Guid guid = Guid.NewGuid();
+                            fileInfo.MoveTo(tmpDirectory + guid.ToString());
+                            storedFiles.Add(Tuple.Create(path, guid.ToString()));
+                            canRestoreFiles = true;
+                        }
+                        else {
+                            fileInfo.Delete();
+                        }
+                    }
+                    else {
+                        if (!askLarge || MessageBox.Show("You will permanently delete file " + path) == MessageBoxResult.OK)
+                            fileInfo.Delete();
+                    }
+                }
+            }
+            catch (IOException) {
+                Utility.LogFromNonGUIThread("File " + path + " no longer exists.");
+            }
+            catch (UnauthorizedAccessException) {
+                Utility.LogFromNonGUIThread("Access denied for " + path);
+            }
+
+            return canRestoreFiles;
+        }
+
+        internal static void ClearDirectory(string path) {
+            DirectoryInfo directoryInfo = new DirectoryInfo(path);
+            foreach (FileInfo file in directoryInfo.GetFiles())
+                file.Delete();
+            foreach (DirectoryInfo dir in directoryInfo.GetDirectories())
+                dir.Delete(true);
+        }
+
+
+        // Sorting functions
+
+        internal static void SortAlphabetically() {
+            duplicatedFiles.Sort((a, b) => a.Item1[0].Path.CompareTo(b.Item1[0].Path));
+        }
+
+        internal static void SortBySize(string baseDirectory = "") {
+            bool sorted = false;
+            while (!sorted) {
+                try {
+                    duplicatedFiles.Sort((a, b) => {
+                        long aLength = GetFileLength(baseDirectory + a.Item1[0].Path);
+                        if (aLength < 0) {
+                            a.Item1.RemoveAt(0);
+                            throw new SortException();
+                        }
+                        long bLength = GetFileLength(baseDirectory + b.Item1[0].Path);
+                        if (bLength < 0) {
+                            b.Item1.RemoveAt(0);
+                            throw new SortException();
+                        }
+                        return aLength.CompareTo(bLength);
+                    });
+                }
+                catch (InvalidOperationException ex) {
+                    if (ex.InnerException is SortException) {
+                        for (int i = 0; i < duplicatedFiles.Count; i++) {
+                            for (int j = 0; j < duplicatedFiles[i].Item1.Count; j++) {
+                                if (GetFileLength(baseDirectory + duplicatedFiles[i].Item1[j].Path) < 0) {
+                                    duplicatedFiles[i].Item1.RemoveAt(j);
+                                    j--;
+                                }
+                            }
+                            for (int j = 0; j < duplicatedFiles[i].Item2.Count; j++) {
+                                if (GetFileLength(baseDirectory + duplicatedFiles[i].Item2[j].Path) < 0) {
+                                    duplicatedFiles[i].Item2.RemoveAt(j);
+                                    j--;
+                                }
+                            }
+                            if (duplicatedFiles[i].Item1.Count + duplicatedFiles[i].Item2.Count <= 1) {
+                                duplicatedFiles.RemoveAt(i);
+                                i--;
+                            }
+                        }
+                        continue;
+                    }
+                }
+                sorted = true;
+            }
+        }
+
+        internal static void SortAlphabeticallyPrimaryOnly() {
+            duplicatedFilesPrimaryOnly.Sort((a, b) => a[0].Path.CompareTo(b[0].Path));
+        }
+
+        internal static void SortBySizePrimaryOnly(string baseDirectory = "") {
+            bool sorted = false;
+            while (!sorted) {
+                try {
+                    duplicatedFilesPrimaryOnly.Sort((a, b) => {
+                        long aLength = GetFileLength(baseDirectory + a[0].Path);
+                        if (aLength < 0) {
+                            a.RemoveAt(0);
+                            if (a.Count == 0)
+                                duplicatedFilesPrimaryOnly.Remove(a);
+                            throw new SortException();
+                        }
+                        long bLength = GetFileLength(baseDirectory + b[0].Path);
+                        if (bLength < 0) {
+                            b.RemoveAt(0);
+                            if (b.Count == 0)
+                                duplicatedFilesPrimaryOnly.Remove(b);
+                            throw new SortException();
+                        }
+                        return aLength.CompareTo(bLength);
+                    });
+                }
+                catch (InvalidOperationException ex) {
+                    if (ex.InnerException is SortException) {
+                        for (int i = 0; i < duplicatedFilesPrimaryOnly.Count; i++) {
+                            for (int j = 0; j < duplicatedFilesPrimaryOnly[i].Count; j++) {
+                                if (GetFileLength(baseDirectory + duplicatedFilesPrimaryOnly[i][j].Path) < 0) {
+                                    duplicatedFilesPrimaryOnly[i].RemoveAt(j);
+                                    j--;
+                                }
+                            }
+                            if (duplicatedFilesPrimaryOnly[i].Count <= 1) {
+                                duplicatedFilesPrimaryOnly.RemoveAt(i);
+                                i--;
+                            }
+                        }
+                        continue;
+                    }
+                }
+                sorted = true;
+            }
+        }
+
+        internal static void RemoveAllEmptyDirectoriesPrimary(string primaryDirectory) {
+            for (int i = 0; i < emptyDirectoriesPrimary.Count; i++) {
+                RemoveFile(emptyDirectoriesPrimary[i], primaryDirectory, false, false);
+                dispatcher.Invoke(() => {
+                    progressBar.Value = i * 100f / emptyDirectoriesPrimary.Count;
+                    Utility.SetProgress(i, emptyDirectoriesPrimary.Count);
+                });
+            }
+            emptyDirectoriesPrimary.Clear();
+        }
+
+        internal static void RemoveAllEmptyDirectoriesSecondary(string secondaryDirectory) {
+            for (int i = 0; i < emptyDirectoriesSecondary.Count; i++) {
+                RemoveFile(emptyDirectoriesSecondary[i], secondaryDirectory, false, false);
+                dispatcher.Invoke(() => {
+                    progressBar.Value = i * 100f / emptyDirectoriesSecondary.Count;
+                    Utility.SetProgress(i, emptyDirectoriesSecondary.Count);
+                });
+            }
+            emptyDirectoriesSecondary.Clear();
+        }
+
+        internal static void RemoveAllEmptyFilesPrimary(string primaryDirectory) {
+            for (int i = 0; i < emptyFilesPrimary.Count; i++) {
+                RemoveFile(emptyFilesPrimary[i], primaryDirectory, false, false);
+                dispatcher.Invoke(() => {
+                    progressBar.Value = i * 100f / emptyFilesPrimary.Count;
+                    Utility.SetProgress(i, emptyFilesPrimary.Count);
+                });
+            }
+            emptyFilesPrimary.Clear();
+        }
+
+        internal static void RemoveAllEmptyFilesSecondary(string secondaryDirectory) {
+            for (int i = 0; i < emptyFilesSecondary.Count; i++) {
+                RemoveFile(emptyFilesSecondary[i], secondaryDirectory, false, false);
+                dispatcher.Invoke(() => {
+                    progressBar.Value = i * 100f / emptyFilesSecondary.Count;
+                    Utility.SetProgress(i, emptyFilesSecondary.Count);
+                });
+            }
+            emptyFilesSecondary.Clear();
+        }
+
+        internal static void RemoveAllPrimary(string primaryDirectory) {
+            int count = duplicatedFiles.Count;
+            for (int i = 0; i < duplicatedFiles.Count;) {
+                for (int j = 0; j < duplicatedFiles[i].Item1.Count; j++)
+                    RemoveFile(duplicatedFiles[i].Item1[j].Path, primaryDirectory, false, false);
+                if (duplicatedFiles[i].Item2.Count <= 1) {
+                    duplicatedFiles.RemoveAt(i);
+                }
+                else {
+                    duplicatedFiles[i].Item1.Clear();
+                    i++;
+                }
+                dispatcher.Invoke(() => {
+                    int progress = i + count - duplicatedFiles.Count;
+                    progressBar.Value = progress * 100f / count;
+                    Utility.SetProgress(progress, duplicatedFiles.Count);
+                });
+            }
+        }
+
+        internal static void RemoveAllSecondary(string secondaryDirectory) {
+            int count = duplicatedFiles.Count;
+            for (int i = 0; i < duplicatedFiles.Count;) {
+                for (int j = 0; j < duplicatedFiles[i].Item2.Count; j++)
+                    RemoveFile(duplicatedFiles[i].Item2[j].Path, secondaryDirectory, false, false);
+                if (duplicatedFiles[i].Item1.Count <= 1) {
+                    duplicatedFiles.RemoveAt(i);
+                }
+                else {
+                    duplicatedFiles[i].Item2.Clear();
+                    i++;
+                }
+                dispatcher.Invoke(() => {
+                    int progress = i + count - duplicatedFiles.Count;
+                    progressBar.Value = progress * 100f / count;
+                    Utility.SetProgress(progress, duplicatedFiles.Count);
+                });
+            }
         }
     }
 }
