@@ -5,22 +5,50 @@ VisualStudioVersion = 15.0.27130.2020
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "File Duplicate Finder", "File Duplicate Finder\File Duplicate Finder.csproj", "{F8ECED31-975E-4779-8612-60E7722CBF56}"
 EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "FileDuplicateFinderSetupx86", "FileDuplicateFinderSetupx86\FileDuplicateFinderSetupx86.vdproj", "{4933A0FA-9836-4FB5-A1FF-D0E72C6769E1}"
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "FileDuplicateFinderSetupx64", "FileDuplicateFinderSetupx64\FileDuplicateFinderSetup.vdproj", "{CA109BB5-BFE6-425D-9AFA-CACA4D68BB67}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
 		Release|Any CPU = Release|Any CPU
 		Release|x64 = Release|x64
+		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{F8ECED31-975E-4779-8612-60E7722CBF56}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F8ECED31-975E-4779-8612-60E7722CBF56}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F8ECED31-975E-4779-8612-60E7722CBF56}.Debug|x64.ActiveCfg = Debug|x64
 		{F8ECED31-975E-4779-8612-60E7722CBF56}.Debug|x64.Build.0 = Debug|x64
+		{F8ECED31-975E-4779-8612-60E7722CBF56}.Debug|x86.ActiveCfg = Debug|x86
+		{F8ECED31-975E-4779-8612-60E7722CBF56}.Debug|x86.Build.0 = Debug|x86
 		{F8ECED31-975E-4779-8612-60E7722CBF56}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F8ECED31-975E-4779-8612-60E7722CBF56}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F8ECED31-975E-4779-8612-60E7722CBF56}.Release|x64.ActiveCfg = Release|x64
 		{F8ECED31-975E-4779-8612-60E7722CBF56}.Release|x64.Build.0 = Release|x64
+		{F8ECED31-975E-4779-8612-60E7722CBF56}.Release|x86.ActiveCfg = Release|x86
+		{F8ECED31-975E-4779-8612-60E7722CBF56}.Release|x86.Build.0 = Release|x86
+		{4933A0FA-9836-4FB5-A1FF-D0E72C6769E1}.Debug|Any CPU.ActiveCfg = Debug
+		{4933A0FA-9836-4FB5-A1FF-D0E72C6769E1}.Debug|x64.ActiveCfg = Debug
+		{4933A0FA-9836-4FB5-A1FF-D0E72C6769E1}.Debug|x86.ActiveCfg = Debug
+		{4933A0FA-9836-4FB5-A1FF-D0E72C6769E1}.Release|Any CPU.ActiveCfg = Release
+		{4933A0FA-9836-4FB5-A1FF-D0E72C6769E1}.Release|x64.ActiveCfg = Release
+		{4933A0FA-9836-4FB5-A1FF-D0E72C6769E1}.Release|x86.ActiveCfg = Release
+		{CA109BB5-BFE6-425D-9AFA-CACA4D68BB67}.Debug|Any CPU.ActiveCfg = Debug
+		{CA109BB5-BFE6-425D-9AFA-CACA4D68BB67}.Debug|Any CPU.Build.0 = Debug
+		{CA109BB5-BFE6-425D-9AFA-CACA4D68BB67}.Debug|x64.ActiveCfg = Debug
+		{CA109BB5-BFE6-425D-9AFA-CACA4D68BB67}.Debug|x64.Build.0 = Debug
+		{CA109BB5-BFE6-425D-9AFA-CACA4D68BB67}.Debug|x86.ActiveCfg = Debug
+		{CA109BB5-BFE6-425D-9AFA-CACA4D68BB67}.Debug|x86.Build.0 = Debug
+		{CA109BB5-BFE6-425D-9AFA-CACA4D68BB67}.Release|Any CPU.ActiveCfg = Release
+		{CA109BB5-BFE6-425D-9AFA-CACA4D68BB67}.Release|Any CPU.Build.0 = Release
+		{CA109BB5-BFE6-425D-9AFA-CACA4D68BB67}.Release|x64.ActiveCfg = Release
+		{CA109BB5-BFE6-425D-9AFA-CACA4D68BB67}.Release|x64.Build.0 = Release
+		{CA109BB5-BFE6-425D-9AFA-CACA4D68BB67}.Release|x86.ActiveCfg = Release
+		{CA109BB5-BFE6-425D-9AFA-CACA4D68BB67}.Release|x86.Build.0 = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

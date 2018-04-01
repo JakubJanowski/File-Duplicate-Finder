@@ -305,14 +305,6 @@
                 <StackPanel Grid.Column="0">
                     <CheckBox x:Name="primaryOnlyCheckBox" Checked="PrimaryOnlyChecked" Unchecked="PrimaryOnlyUnchecked">Find duplicated files in primary directory only</CheckBox>
                     <Separator Margin="0,10,0,5"/>
-                    <CheckBox Visibility="Collapsed" x:Name="removeByPathAndContentCheckBox" Checked="RemoveByPathAndContentChecked" Unchecked="RemoveByPathAndContentUnchecked">Remove files with identical path and content from secondary directory</CheckBox>
-                    <CheckBox Visibility="Collapsed" x:Name="removeByContentCheckBox" Checked="RemoveByContentChecked" Unchecked="RemoveByContentUnchecked">Remove files with identical content from secondary directory</CheckBox>
-                    <CheckBox Visibility="Collapsed" x:Name="removeEmptyDirectoriesFromPrimaryCheckBox" Checked="RemoveEmptyDirectoriesFromPrimaryChecked" Unchecked="RemoveEmptyDirectoriesFromPrimaryUnchecked">Remove empty folders from primary directory</CheckBox>
-                    <CheckBox Visibility="Collapsed" x:Name="removeEmptyDirectoriesFromSecondaryCheckBox" Checked="RemoveEmptyDirectoriesFromSecondaryChecked" Unchecked="RemoveEmptyDirectoriesFromSecondaryUnchecked">Remove empty folders from secondary directory</CheckBox>
-                    <CheckBox Visibility="Collapsed" x:Name="removeEmptyFilesFromPrimaryCheckBox" Checked="RemoveEmptyFilesFromPrimaryChecked" Unchecked="RemoveEmptyFilesFromPrimaryUnchecked">Remove empty files from primary directory</CheckBox>
-                    <CheckBox Visibility="Collapsed" x:Name="removeEmptyFilesFromSecondaryCheckBox" Checked="RemoveEmptyFilesFromSecondaryChecked" Unchecked="RemoveEmptyFilesFromSecondaryUnchecked">Remove empty files from secondary directory</CheckBox>
-                    <CheckBox Visibility="Collapsed" x:Name="keepFilesCheckBox" Checked="KeepFilesChecked" Unchecked="KeepFilesUnchecked">Keep all files</CheckBox>
-                    <Separator Visibility="Collapsed" Margin="0,10,0,5"/>
                     <CheckBox x:Name="basePathsCheckBox" Checked="ShowBasePathsChecked" Unchecked="ShowBasePathsUnchecked">Show base paths</CheckBox>
                     <CheckBox x:Name="backupFilesCheckBox" Checked="BackupFilesChecked" Unchecked="BackupFilesUnchecked" IsChecked="True">Store backup files</CheckBox>
                     <CheckBox x:Name="askLargeCheckBox" Checked="AskLargeChecked" Unchecked="AskLargeUnchecked" IsChecked="True">Ask when deleting large files without backup</CheckBox>

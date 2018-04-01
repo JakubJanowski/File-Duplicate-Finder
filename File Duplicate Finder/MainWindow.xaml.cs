@@ -3,7 +3,6 @@
 // show file size checkbox
 // remove/ignore/show in explorer on restore list
 //scroll propagate down to main list
-//abort task
 // clean up hidden checkboxes or add their functionality
 // restructurize code
 // switch visibility for tabitems after pressing find duplicates button not the checkbox for primaryonly
@@ -17,6 +16,7 @@
 // checkbox remove from list when only one element left whit no other to compare to (do not delete elements from list after ignoring other for sure
 // config file with ignored directories in search and mayby open last checked
 // remove obsolete function
+// start progressbar when started searching for duplicates, during initialization make progressbar shift green area constantly
 
 using Microsoft.WindowsAPICodePack.Dialogs;
 using System;
@@ -31,13 +31,7 @@ using System.Windows.Media;
 
 namespace FileDuplicateFinder {
     public partial class MainWindow: Window {
-        bool removeByPathAndContent = false;
-        bool removeByContent = false;
-        bool removeEmptyFoldersPrimary = false;
-        bool removeEmptyFoldersSecondary = false;
-        bool removeEmptyFilesPrimary = false;
-        bool removeEmptyFilesSecondary = false;
-        bool keepFiles = true;
+        volatile bool abortTask = false;
         bool showBasePaths = false;
         bool backupFiles = true;
         bool askLarge = true;
@@ -54,8 +48,6 @@ namespace FileDuplicateFinder {
             Utility.logTabItem = logTabItem;
             Utility.dispatcher = Dispatcher;
             Utility.progressTextBlock = progressTextBlock;
-            keepFilesCheckBox.IsChecked = true;
-            keepFilesCheckBox.IsEnabled = false;
             emptyDirectoriesPrimaryListView.ItemsSource = FileManager.emptyDirectoriesPrimary;
             emptyFilesPrimaryListView.ItemsSource = FileManager.emptyFilesPrimary;
             emptyDirectoriesSecondaryListView.ItemsSource = FileManager.emptyDirectoriesSecondary;
@@ -80,109 +72,6 @@ namespace FileDuplicateFinder {
 
             Directory.CreateDirectory(tmpDirectory);
         }
-
-        #region checkboxes
-        private void RemoveByPathAndContentChecked(object sender, RoutedEventArgs e) {
-            removeByPathAndContent = true;
-            keepFilesCheckBox.IsChecked = false;
-            keepFilesCheckBox.IsEnabled = true;
-            stateTextBlock.Text = "Ready";
-        }
-        private void RemoveByPathAndContentUnchecked(object sender, RoutedEventArgs e) {
-            removeByPathAndContent = false;
-            removeByContentCheckBox.IsChecked = false;
-            if (!removeByContent && !removeEmptyFoldersPrimary && !removeEmptyFoldersSecondary && !removeEmptyFilesPrimary && !removeEmptyFilesSecondary) {
-                keepFilesCheckBox.IsChecked = true;
-                keepFilesCheckBox.IsEnabled = false;
-            }
-            stateTextBlock.Text = "Ready";
-        }
-        private void RemoveByContentChecked(object sender, RoutedEventArgs e) {
-            removeByContent = true;
-            removeByPathAndContentCheckBox.IsChecked = true;
-            keepFilesCheckBox.IsChecked = false;
-            keepFilesCheckBox.IsEnabled = true;
-            stateTextBlock.Text = "Ready";
-        }
-        private void RemoveByContentUnchecked(object sender, RoutedEventArgs e) {
-            removeByContent = false;
-            if (!removeByPathAndContent && !removeEmptyFoldersPrimary && !removeEmptyFoldersSecondary && !removeEmptyFilesPrimary && !removeEmptyFilesSecondary) {
-                keepFilesCheckBox.IsChecked = true;
-                keepFilesCheckBox.IsEnabled = false;
-            }
-            stateTextBlock.Text = "Ready";
-        }
-        private void RemoveEmptyDirectoriesFromPrimaryChecked(object sender, RoutedEventArgs e) {
-            removeEmptyFoldersPrimary = true;
-            keepFilesCheckBox.IsChecked = false;
-            keepFilesCheckBox.IsEnabled = true;
-            stateTextBlock.Text = "Ready";
-        }
-        private void RemoveEmptyDirectoriesFromPrimaryUnchecked(object sender, RoutedEventArgs e) {
-            removeEmptyFoldersPrimary = false;
-            if (!removeByPathAndContent && !removeByContent && !removeEmptyFoldersSecondary && !removeEmptyFilesPrimary && !removeEmptyFilesSecondary) {
-                keepFilesCheckBox.IsChecked = true;
-                keepFilesCheckBox.IsEnabled = false;
-            }
-            stateTextBlock.Text = "Ready";
-        }
-        private void RemoveEmptyDirectoriesFromSecondaryChecked(object sender, RoutedEventArgs e) {
-            removeEmptyFoldersSecondary = true;
-            keepFilesCheckBox.IsChecked = false;
-            keepFilesCheckBox.IsEnabled = true;
-            stateTextBlock.Text = "Ready";
-        }
-        private void RemoveEmptyDirectoriesFromSecondaryUnchecked(object sender, RoutedEventArgs e) {
-            removeEmptyFoldersSecondary = false;
-            if (!removeByPathAndContent && !removeByContent && !removeEmptyFoldersPrimary && !removeEmptyFilesPrimary && !removeEmptyFilesSecondary) {
-                keepFilesCheckBox.IsChecked = true;
-                keepFilesCheckBox.IsEnabled = false;
-            }
-            stateTextBlock.Text = "Ready";
-        }
-        private void RemoveEmptyFilesFromPrimaryChecked(object sender, RoutedEventArgs e) {
-            removeEmptyFilesPrimary = true;
-            keepFilesCheckBox.IsChecked = false;
-            keepFilesCheckBox.IsEnabled = true;
-            stateTextBlock.Text = "Ready";
-        }
-        private void RemoveEmptyFilesFromPrimaryUnchecked(object sender, RoutedEventArgs e) {
-            removeEmptyFilesPrimary = false;
-            if (!removeByPathAndContent && !removeByContent && !removeEmptyFoldersPrimary && !removeEmptyFoldersSecondary && !removeEmptyFilesSecondary) {
-                keepFilesCheckBox.IsChecked = true;
-                keepFilesCheckBox.IsEnabled = false;
-            }
-            stateTextBlock.Text = "Ready";
-        }
-        private void RemoveEmptyFilesFromSecondaryChecked(object sender, RoutedEventArgs e) {
-            removeEmptyFilesSecondary = true;
-            keepFilesCheckBox.IsChecked = false;
-            keepFilesCheckBox.IsEnabled = true;
-            stateTextBlock.Text = "Ready";
-        }
-        private void RemoveEmptyFilesFromSecondaryUnchecked(object sender, RoutedEventArgs e) {
-            removeEmptyFilesSecondary = false;
-            if (!removeByPathAndContent && !removeByContent && !removeEmptyFoldersPrimary && !removeEmptyFoldersSecondary && !removeEmptyFilesPrimary) {
-                keepFilesCheckBox.IsChecked = true;
-                keepFilesCheckBox.IsEnabled = false;
-            }
-            stateTextBlock.Text = "Ready";
-        }
-        private void KeepFilesChecked(object sender, RoutedEventArgs e) {
-            keepFiles = true;
-            removeByPathAndContentCheckBox.IsChecked = false;
-            removeByContentCheckBox.IsChecked = false;
-            removeEmptyDirectoriesFromPrimaryCheckBox.IsChecked = false;
-            removeEmptyDirectoriesFromSecondaryCheckBox.IsChecked = false;
-            removeEmptyFilesFromPrimaryCheckBox.IsChecked = false;
-            removeEmptyFilesFromSecondaryCheckBox.IsChecked = false;
-            stateTextBlock.Text = "Ready";
-        }
-        private void KeepFilesUnchecked(object sender, RoutedEventArgs e) {
-            keepFiles = false;
-            stateTextBlock.Text = "Ready";
-        }
-        #endregion
 
         private void PrimaryDirectoryDialog(object sender, RoutedEventArgs e) {
             var dialog = new CommonOpenFileDialog { IsFolderPicker = true };
@@ -324,7 +213,11 @@ namespace FileDuplicateFinder {
         }
 
         private void FinalizeDuplicateFinding() {
-            stateTextBlock.Text = "Done";
+            if(abortTask) {
+                abortTask = false;
+                stateTextBlock.Text = "Aborted";
+            } else
+                stateTextBlock.Text = "Done";
             progressBar.Visibility = Visibility.Hidden;
             progressTextBlock.Visibility = Visibility.Hidden;
             UnlockGUI();
@@ -344,11 +237,6 @@ namespace FileDuplicateFinder {
             primaryDirectoryDialogButton.IsEnabled = false;
             secondaryDirectoryDialogButton.IsEnabled = false;
             primaryOnlyCheckBox.IsEnabled = false;
-            removeByPathAndContentCheckBox.IsEnabled = false;
-            removeByContentCheckBox.IsEnabled = false;
-            removeEmptyDirectoriesFromPrimaryCheckBox.IsEnabled = false;
-            removeEmptyDirectoriesFromSecondaryCheckBox.IsEnabled = false;
-            keepFilesCheckBox.IsEnabled = false;
             basePathsCheckBox.IsEnabled = false;
             findButton.IsEnabled = false;
             emptyDirectoriesPrimaryButton.IsEnabled = false;
@@ -359,6 +247,7 @@ namespace FileDuplicateFinder {
             duplicatedFilesSecondaryButton.IsEnabled = false;
             emptyFilesPrimaryOnlyButton.IsEnabled = false;
             emptyDirectoriesPrimaryOnlyButton.IsEnabled = false;
+            abortButton.IsEnabled = true;
         }
 
         private void UnlockGUI() {
@@ -367,11 +256,6 @@ namespace FileDuplicateFinder {
             primaryDirectoryDialogButton.IsEnabled = true;
             secondaryDirectoryDialogButton.IsEnabled = true;
             primaryOnlyCheckBox.IsEnabled = true;
-            removeByPathAndContentCheckBox.IsEnabled = true;
-            removeByContentCheckBox.IsEnabled = true;
-            removeEmptyDirectoriesFromPrimaryCheckBox.IsEnabled = true;
-            removeEmptyDirectoriesFromSecondaryCheckBox.IsEnabled = true;
-            keepFilesCheckBox.IsEnabled = true;
             findButton.IsEnabled = true;
             basePathsCheckBox.IsEnabled = true;
             emptyDirectoriesPrimaryButton.IsEnabled = true;
@@ -382,6 +266,7 @@ namespace FileDuplicateFinder {
             duplicatedFilesSecondaryButton.IsEnabled = true;
             emptyFilesPrimaryOnlyButton.IsEnabled = true;
             emptyDirectoriesPrimaryOnlyButton.IsEnabled = true;
+            abortButton.IsEnabled = false;
         }
 
         private void OpenDirectoryPrimary(object sender, RoutedEventArgs e) {
@@ -691,6 +576,7 @@ namespace FileDuplicateFinder {
             emptyDirectoriesPrimaryOnlyTabItem.Visibility = Visibility.Visible;
             emptyFilesPrimaryOnlyTabItem.Visibility = Visibility.Visible;
             duplicatedFilesPrimaryOnlyTabItem.Visibility = Visibility.Visible;
+            stateTextBlock.Text = "Ready";
         }
 
         private void PrimaryOnlyUnchecked(object sender, RoutedEventArgs e) {
@@ -702,6 +588,7 @@ namespace FileDuplicateFinder {
             emptyDirectoriesPrimaryOnlyTabItem.Visibility = Visibility.Collapsed;
             emptyFilesPrimaryOnlyTabItem.Visibility = Visibility.Collapsed;
             duplicatedFilesPrimaryOnlyTabItem.Visibility = Visibility.Collapsed;
+            stateTextBlock.Text = "Ready";
         }
 
         private void RemoveAllEmptyDirectoriesPrimary(object sender, RoutedEventArgs e) {
@@ -824,7 +711,12 @@ namespace FileDuplicateFinder {
         private void FinishProgress(string state) {
             progressBar.Visibility = Visibility.Hidden;
             progressTextBlock.Visibility = Visibility.Hidden;
-            stateTextBlock.Text = state;
+            if (abortTask) {
+                abortTask = false;
+                stateTextBlock.Text = "Aborted";
+            }
+            else
+                stateTextBlock.Text = state;
         }
 
         private void InitProgress(string state) {
@@ -833,13 +725,10 @@ namespace FileDuplicateFinder {
             progressTextBlock.Visibility = Visibility.Visible;
             stateTextBlock.Text = state;
         }
-
-
-        Thread currentTask;
+        
         private void AbortTask(object sender, RoutedEventArgs e) {
-            currentTask.Abort();//or interrupt to do something like finally block in try catch
-
-            stateTextBlock.Text = "Aborted";
+            abortTask = true;
+            FileManager.AbortTask();
         }
     }
 }
