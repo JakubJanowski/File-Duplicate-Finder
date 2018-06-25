@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?include Config.wxi?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  
+  <!-- Define main product -->
+  <Product Id="$(var.ProductCode)"
+           Name="!(loc.ProductName_$(var.Platform))"
+           Language="!(loc.Language)"
+           Version="$(var.Version)"
+           Manufacturer="!(loc.Manufacturer)"
+           UpgradeCode="$(var.UpgradeCode)">
+
+    <!-- Provide package details -->
+    <Package InstallerVersion="200"
+             Compressed="yes"
+             InstallScope="perMachine"
+             Platform="$(var.Platform)"
+             Manufacturer="!(loc.Manufacturer)"
+             Description="!(loc.Description)"
+             Keywords="!(loc.Keywords)"
+             Comments="!(loc.Comments)"
+             Languages="!(loc.Language)"/>
+
+    <MajorUpgrade DowngradeErrorMessage="!(loc.DowngradeErrorMessage)"/>
+
+    <!-- Include .cab file into .msi file -->
+    <MediaTemplate EmbedCab="yes"/>
+
+    <!-- Define main app icon -->
+    <Icon Id="icon.ico" SourceFile="$(var.IconPath)"/>
+
+    <!-- Use icon.ico for this installer (shows up in Add/Remove programs) -->
+    <Property Id="ARPPRODUCTICON" Value="icon.ico"/>
+    <Property Id="ARPNOMODIFY" Value="1" />
+
+    <!-- Help/Support website (shows in the Add/Remove programs) -->
+    <!--<Property Id="ARPURLINFOABOUT" Value="$(var.Website)" />-->
+
+    <!-- UI variables -->
+    <Property Id="ApplicationFolderName" Value="!(loc.ProductFolderName)"/>
+    <Property Id="WixAppFolder" Value="WixPerMachineFolder"/>
+    <Property Id="UI_INSTALLDIR" Value="INSTALLDIR" />
+    <Property Id="INSTALLDESKTOPSHORTCUT" Value="1"/>
+    <Property Id="LAUNCHPRODUCT" Value="1"/>
+    <Property Id="ProgressStarted" Value="0" />
+
+    <Property Id="BannerBitmap" Value="bannerBmpBin"/>
+    <Property Id="InfoIcon" Value="info"/>
+    <Property Id="CustomSetupIcon" Value="custicon"/>
+    <Property Id="RemoveIcon" Value="removico"/>
+    <Property Id="ExclamationIcon" Value="exclamic"/>
+    <Property Id="CompleteSetupIcon" Value="completi"/>
+    <Property Id="RepairIcon" Value="repairic"/>
+    <Property Id="InstallerIcon" Value="insticon"/>
+    <Property Id="DialogBitmap" Value="dialogBmpBin"/>
+
+    <!-- Create a basic UI for the installer -->
+    <UIRef Id="UI"/>
+    <!--<UIRef Id="WixUI_Advanced"/>-->
+
+    <!-- Define components, shortcuts, files, etc. for installer -->
+    <Feature Id="ProductFeature" Title="!(loc.ProductName)" Level="1" ConfigurableDirectory="INSTALLDIR">
+      <ComponentGroupRef Id="ProductComponents" />
+      <!--<ComponentGroupRef Id="PublishedComponents" />-->
+    </Feature>
+
+    <!-- Installer resources -->
+    <Binary Id="Up" SourceFile="$(var.ProjectDir)\Assets\Up.ico" />
+    <Binary Id="New" SourceFile="$(var.ProjectDir)\Assets\New.ico" />
+    <Binary Id="custicon" SourceFile="$(var.ProjectDir)\Assets\Custom.ico" />
+    <Binary Id="repairic" SourceFile="$(var.ProjectDir)\Assets\Repair.ico" />
+    <Binary Id="exclamic" SourceFile="$(var.ProjectDir)\Assets\Exclam.ico" />
+    <Binary Id="removico" SourceFile="$(var.ProjectDir)\Assets\Remove.ico" />
+    <Binary Id="completi" SourceFile="$(var.ProjectDir)\Assets\Complete.ico" />
+    <Binary Id="insticon" SourceFile="$(var.ProjectDir)\Assets\Typical.ico" />
+    <Binary Id="info" SourceFile="$(var.ProjectDir)\Assets\Info.ico" />
+    <Binary Id="bannerBmpBin" SourceFile="$(var.ProjectDir)\Assets\Banner.bmp" />
+    <Binary Id="dialogBmpBin" SourceFile="$(var.ProjectDir)\Assets\Background.bmp" />
+  </Product>
+
+</Wix>

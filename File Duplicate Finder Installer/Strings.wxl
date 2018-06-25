@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WixLocalization Culture="en-us" xmlns="http://schemas.microsoft.com/wix/2006/localization">
+
+  <String Id="Manufacturer">Jakub Janowski</String>
+
+  <String Id="ProductFolderName">File Duplicate Finder</String>
+
+  <String Id="ProductName">File Duplicate Finder</String>
+  <String Id="ProductName_x86">File Duplicate Finder (32-bit)</String>
+  <String Id="ProductName_x64">File Duplicate Finder (64-bit)</String>
+
+  <String Id="Description">File Duplicate Finder Installer</String>
+  <String Id="Keywords">file,duplicate,finder,installer</String>
+  <String Id="Comments">xx</String>
+
+  <String Id="DowngradeErrorMessage">A newer version of File Duplicate Finder is already installed.</String>
+
+  <String Id="Language">1033</String>
+
+  <String Id="Setup">Setup</String>
+  <String Id="Wizard">Setup Wizard</String>
+  
+  <!-- Dialog specific texts -->
+  <String Id="CancelDlgText">Are you sure you want to cancel File Duplicate Finder installation?</String>
+  
+  <String Id="LicenseAgreementDlgTitle">{\DlgTitleFont}License Agreement</String>
+  <String Id="LicenseAgreementDlgDescription">Please read the following license agreement carefully.</String>
+  <String Id="LicenseAgreementDlgNote">If you accept the terms of agreement, click I Agree to continue. You must accept the agreement to install File Duplicate Finder.</String>
+
+  <String Id="DirAndShortcutsDlgTitle">{\WixUI_Font_Title}Destination Folder &amp; Shortcuts</String>
+  <String Id="DirAndShortcutsDlgDescription">Choose the destination folder and which shortcuts you want to be created.</String>
+  <String Id="DirAndShortcutsDlgFolderLabel">The installer will install File Duplicate Finder in the following folder. To install in a different folder click Browse and select another folder. Click Next to continue.</String>
+  <String Id="DirAndShortcutsDlgChange">Browse...</String>
+  <String Id="CreateDesktopShortcutLabel">Create shortcut on desktop</String>
+  <String Id="CreateStartMenuShortcutLabel">Create shortcut in start menu</String>
+  
+  <!-- Buttons -->
+  <String Id="Back">&lt; &amp;Back</String>
+  <String Id="Browse">Br&amp;owse</String>
+  <String Id="Cancel">&amp;Cancel</String>
+  <String Id="Exit">&amp;Exit</String>
+  <String Id="Finish">&amp;Finish</String>
+  <String Id="IAgree">I &amp;Agree</String>
+  <String Id="Ignore">&amp;Ignore</String>
+  <String Id="Install">&amp;Install</String>
+  <String Id="Next">&amp;Next &gt;</String>
+  <String Id="No">&amp;No</String>
+  <String Id="OK">&amp;OK</String>
+  <String Id="Remove">&amp;Remove</String>
+  <String Id="Repair">&amp;Repair</String>
+  <String Id="Reset">&amp;Reset</String>
+  <String Id="Resume">&amp;Resume</String>
+  <String Id="Retry">&amp;Retry</String>
+  <String Id="Return">&amp;Return</String>
+  <String Id="Yes">&amp;Yes</String>
+  
+
+</WixLocalization>

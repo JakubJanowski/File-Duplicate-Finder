@@ -14,9 +14,16 @@
 // when deleting from appdata with noadmin rights it did nothing not even logged errors
 //test primary only Touro/backup/kuba janowski old    and remove file from duplicated list
 // checkbox remove from list when only one element left whit no other to compare to (do not delete elements from list after ignoring other for sure
+//  add watermark text after removing files from list because they don't have a duplicate saying something like "Files that did not have a duplicate after your operation were removed from this list"
 // config file with ignored directories in search and mayby open last checked
-// remove obsolete function
 // start progressbar when started searching for duplicates, during initialization make progressbar shift green area constantly
+// ikonki folderów
+// dont store names as guids but as normal name but make sure the names don't collide easiest way - add guid at the end, can use some base64 number of files in this directory past max or etc
+// do something with hiding list elements on remove all, the <= 1 is bad as default as it's scary to see all elements disappear, maybe add an information, make them collapse into subgroup or make a checkbox to make it an opitonal feature
+// Features:
+// look at files in archives too
+// show files with match percentage above given treshold
+// regex search names (add tooltip because it's hard to use - "If you want to search for files with some extension write *.jpg, see full guide online link")
 
 using Microsoft.WindowsAPICodePack.Dialogs;
 using System;
@@ -31,16 +38,17 @@ using System.Windows.Media;
 
 namespace FileDuplicateFinder {
     public partial class MainWindow: Window {
-        volatile bool abortTask = false;
-        bool showBasePaths = false;
-        bool backupFiles = true;
-        bool askLarge = true;
-        bool sortBySize = true;
-        bool primaryOnly = false;
-        bool sortBySizePrimaryOnly = true;
-        string primaryDirectory;
-        string secondaryDirectory;
-        string tmpDirectory = AppDomain.CurrentDomain.BaseDirectory + "tmp/";
+        private const int pathChildPosition = 1;
+        private volatile bool abortTask = false;
+        private bool showBasePaths = false;
+        private bool backupFiles = true;
+        private bool askLarge = true;
+        private bool sortBySize = true;
+        private bool primaryOnly = false;
+        private bool sortBySizePrimaryOnly = true;
+        private string primaryDirectory;
+        private string secondaryDirectory;
+        private string tmpDirectory = AppDomain.CurrentDomain.BaseDirectory + "tmp/";
 
         public MainWindow() {
             InitializeComponent();
@@ -139,7 +147,7 @@ namespace FileDuplicateFinder {
             }
 
             FileManager.FindDuplicatedFiles(primaryDirectory, showBasePaths);
-            
+
             if (!sortBySizePrimaryOnly)
                 FileManager.duplicatedFilesPrimaryOnly.Sort((a, b) => a[0].Path.CompareTo(b[0].Path));
 
@@ -213,10 +221,11 @@ namespace FileDuplicateFinder {
         }
 
         private void FinalizeDuplicateFinding() {
-            if(abortTask) {
+            if (abortTask) {
                 abortTask = false;
                 stateTextBlock.Text = "Aborted";
-            } else
+            }
+            else
                 stateTextBlock.Text = "Done";
             progressBar.Visibility = Visibility.Hidden;
             progressTextBlock.Visibility = Visibility.Hidden;
@@ -270,14 +279,14 @@ namespace FileDuplicateFinder {
         }
 
         private void OpenDirectoryPrimary(object sender, RoutedEventArgs e) {
-            string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[0]).Text;
+            string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[pathChildPosition]).Text;
             if (!showBasePaths)
                 path = primaryDirectory + path;
             try {
                 Process.Start(path);
             }
             catch (Win32Exception) {
-                FileManager.emptyDirectoriesPrimary.Remove(((TextBlock)((Grid)((Button)sender).Parent).Children[0]).Text);
+                FileManager.emptyDirectoriesPrimary.Remove(((TextBlock)((Grid)((Button)sender).Parent).Children[pathChildPosition]).Text);
                 emptyDirectoriesPrimaryListView.Items.Refresh();
                 emptyDirectoriesPrimaryOnlyListView.Items.Refresh();
                 Utility.Log("Directory \"" + path + "\" no longer exists.");
@@ -285,27 +294,27 @@ namespace FileDuplicateFinder {
         }
 
         private void OpenDirectorySecondary(object sender, RoutedEventArgs e) {
-            string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[0]).Text;
+            string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[pathChildPosition]).Text;
             if (!showBasePaths)
                 path = secondaryDirectory + path;
             try {
                 Process.Start(path);
             }
             catch (Win32Exception) {
-                FileManager.emptyDirectoriesSecondary.Remove(((TextBlock)((Grid)((Button)sender).Parent).Children[0]).Text);
+                FileManager.emptyDirectoriesSecondary.Remove(((TextBlock)((Grid)((Button)sender).Parent).Children[pathChildPosition]).Text);
                 emptyDirectoriesSecondaryListView.Items.Refresh();
                 Utility.Log("Directory \"" + path + "\" no longer exists.");
             }
         }
 
         private void OpenFileDirectoryPrimary(object sender, RoutedEventArgs e) {
-            string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[0]).Text;
+            string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[pathChildPosition]).Text;
             if (!showBasePaths)
                 path = primaryDirectory + path;
             if (File.Exists(path))
                 Process.Start("explorer.exe", "/select, \"" + path + "\"");
             else {
-                path = ((TextBlock)((Grid)((Button)sender).Parent).Children[0]).Text;
+                path = ((TextBlock)((Grid)((Button)sender).Parent).Children[pathChildPosition]).Text;
                 if (!FileManager.emptyFilesPrimary.Remove(path)) {
                     for (int i = 0; i < FileManager.duplicatedFilesPrimaryOnly.Count; i++) {
                         int index = FileManager.duplicatedFilesPrimaryOnly[i].FindIndex(f => f.Path == path);
@@ -338,13 +347,13 @@ namespace FileDuplicateFinder {
         }
 
         private void OpenFileDirectorySecondary(object sender, RoutedEventArgs e) {
-            string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[0]).Text;
+            string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[pathChildPosition]).Text;
             if (!showBasePaths)
                 path = secondaryDirectory + path;
             if (File.Exists(path))
                 Process.Start("explorer.exe", "/select, \"" + path + "\"");
             else {
-                path = ((TextBlock)((Grid)((Button)sender).Parent).Children[0]).Text;
+                path = ((TextBlock)((Grid)((Button)sender).Parent).Children[pathChildPosition]).Text;
                 if (!FileManager.emptyFilesSecondary.Remove(path)) {
                     for (int i = 0; i < FileManager.duplicatedFiles.Count; i++) {
                         int index = FileManager.duplicatedFiles[i].Item2.FindIndex(f => f.Path == path);
@@ -364,79 +373,79 @@ namespace FileDuplicateFinder {
         }
 
         private void EmptyDirectoriesPrimaryRemoveFile(object sender, RoutedEventArgs e) {
-            string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[0]).Text;
+            string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[pathChildPosition]).Text;
             RemoveFile(path, primaryDirectory);
             FileManager.EmptyDirectoriesPrimaryIgnoreFile(path);
         }
 
         private void EmptyDirectoriesPrimaryIgnoreFile(object sender, RoutedEventArgs e) {
-            string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[0]).Text;
+            string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[pathChildPosition]).Text;
             FileManager.EmptyDirectoriesPrimaryIgnoreFile(path);
         }
 
         private void EmptyFilesPrimaryRemoveFile(object sender, RoutedEventArgs e) {
-            string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[0]).Text;
+            string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[pathChildPosition]).Text;
             RemoveFile(path, primaryDirectory);
             FileManager.EmptyFilesPrimaryIgnoreFile(path);
         }
 
         private void EmptyFilesPrimaryIgnoreFile(object sender, RoutedEventArgs e) {
-            string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[0]).Text;
+            string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[pathChildPosition]).Text;
             FileManager.EmptyFilesPrimaryIgnoreFile(path);
         }
 
         private void EmptyDirectoriesSecondaryRemoveFile(object sender, RoutedEventArgs e) {
-            string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[0]).Text;
+            string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[pathChildPosition]).Text;
             RemoveFile(path, secondaryDirectory);
             FileManager.EmptyDirectoriesSecondaryIgnoreFile(path);
         }
 
         private void EmptyDirectoriesSecondaryIgnoreFile(object sender, RoutedEventArgs e) {
-            string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[0]).Text;
+            string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[pathChildPosition]).Text;
             FileManager.EmptyDirectoriesSecondaryIgnoreFile(path);
         }
 
         private void EmptyFilesSecondaryRemoveFile(object sender, RoutedEventArgs e) {
-            string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[0]).Text;
+            string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[pathChildPosition]).Text;
             RemoveFile(path, secondaryDirectory);
             FileManager.EmptyFilesSecondaryIgnoreFile(path);
         }
 
         private void EmptyFilesSecondaryIgnoreFile(object sender, RoutedEventArgs e) {
-            string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[0]).Text;
+            string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[pathChildPosition]).Text;
             FileManager.EmptyFilesSecondaryIgnoreFile(path);
         }
 
         private void DuplicatedFilesPrimaryRemoveFile(object sender, RoutedEventArgs e) {
-            string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[0]).Text;
+            string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[pathChildPosition]).Text;
             RemoveFile(path, primaryDirectory);
             FileManager.DuplicatedFilesPrimaryIgnoreFile(path);
         }
 
         private void DuplicatedFilesPrimaryIgnoreFile(object sender, RoutedEventArgs e) {
-            string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[0]).Text;
+            string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[pathChildPosition]).Text;
             FileManager.DuplicatedFilesPrimaryIgnoreFile(path);
         }
 
         private void DuplicatedFilesSecondaryRemoveFile(object sender, RoutedEventArgs e) {
-            string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[0]).Text;
+            string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[pathChildPosition]).Text;
             RemoveFile(path, secondaryDirectory);
             FileManager.DuplicatedFilesSecondaryIgnoreFile(path);
         }
 
         private void DuplicatedFilesSecondaryIgnoreFile(object sender, RoutedEventArgs e) {
-            string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[0]).Text;
+            string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[pathChildPosition]).Text;
             FileManager.DuplicatedFilesSecondaryIgnoreFile(path);
         }
 
         private void DuplicatedFilesPrimaryOnlyRemoveFile(object sender, RoutedEventArgs e) {
-            string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[0]).Text;
+            string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[pathChildPosition]).Text;
             RemoveFile(path, primaryDirectory);
             FileManager.DuplicatedFilesPrimaryOnlyIgnoreFile(path);
         }
 
         private void DuplicatedFilesPrimaryOnlyIgnoreFile(object sender, RoutedEventArgs e) {
-            string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[0]).Text;
+            string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[pathChildPosition]).Text;
             FileManager.DuplicatedFilesPrimaryOnlyIgnoreFile(path);
         }
 
@@ -444,7 +453,7 @@ namespace FileDuplicateFinder {
             if (!showBasePaths)
                 path = baseDirectory + path;
             // try catch log here
-            if (FileManager.RemoveFile(path, baseDirectory, backupFiles, askLarge) )
+            if (FileManager.RemoveFile(path, backupFiles, askLarge))
                 restoreButton.IsEnabled = true;
         }
 
@@ -458,16 +467,16 @@ namespace FileDuplicateFinder {
             }
             duplicatedFilesListView.Items.Refresh();
             for (int i = 0; i < FileManager.emptyDirectoriesPrimary.Count; i++)
-                FileManager.emptyDirectoriesPrimary[i] = primaryDirectory + FileManager.emptyDirectoriesPrimary[i];
+                FileManager.emptyDirectoriesPrimary[i].Path = primaryDirectory + FileManager.emptyDirectoriesPrimary[i].Path;
             emptyDirectoriesPrimaryListView.Items.Refresh();
             for (int i = 0; i < FileManager.emptyFilesPrimary.Count; i++)
-                FileManager.emptyFilesPrimary[i] = primaryDirectory + FileManager.emptyFilesPrimary[i];
+                FileManager.emptyFilesPrimary[i].Path = primaryDirectory + FileManager.emptyFilesPrimary[i].Path;
             emptyFilesPrimaryListView.Items.Refresh();
             for (int i = 0; i < FileManager.emptyDirectoriesSecondary.Count; i++)
-                FileManager.emptyDirectoriesSecondary[i] = secondaryDirectory + FileManager.emptyDirectoriesSecondary[i];
+                FileManager.emptyDirectoriesSecondary[i].Path = secondaryDirectory + FileManager.emptyDirectoriesSecondary[i].Path;
             emptyDirectoriesSecondaryListView.Items.Refresh();
             for (int i = 0; i < FileManager.emptyFilesSecondary.Count; i++)
-                FileManager.emptyFilesSecondary[i] = secondaryDirectory + FileManager.emptyFilesSecondary[i];
+                FileManager.emptyFilesSecondary[i].Path = secondaryDirectory + FileManager.emptyFilesSecondary[i].Path;
             emptyFilesSecondaryListView.Items.Refresh();
             for (int i = 0; i < FileManager.duplicatedFilesPrimaryOnly.Count; i++)
                 for (int p = 0; p < FileManager.duplicatedFilesPrimaryOnly[i].Count; p++)
@@ -485,16 +494,16 @@ namespace FileDuplicateFinder {
             }
             duplicatedFilesListView.Items.Refresh();
             for (int i = 0; i < FileManager.emptyDirectoriesPrimary.Count; i++)
-                FileManager.emptyDirectoriesPrimary[i] = new string(FileManager.emptyDirectoriesPrimary[i].Skip(primaryDirectory.Length).ToArray());
+                FileManager.emptyDirectoriesPrimary[i].Path = new string(FileManager.emptyDirectoriesPrimary[i].Path.Skip(primaryDirectory.Length).ToArray());
             emptyDirectoriesPrimaryListView.Items.Refresh();
             for (int i = 0; i < FileManager.emptyFilesPrimary.Count; i++)
-                FileManager.emptyFilesPrimary[i] = new string(FileManager.emptyFilesPrimary[i].Skip(primaryDirectory.Length).ToArray());
+                FileManager.emptyFilesPrimary[i].Path = new string(FileManager.emptyFilesPrimary[i].Path.Skip(primaryDirectory.Length).ToArray());
             emptyFilesPrimaryListView.Items.Refresh();
             for (int i = 0; i < FileManager.emptyDirectoriesSecondary.Count; i++)
-                FileManager.emptyDirectoriesSecondary[i] = new string(FileManager.emptyDirectoriesSecondary[i].Skip(secondaryDirectory.Length).ToArray());
+                FileManager.emptyDirectoriesSecondary[i].Path = new string(FileManager.emptyDirectoriesSecondary[i].Path.Skip(secondaryDirectory.Length).ToArray());
             emptyDirectoriesSecondaryListView.Items.Refresh();
             for (int i = 0; i < FileManager.emptyFilesSecondary.Count; i++)
-                FileManager.emptyFilesSecondary[i] = new string(FileManager.emptyFilesSecondary[i].Skip(secondaryDirectory.Length).ToArray());
+                FileManager.emptyFilesSecondary[i].Path = new string(FileManager.emptyFilesSecondary[i].Path.Skip(secondaryDirectory.Length).ToArray());
             emptyFilesSecondaryListView.Items.Refresh();
             for (int i = 0; i < FileManager.duplicatedFilesPrimaryOnly.Count; i++)
                 for (int p = 0; p < FileManager.duplicatedFilesPrimaryOnly[i].Count; p++)
@@ -598,7 +607,10 @@ namespace FileDuplicateFinder {
             Utility.SetProgress(0, FileManager.emptyDirectoriesPrimary.Count);
             LockGUI();
             new Thread(() => {
-                FileManager.RemoveAllEmptyDirectoriesPrimary(primaryDirectory);
+                if (showBasePaths)
+                    FileManager.RemoveAllEmptyDirectoriesPrimary();
+                else
+                    FileManager.RemoveAllEmptyDirectoriesPrimary(primaryDirectory);
                 Dispatcher.Invoke(() => {
                     emptyDirectoriesPrimaryListView.Items.Refresh();
                     emptyDirectoriesPrimaryOnlyListView.Items.Refresh();
@@ -615,7 +627,10 @@ namespace FileDuplicateFinder {
             Utility.SetProgress(0, FileManager.emptyDirectoriesSecondary.Count);
             LockGUI();
             new Thread(() => {
-                FileManager.RemoveAllEmptyDirectoriesSecondary(secondaryDirectory);
+                if (showBasePaths)
+                    FileManager.RemoveAllEmptyDirectoriesSecondary();
+                else
+                    FileManager.RemoveAllEmptyDirectoriesSecondary(secondaryDirectory);
                 Dispatcher.Invoke(() => {
                     emptyDirectoriesSecondaryListView.Items.Refresh();
                     FinishProgress("Done");
@@ -632,7 +647,10 @@ namespace FileDuplicateFinder {
             LockGUI();
             stateTextBlock.Text = "Removing files...";
             new Thread(() => {
-                FileManager.RemoveAllEmptyFilesPrimary(primaryDirectory);
+                if (showBasePaths)
+                    FileManager.RemoveAllEmptyFilesPrimary();
+                else
+                    FileManager.RemoveAllEmptyFilesPrimary(primaryDirectory);
                 Dispatcher.Invoke(() => {
                     emptyFilesPrimaryListView.Items.Refresh();
                     emptyFilesPrimaryOnlyListView.Items.Refresh();
@@ -649,7 +667,10 @@ namespace FileDuplicateFinder {
             Utility.SetProgress(0, FileManager.emptyFilesSecondary.Count);
             LockGUI();
             new Thread(() => {
-                FileManager.RemoveAllEmptyFilesSecondary(secondaryDirectory);
+                if (showBasePaths)
+                    FileManager.RemoveAllEmptyFilesSecondary();
+                else
+                    FileManager.RemoveAllEmptyFilesSecondary(secondaryDirectory);
                 Dispatcher.Invoke(() => {
                     emptyFilesSecondaryListView.Items.Refresh();
                     FinishProgress("Done");
@@ -665,7 +686,10 @@ namespace FileDuplicateFinder {
             Utility.SetProgress(0, FileManager.duplicatedFiles.Count);
             LockGUI();
             new Thread(() => {
-                FileManager.RemoveAllPrimary(primaryDirectory);
+                if (showBasePaths)
+                    FileManager.RemoveAllPrimary();
+                else
+                    FileManager.RemoveAllPrimary(primaryDirectory);
                 Dispatcher.Invoke(() => {
                     duplicatedFilesListView.Items.Refresh();
                     FinishProgress("Done");
@@ -681,7 +705,10 @@ namespace FileDuplicateFinder {
             Utility.SetProgress(0, FileManager.duplicatedFiles.Count);
             LockGUI();
             new Thread(() => {
-                FileManager.RemoveAllSecondary(secondaryDirectory);
+                if (showBasePaths)
+                    FileManager.RemoveAllSecondary();
+                else
+                    FileManager.RemoveAllSecondary(secondaryDirectory);
                 Dispatcher.Invoke(() => {
                     duplicatedFilesListView.Items.Refresh();
                     FinishProgress("Done");
@@ -725,7 +752,7 @@ namespace FileDuplicateFinder {
             progressTextBlock.Visibility = Visibility.Visible;
             stateTextBlock.Text = state;
         }
-        
+
         private void AbortTask(object sender, RoutedEventArgs e) {
             abortTask = true;
             FileManager.AbortTask();

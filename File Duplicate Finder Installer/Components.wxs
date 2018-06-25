@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?include Config.wxi?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  
+  <Fragment>
+    <ComponentGroup Id="ProductComponents">
+      <!-- Shortcut -->
+      <ComponentRef Id="exe"/>
+      <ComponentRef Id="exe_B"/>
+      <ComponentRef Id="exe_D"/>
+      <ComponentRef Id="exe_SM"/>
+      <ComponentRef Id="exeConfig" />
+      <ComponentRef Id="windowsAPICodePackDll" />
+      <ComponentRef Id="windowsAPICodePackExtendedLinguisticServicesDll" />
+      <ComponentRef Id="windowsAPICodePackSensorsDll" />
+      <ComponentRef Id="windowsAPICodePackShellDll" />
+      <ComponentRef Id="windowsAPICodePackShellExtenstionsDll" />
+    </ComponentGroup>
+
+    <!-- Installed files -->
+    <DirectoryRef Id="INSTALLDIR" FileSource="$(var.PublishFolder)">
+      <!-- Shortcut to main application -->
+      <!--<Component Id="MainAppShortcut" Guid="{0EFC3F34-F5A5-4F86-9419-2ADE43E3D022}">
+        <Shortcut Id="MainAppShortcut"
+                  Name="!(loc.ProductName)"
+                  Target="[INSTALLDIR]File Duplicate Finder.exe"
+                  Directory="InstallProgramMenuFolder"
+                  WorkingDirectory="INSTALLDIR"
+                  Icon="icon.ico"/>
+        
+        <Shortcut Id="MainAppDesktopShortcut"
+                  Name="!(loc.ProductName)"
+                  Description="File Duplicate Finder ($(var.Platform)) v$(var.BuildVersion)"
+                  Target="[INSTALLDIR]File Duplicate Finder.exe"
+                  Directory="DesktopFolder"
+                  WorkingDirectory="INSTALLDIR"
+                  Icon="icon.ico"/>
+
+        --><!-- Unique key for this component / shortcut--><!--
+        <RegistryValue Id="RegShortcutKey" Root="HKCU" Key="SOFTWARE\!(loc.ProductFolderName)" Name="Shortcut" Value="1" Type="integer" KeyPath="yes"/>
+        
+         --><!-- Remove start menu items --><!-- 
+        <RemoveFolder Id="RemoveStartMenu" Directory="InstallProgramMenuFolder" On="uninstall"/>
+        
+      </Component>-->
+
+
+      <!-- Intsall start menu and desktop shortcut -->
+      <Component Id="exe_B" Guid="{5B2D147C-FC9E-41F1-B5BF-B9DD0B05D84E}">
+        <File Id="exeFile_B" 
+              KeyPath="yes" 
+              Source="$(var.PublishFolder)\File Duplicate Finder.exe">
+          <Shortcut Id="startMenuShortcut_B" 
+                    Name="!(loc.ProductName)"
+                    Directory="InstallProgramMenuFolder"
+                    WorkingDirectory='INSTALLDIR' 
+                    Icon="icon.ico"
+                    Advertise="yes" />
+          <Shortcut Id="desktopShortcut_B"
+                    Name="!(loc.ProductName)"
+                    Directory="DesktopFolder"
+                    WorkingDirectory='INSTALLDIR'
+                    Icon="icon.ico"
+                    Advertise="yes"/>
+        </File>
+        <Condition>INSTALLDESKTOPSHORTCUT AND INSTALLSTARTMENUSHORTCUT</Condition>
+      </Component>
+      
+      <!-- Intsall only start menu shortcut -->
+      <Component Id="exe_SM" Guid="{8BACEEEA-9F1C-4345-9302-559C6534E2E9}">
+        <File Id="exeFile_SM"
+              KeyPath="yes"
+              Source="$(var.PublishFolder)\File Duplicate Finder.exe">
+          <Shortcut Id="startMenuShortcut_SM"
+                    Name="!(loc.ProductName)"
+                    Directory="InstallProgramMenuFolder"
+                    WorkingDirectory='INSTALLDIR'
+                    Icon="icon.ico"
+                    Advertise="yes" />
+        </File>
+        <Condition>NOT INSTALLDESKTOPSHORTCUT AND INSTALLSTARTMENUSHORTCUT</Condition>
+      </Component>
+
+      <!-- Intsall only desktop shortcut -->
+      <Component Id="exe_D" Guid="{F37BC7AA-4985-43FB-B9CC-FF5199288562}">
+        <File Id="exeFile_D"
+              KeyPath="yes"
+              Source="$(var.PublishFolder)\File Duplicate Finder.exe">
+          <Shortcut Id="desktopShortcut_D"
+                    Name="!(loc.ProductName)"
+                    Directory="DesktopFolder"
+                    WorkingDirectory='INSTALLDIR'
+                    Icon="icon.ico"
+                    Advertise="yes"/>
+        </File>
+        <Condition>INSTALLDESKTOPSHORTCUT AND NOT INSTALLSTARTMENUSHORTCUT</Condition>
+      </Component>
+      
+      <!-- Intsall no shortcuts -->
+      <Component Id="exe" Guid="{1F595452-F9E9-4A6F-99A8-99271B799B28}">
+        <File Id="exeFile"
+              KeyPath="yes"
+              Source="$(var.PublishFolder)\File Duplicate Finder.exe"/>
+        <Condition>NOT INSTALLDESKTOPSHORTCUT AND NOT INSTALLSTARTMENUSHORTCUT</Condition>
+      </Component>
+      
+      <!-- Other files and dependencies -->
+      <Component Id="exeConfig" Guid="{1E6528E8-2DD2-41FE-87AB-67454F591489}">
+        <File Id="exeConfigFile" KeyPath="yes" Source="$(var.PublishFolder)\File Duplicate Finder.exe.config" />
+        <RemoveFolder Id="removeStartMenu" Directory="InstallProgramMenuFolder" On="uninstall"/>
+      </Component>
+      <Component Id="windowsAPICodePackDll" Guid="{EF697F20-81F7-49FA-B678-FB8CD5590EA8}">
+        <File Id="windowsAPICodePackDllFile" KeyPath="yes" Source="$(var.PublishFolder)\Microsoft.WindowsAPICodePack.dll" />
+      </Component>
+      <Component Id="windowsAPICodePackExtendedLinguisticServicesDll" Guid="{8A2BBE46-6410-463D-A6CC-2F9CDF0D7557}">
+        <File Id="windowsAPICodePackExtendedLinguisticServicesDllFile" KeyPath="yes" Source="$(var.PublishFolder)\Microsoft.WindowsAPICodePack.ExtendedLinguisticServices.dll" />
+      </Component>
+      <Component Id="windowsAPICodePackSensorsDll" Guid="{72DD7EAA-E329-4F82-AFFD-A4161CFF7865}">
+        <File Id="windowsAPICodePackSensorsDllFile" KeyPath="yes" Source="$(var.PublishFolder)\Microsoft.WindowsAPICodePack.Sensors.dll" />
+      </Component>
+      <Component Id="windowsAPICodePackShellDll" Guid="{C7F36954-57C1-4768-970D-C9B7C2B5BE5B}">
+        <File Id="windowsAPICodePackShellDllFile" KeyPath="yes" Source="$(var.PublishFolder)\Microsoft.WindowsAPICodePack.Shell.dll" />
+      </Component>
+      <Component Id="windowsAPICodePackShellExtenstionsDll" Guid="{49CEBE7B-19C7-4F02-97B9-F0261ACF7B61}">
+        <File Id="windowsAPICodePackShellExtenstionsDllFile" KeyPath="yes" Source="$(var.PublishFolder)\Microsoft.WindowsAPICodePack.ShellExtensions.dll" />
+      </Component>
+    </DirectoryRef>
+    
+  </Fragment>
+  
+</Wix>

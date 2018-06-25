@@ -16,15 +16,17 @@
                         <Border Name="Border" Padding="2" Height="24" SnapsToDevicePixels="true" Background="Transparent" MouseEnter="ShowButtons" MouseLeave="HideButtons">
                             <Grid>
                                 <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="auto"/>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="auto"/>
                                     <ColumnDefinition Width="auto"/>
                                     <ColumnDefinition Width="auto"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0" Text="{Binding}"/>
-                                <Button Margin="5,0,0,0" Visibility="Collapsed" Grid.Column="1" Click="OpenDirectoryPrimary">Open in explorer</Button>
-                                <Button Margin="5,0,5,0" Visibility="Collapsed" Grid.Column="2" Click="EmptyDirectoriesPrimaryIgnoreFile">Ignore folder</Button>
-                                <Button Visibility="Collapsed" Grid.Column="3" Click="EmptyDirectoriesPrimaryRemoveFile">Remove folder</Button>
+                                <Image Margin="0,0,5,3" Grid.Column="0" Width="16" Height="16" Source="{Binding Icon}"/>
+                                <TextBlock Grid.Column="1" Text="{Binding Path}"/>
+                                <Button Margin="5,0,0,0" Visibility="Collapsed" Grid.Column="2" Click="OpenDirectoryPrimary">Open in explorer</Button>
+                                <Button Margin="5,0,5,0" Visibility="Collapsed" Grid.Column="3" Click="EmptyDirectoriesPrimaryIgnoreFile">Ignore folder</Button>
+                                <Button Visibility="Collapsed" Grid.Column="4" Click="EmptyDirectoriesPrimaryRemoveFile">Remove folder</Button>
                             </Grid>
                         </Border>
                         <ControlTemplate.Triggers>
@@ -45,15 +47,17 @@
                         <Border Name="Border" Padding="2" Height="24" SnapsToDevicePixels="true" Background="Transparent" MouseEnter="ShowButtons" MouseLeave="HideButtons">
                             <Grid>
                                 <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="auto"/>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="auto"/>
                                     <ColumnDefinition Width="auto"/>
                                     <ColumnDefinition Width="auto"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0" Text="{Binding}"/>
-                                <Button Margin="5,0,0,0" Visibility="Collapsed" Grid.Column="1" Click="OpenFileDirectoryPrimary">Open in explorer</Button>
-                                <Button Margin="5,0,5,0" Visibility="Collapsed" Grid.Column="2" Click="EmptyFilesPrimaryIgnoreFile">Ignore file</Button>
-                                <Button Visibility="Collapsed" Grid.Column="3" Click="EmptyFilesPrimaryRemoveFile">Remove file</Button>
+                                <Image Margin="0,0,5,3" Grid.Column="0" Width="16" Height="16" Source="{Binding Icon}"/>
+                                <TextBlock Grid.Column="1" Text="{Binding Path}"/>
+                                <Button Margin="5,0,0,0" Visibility="Collapsed" Grid.Column="2" Click="OpenFileDirectoryPrimary">Open in explorer</Button>
+                                <Button Margin="5,0,5,0" Visibility="Collapsed" Grid.Column="3" Click="EmptyFilesPrimaryIgnoreFile">Ignore file</Button>
+                                <Button Visibility="Collapsed" Grid.Column="4" Click="EmptyFilesPrimaryRemoveFile">Remove file</Button>
                             </Grid>
                         </Border>
                         <ControlTemplate.Triggers>
@@ -74,15 +78,17 @@
                         <Border Name="Border" Padding="2" Height="24" SnapsToDevicePixels="true" Background="Transparent" MouseEnter="ShowButtons" MouseLeave="HideButtons">
                             <Grid>
                                 <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="auto"/>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="auto"/>
                                     <ColumnDefinition Width="auto"/>
                                     <ColumnDefinition Width="auto"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0" Text="{Binding}"/>
-                                <Button Margin="5,0,0,0" Visibility="Collapsed" Grid.Column="1" Click="OpenDirectorySecondary">Open in explorer</Button>
-                                <Button Margin="5,0,5,0" Visibility="Collapsed" Grid.Column="2" Click="EmptyDirectoriesSecondaryIgnoreFile">Ignore folder</Button>
-                                <Button Visibility="Collapsed" Grid.Column="3" Click="EmptyDirectoriesSecondaryRemoveFile">Remove folder</Button>
+                                <Image Margin="0,0,5,3" Grid.Column="0" Width="16" Height="16" Source="{Binding Icon}"/>
+                                <TextBlock Grid.Column="1" Text="{Binding Path}"/>
+                                <Button Margin="5,0,0,0" Visibility="Collapsed" Grid.Column="2" Click="OpenDirectorySecondary">Open in explorer</Button>
+                                <Button Margin="5,0,5,0" Visibility="Collapsed" Grid.Column="3" Click="EmptyDirectoriesSecondaryIgnoreFile">Ignore folder</Button>
+                                <Button Visibility="Collapsed" Grid.Column="4" Click="EmptyDirectoriesSecondaryRemoveFile">Remove folder</Button>
                             </Grid>
                         </Border>
                         <ControlTemplate.Triggers>
@@ -103,15 +109,17 @@
                         <Border Name="Border" Padding="2" Height="24" SnapsToDevicePixels="true" Background="Transparent" MouseEnter="ShowButtons" MouseLeave="HideButtons">
                             <Grid>
                                 <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="auto"/>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="auto"/>
                                     <ColumnDefinition Width="auto"/>
                                     <ColumnDefinition Width="auto"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0" Text="{Binding}"/>
-                                <Button Margin="5,0,0,0" Visibility="Collapsed" Grid.Column="1" Click="OpenFileDirectorySecondary">Open in explorer</Button>
-                                <Button Margin="5,0,5,0" Visibility="Collapsed" Grid.Column="2" Click="EmptyFilesSecondaryIgnoreFile">Ignore file</Button>
-                                <Button Visibility="Collapsed" Grid.Column="3" Click="EmptyFilesSecondaryRemoveFile">Remove file</Button>
+                                <Image Margin="0,0,5,3" Grid.Column="0" Width="16" Height="16" Source="{Binding Icon}"/>
+                                <TextBlock Grid.Column="1" Text="{Binding Path}"/>
+                                <Button Margin="5,0,0,0" Visibility="Collapsed" Grid.Column="2" Click="OpenFileDirectorySecondary">Open in explorer</Button>
+                                <Button Margin="5,0,5,0" Visibility="Collapsed" Grid.Column="3" Click="EmptyFilesSecondaryIgnoreFile">Ignore file</Button>
+                                <Button Visibility="Collapsed" Grid.Column="4" Click="EmptyFilesSecondaryRemoveFile">Remove file</Button>
                             </Grid>
                         </Border>
                         <ControlTemplate.Triggers>
@@ -132,17 +140,19 @@
                         <Border Name="Border" Padding="2" Height="24" SnapsToDevicePixels="true" Background="Transparent" MouseEnter="ShowButtons" MouseLeave="HideButtons">
                             <Grid>
                                 <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="auto"/>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="auto"/>
                                     <ColumnDefinition Width="auto"/>
                                     <ColumnDefinition Width="auto"/>
                                     <ColumnDefinition Width="auto"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0" Text="{Binding Path}"/>
-                                <TextBlock Margin="5,0,5,0" Grid.Column="1" Text="{Binding Size}" Foreground="Gray"/>
-                                <Button Visibility="Collapsed" Grid.Column="2" Click="OpenFileDirectoryPrimary">Open in explorer</Button>
-                                <Button Margin="5,0,5,0" Visibility="Collapsed" Grid.Column="3" Click="DuplicatedFilesPrimaryIgnoreFile">Ignore file</Button>
-                                <Button Visibility="Collapsed" Grid.Column="4" Click="DuplicatedFilesPrimaryRemoveFile">Remove file</Button>
+                                <Image Margin="0,0,5,3" Grid.Column="0" Width="16" Height="16" Source="{Binding Icon}"/>
+                                <TextBlock Grid.Column="1" Text="{Binding Path}"/>
+                                <TextBlock Margin="5,0,5,0" Grid.Column="2" Text="{Binding Size}" Foreground="Gray"/>
+                                <Button Visibility="Collapsed" Grid.Column="3" Click="OpenFileDirectoryPrimary">Open in explorer</Button>
+                                <Button Margin="5,0,5,0" Visibility="Collapsed" Grid.Column="4" Click="DuplicatedFilesPrimaryIgnoreFile">Ignore file</Button>
+                                <Button Visibility="Collapsed" Grid.Column="5" Click="DuplicatedFilesPrimaryRemoveFile">Remove file</Button>
                             </Grid>
                         </Border>
                         <ControlTemplate.Triggers>
@@ -163,17 +173,19 @@
                         <Border Name="Border" Padding="2" Height="24" SnapsToDevicePixels="true" Background="Transparent" MouseEnter="ShowButtons" MouseLeave="HideButtons">
                             <Grid>
                                 <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="auto"/>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="auto"/>
                                     <ColumnDefinition Width="auto"/>
                                     <ColumnDefinition Width="auto"/>
                                     <ColumnDefinition Width="auto"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0" Text="{Binding Path}"/>
-                                <TextBlock Margin="5,0,5,0" Grid.Column="1" Text="{Binding Size}" Foreground="Gray"/>
-                                <Button Visibility="Collapsed" Grid.Column="2" Click="OpenFileDirectorySecondary">Open in explorer</Button>
-                                <Button Margin="5,0,5,0" Visibility="Collapsed" Grid.Column="3" Click="DuplicatedFilesSecondaryIgnoreFile">Ignore file</Button>
-                                <Button Visibility="Collapsed" Grid.Column="4" Click="DuplicatedFilesSecondaryRemoveFile">Remove file</Button>
+                                <Image Margin="0,0,5,3" Grid.Column="0" Width="16" Height="16" Source="{Binding Icon}"/>
+                                <TextBlock Grid.Column="1" Text="{Binding Path}"/>
+                                <TextBlock Margin="5,0,5,0" Grid.Column="2" Text="{Binding Size}" Foreground="Gray"/>
+                                <Button Visibility="Collapsed" Grid.Column="3" Click="OpenFileDirectorySecondary">Open in explorer</Button>
+                                <Button Margin="5,0,5,0" Visibility="Collapsed" Grid.Column="4" Click="DuplicatedFilesSecondaryIgnoreFile">Ignore file</Button>
+                                <Button Visibility="Collapsed" Grid.Column="5" Click="DuplicatedFilesSecondaryRemoveFile">Remove file</Button>
                             </Grid>
                         </Border>
                         <ControlTemplate.Triggers>
@@ -219,17 +231,19 @@
                         <Border Name="Border" Padding="2" Height="24" SnapsToDevicePixels="true" Background="Transparent" MouseEnter="ShowButtons" MouseLeave="HideButtons">
                             <Grid>
                                 <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="auto"/>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="auto"/>
                                     <ColumnDefinition Width="auto"/>
                                     <ColumnDefinition Width="auto"/>
                                     <ColumnDefinition Width="auto"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0" Text="{Binding Path}"/>
-                                <TextBlock Margin="5,0,5,0" Grid.Column="1" Text="{Binding Size}" Foreground="Gray"/>
-                                <Button Visibility="Collapsed" Grid.Column="2" Click="OpenFileDirectoryPrimary">Open in explorer</Button>
-                                <Button Margin="5,0,5,0" Visibility="Collapsed" Grid.Column="3" Click="DuplicatedFilesPrimaryOnlyIgnoreFile">Ignore file</Button>
-                                <Button Visibility="Collapsed" Grid.Column="4" Click="DuplicatedFilesPrimaryOnlyRemoveFile">Remove file</Button>
+                                <Image Margin="0,0,5,3" Grid.Column="0" Width="16" Height="16" Source="{Binding Icon}"/>
+                                <TextBlock Grid.Column="1" Text="{Binding Path}"/>
+                                <TextBlock Margin="5,0,5,0" Grid.Column="2" Text="{Binding Size}" Foreground="Gray"/>
+                                <Button Visibility="Collapsed" Grid.Column="3" Click="OpenFileDirectoryPrimary">Open in explorer</Button>
+                                <Button Margin="5,0,5,0" Visibility="Collapsed" Grid.Column="4" Click="DuplicatedFilesPrimaryOnlyIgnoreFile">Ignore file</Button>
+                                <Button Visibility="Collapsed" Grid.Column="5" Click="DuplicatedFilesPrimaryOnlyRemoveFile">Remove file</Button>
                             </Grid>
                         </Border>
                         <ControlTemplate.Triggers>

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the Microsoft Reciprocal License. See LICENSE.TXT file in the project root for full license information. -->
+
+
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Fragment>
+    <UI>
+      <Dialog Id="MaintenanceTypeDlg" Width="370" Height="270" Title="[ProductName] !(loc.Setup)" NoMinimize="yes">
+        <Control Id="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="44" TabSkip="no" Text="[BannerBitmap]" />
+        <Control Id="Title" Type="Text" X="15" Y="6" Width="240" Height="15" Transparent="yes" NoPrefix="yes">
+          <Text>{\DlgTitleFont}Modify, Repair or Remove installation</Text>
+        </Control>
+        <Control Id="Description" Type="Text" X="25" Y="23" Width="280" Height="20" Transparent="yes" NoPrefix="yes">
+          <Text>Select the operation you wish to perform.</Text>
+        </Control>
+        <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="370" Height="0" />
+
+        <!--<Control Id="ChangeLabel" Type="Text" X="105" Y="65" Width="100" Height="10" TabSkip="no">
+          <Text>{\DlgTitleFont}&amp;Modify</Text>
+        </Control>
+        <Control Id="ChangeButton" Type="PushButton" X="50" Y="65" Width="38" Height="38" ToolTip="Modify Installation" Default="yes" Icon="yes" FixedSize="yes" IconSize="32" Text="[CustomSetupIcon]">
+          <Publish Property="InstallMode" Value="Change">1</Publish>
+          <Publish Property="Progress1" Value="Changing">1</Publish>
+          <Publish Property="Progress2" Value="changes">1</Publish>
+        </Control>
+        <Control Id="ChangeText" Type="Text" X="105" Y="78" Width="230" Height="20">
+          <Text>Allows users to change the way features are installed.</Text>
+        </Control>-->
+        <Control Id="RepairLabel" Type="Text" X="105" Y="89" Width="100" Height="10" TabSkip="no">
+          <Text>{\DlgTitleFont}Re&amp;pair</Text>
+        </Control>
+        <Control Id="RepairButton" Type="PushButton" X="50" Y="89" Width="38" Height="38" ToolTip="Repair Installation" Icon="yes" FixedSize="yes" IconSize="32" Text="[RepairIcon]">
+          <Publish Property="InstallMode" Value="Repair">1</Publish>
+          <Publish Property="Progress1" Value="Repairing">1</Publish>
+          <Publish Property="Progress2" Value="repairs">1</Publish>
+        </Control>
+        <Control Id="RepairText" Type="Text" X="105" Y="102" Width="230" Height="30">
+          <Text>Repairs errors in the most recent installation state - fixes missing or corrupt files, shortcuts and registry entries.</Text>
+        </Control>
+        <Control Id="RemoveLabel" Type="Text" X="105" Y="138" Width="100" Height="10" TabSkip="no">
+          <Text>{\DlgTitleFont}&amp;Remove</Text>
+        </Control>
+        <Control Id="RemoveButton" Type="PushButton" X="50" Y="138" Width="38" Height="38" ToolTip="Remove Installation" Icon="yes" FixedSize="yes" IconSize="32" Text="[RemoveIcon]">
+          <Publish Property="InstallMode" Value="Remove">1</Publish>
+          <Publish Property="Progress1" Value="Removing">1</Publish>
+          <Publish Property="Progress2" Value="removes">1</Publish>
+        </Control>
+        <Control Id="RemoveText" Type="Text" X="105" Y="151" Width="230" Height="20">
+          <Text>Removes [ProductName] from your computer.</Text>
+        </Control>
+
+        <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
+        <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Text="!(loc.Back)"/>
+        <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17" Disabled="yes" Text="!(loc.Next)" />
+        <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17" Cancel="yes" Text="!(loc.Cancel)">
+          <Publish Event="SpawnDialog" Value="CancelDlg">1</Publish>
+        </Control>
+      </Dialog>
+    </UI>
+  </Fragment>
+</Wix>

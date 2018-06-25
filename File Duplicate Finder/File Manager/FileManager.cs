@@ -2,8 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Interop;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 
 namespace FileDuplicateFinder {
@@ -20,10 +25,10 @@ namespace FileDuplicateFinder {
         public static List<List<FileEntry>> duplicatedFilesPrimaryOnly = new List<List<FileEntry>>();
         public static Dictionary<int, int> duplicateIndexingPrimary = new Dictionary<int, int>();
         public static Dictionary<int, int> duplicateIndexingSecondary = new Dictionary<int, int>();
-        public static List<string> emptyDirectoriesPrimary = new List<string>();
-        public static List<string> emptyDirectoriesSecondary = new List<string>();
-        public static List<string> emptyFilesPrimary = new List<string>();
-        public static List<string> emptyFilesSecondary = new List<string>();
+        public static List<FileEntry> emptyDirectoriesPrimary = new List<FileEntry>();
+        public static List<FileEntry> emptyDirectoriesSecondary = new List<FileEntry>();
+        public static List<FileEntry> emptyFilesPrimary = new List<FileEntry>();
+        public static List<FileEntry> emptyFilesSecondary = new List<FileEntry>();
         public static List<Tuple<string, string>> storedFiles = new List<Tuple<string, string>>();
 
         internal static Dispatcher dispatcher;
@@ -48,8 +53,8 @@ namespace FileDuplicateFinder {
                 stateTextBlock.Text = "Processing directory";
                 progressBar.Value = 2;
             });
-            List<string> localEmptyDirectories = new List<string>();
-            List<string> localEmptyFiles = new List<string>();
+            List<FileEntry> localEmptyDirectories = new List<FileEntry>();
+            List<FileEntry> localEmptyFiles = new List<FileEntry>();
             ProcessDirectory(directory, primaryFiles, localEmptyDirectories, localEmptyFiles, directory);
             if (abortTask) {
                 abortTask = false;
@@ -149,17 +154,26 @@ namespace FileDuplicateFinder {
 
                             if (groupIndex != -1) {
                                 if (CompareFileContent(directory + primaryFiles[index], directory + primaryFiles[otherIndex], length)) {
-                                    localList[groupIndex].Add(new FileEntry(primaryFiles[otherIndex], Utility.PrettyPrintSize(length)));
+                                    string absolutePath = primaryFiles[otherIndex];
+                                    if (!showBasePaths)
+                                        absolutePath = directory + absolutePath;
+                                    localList[groupIndex].Add(new FileEntry(primaryFiles[otherIndex], Utility.PrettyPrintSize(length), GetFileIcon(absolutePath)));
                                     duplicateIndexingPrimary[otherIndex] = groupIndex;
                                 }
                             }
                             else if (!duplicateIndexingPrimary.ContainsKey(index)) {
                                 if (CompareFileContent(directory + primaryFiles[index], directory + primaryFiles[otherIndex], length)) {
+                                    string absolutePath = primaryFiles[index];
+                                    string absolutePathOther = primaryFiles[otherIndex];
+                                    if (!showBasePaths) {
+                                        absolutePath = directory + absolutePath;
+                                        absolutePathOther = directory + absolutePathOther;
+                                    }
                                     groupIndex = localList.Count;
                                     duplicateIndexingPrimary[otherIndex] = localList.Count;
                                     List<FileEntry> list = new List<FileEntry>();
-                                    list.Add(new FileEntry(primaryFiles[index], Utility.PrettyPrintSize(length)));
-                                    list.Add(new FileEntry(primaryFiles[otherIndex], Utility.PrettyPrintSize(length)));
+                                    list.Add(new FileEntry(primaryFiles[index], Utility.PrettyPrintSize(length), GetFileIcon(absolutePath)));
+                                    list.Add(new FileEntry(primaryFiles[otherIndex], Utility.PrettyPrintSize(length), GetFileIcon(absolutePathOther)));
                                     localList.Add(list);
                                 }
                             }
@@ -185,7 +199,7 @@ namespace FileDuplicateFinder {
                 });
             }
         }
-        
+
         private static void AbortFindDuplicateFilesOneDirectory(bool showBasePaths, List<List<FileEntry>> localList, string directory) {
             duplicateIndexingPrimary.Clear();
             if (showBasePaths)
@@ -205,8 +219,8 @@ namespace FileDuplicateFinder {
                 stateTextBlock.Text = "Processing primary directory";
                 progressBar.Value = 1;
             });
-            List<string> localEmptyDirectoriesPrimary = new List<string>();
-            List<string> localEmptyFilesPrimary = new List<string>();
+            List<FileEntry> localEmptyDirectoriesPrimary = new List<FileEntry>();
+            List<FileEntry> localEmptyFilesPrimary = new List<FileEntry>();
             ProcessDirectory(primaryDirectory, primaryFiles, localEmptyDirectoriesPrimary, localEmptyFilesPrimary, primaryDirectory);
             if (abortTask) {
                 abortTask = false;
@@ -222,8 +236,8 @@ namespace FileDuplicateFinder {
                 localEmptyDirectoriesPrimary.Clear();
                 localEmptyFilesPrimary.Clear();
             });
-            List<string> localEmptyDirectoriesSecondary = new List<string>();
-            List<string> localEmptyFilesSecondary = new List<string>();
+            List<FileEntry> localEmptyDirectoriesSecondary = new List<FileEntry>();
+            List<FileEntry> localEmptyFilesSecondary = new List<FileEntry>();
             ProcessDirectory(secondaryDirectory, secondaryFiles, localEmptyDirectoriesSecondary, localEmptyFilesSecondary, secondaryDirectory);
             if (abortTask) {
                 abortTask = false;
@@ -394,19 +408,31 @@ namespace FileDuplicateFinder {
                                 continue; // if it was included in the indexing before
                             if (CompareFileContent(primaryDirectory + primaryFiles[indexPrimary], secondaryDirectory + secondaryFiles[indexSecondary], commonLength)) {
                                 if (duplicateIndexingPrimary.ContainsKey(indexPrimary)) {
-                                    localList[duplicateIndexingPrimary[indexPrimary]].Item2.Add(new FileEntry(secondaryFiles[indexSecondary], Utility.PrettyPrintSize(commonLength)));
+                                    string absolutePath = secondaryFiles[indexSecondary];
+                                    if (!showBasePaths)
+                                        absolutePath = secondaryDirectory + absolutePath;
+                                    localList[duplicateIndexingPrimary[indexPrimary]].Item2.Add(new FileEntry(secondaryFiles[indexSecondary], Utility.PrettyPrintSize(commonLength), GetFileIcon(absolutePath)));
                                     duplicateIndexingSecondary[indexSecondary] = duplicateIndexingPrimary[indexPrimary];
                                 }
                                 else if (duplicateIndexingSecondary.ContainsKey(indexSecondary)) {
-                                    localList[duplicateIndexingSecondary[indexSecondary]].Item1.Add(new FileEntry(primaryFiles[indexPrimary], Utility.PrettyPrintSize(commonLength)));
+                                    string absolutePath = primaryFiles[indexPrimary];
+                                    if (!showBasePaths)
+                                        absolutePath = primaryDirectory + absolutePath;
+                                    localList[duplicateIndexingSecondary[indexSecondary]].Item1.Add(new FileEntry(primaryFiles[indexPrimary], Utility.PrettyPrintSize(commonLength), GetFileIcon(absolutePath)));
                                     duplicateIndexingPrimary[indexPrimary] = duplicateIndexingSecondary[indexSecondary];
                                 }
                                 else {
+                                    string absolutePathPrimary = primaryFiles[indexPrimary];
+                                    string absolutePathSecondary = secondaryFiles[indexSecondary];
+                                    if (!showBasePaths) {
+                                        absolutePathPrimary = primaryDirectory + absolutePathPrimary;
+                                        absolutePathSecondary = secondaryDirectory + absolutePathSecondary;
+                                    }
                                     duplicateIndexingPrimary[indexPrimary] = localList.Count;
                                     duplicateIndexingSecondary[indexSecondary] = localList.Count;
                                     Tuple<List<FileEntry>, List<FileEntry>> tuple = Tuple.Create(new List<FileEntry>(), new List<FileEntry>());
-                                    tuple.Item1.Add(new FileEntry(primaryFiles[indexPrimary], Utility.PrettyPrintSize(commonLength)));
-                                    tuple.Item2.Add(new FileEntry(secondaryFiles[indexSecondary], Utility.PrettyPrintSize(commonLength)));
+                                    tuple.Item1.Add(new FileEntry(primaryFiles[indexPrimary], Utility.PrettyPrintSize(commonLength), GetFileIcon(absolutePathPrimary)));
+                                    tuple.Item2.Add(new FileEntry(secondaryFiles[indexSecondary], Utility.PrettyPrintSize(commonLength), GetFileIcon(absolutePathSecondary)));
                                     localList.Add(tuple);
                                 }
                             }
@@ -454,7 +480,7 @@ namespace FileDuplicateFinder {
             });
         }
 
-        private static void ProcessDirectory(string targetDirectory, List<string> fileList, List<string> emptyDirectories, List<string> emptyFiles, string originalDirectory) {
+        private static void ProcessDirectory(string targetDirectory, List<string> fileList, List<FileEntry> emptyDirectories, List<FileEntry> emptyFiles, string originalDirectory) {
             if (abortTask)
                 return;
             string[] files;
@@ -467,15 +493,16 @@ namespace FileDuplicateFinder {
             }
             if (files.Length == 0) {
                 if (Directory.GetDirectories(targetDirectory).Length == 0)
-                    emptyDirectories.Add(new string(targetDirectory.Skip(originalDirectory.Length).ToArray()));
+                    emptyDirectories.Add(new FileEntry(new string(targetDirectory.Skip(originalDirectory.Length).ToArray()), GetFolderIcon(targetDirectory)));
             }
             else {
                 foreach (var file in files) {
                     long fileLength = GetFileLength(file);
+                    string relativePath = new string(file.Skip(originalDirectory.Length).ToArray());
                     if (fileLength == 0)
-                        emptyFiles.Add(new string(file.Skip(originalDirectory.Length).ToArray()));
+                        emptyFiles.Add(new FileEntry(relativePath, GetFileIcon(file)));
                     else if (fileLength > 0)
-                        fileList.Add(new string(file.Skip(originalDirectory.Length).ToArray()));
+                        fileList.Add(relativePath);
                 }
             }
             // Recurse into subdirectories of this directory.
@@ -621,7 +648,7 @@ namespace FileDuplicateFinder {
         /// <param name="path"></param>
         /// <param name="baseDirectory"></param>
         /// <returns><see langword="true"/> if restoring the file will be possible, <see langword="false"/> otherwise</returns>
-        internal static bool RemoveFile(string path, string baseDirectory, bool backupFiles, bool askLarge) {
+        internal static bool RemoveFile(string path, bool backupFiles = false, bool askLarge = false) {
             bool canRestoreFiles = false;
             try {
                 if (File.GetAttributes(path).HasFlag(FileAttributes.Directory)) {
@@ -768,14 +795,14 @@ namespace FileDuplicateFinder {
             }
         }
 
-        internal static void RemoveAllEmptyDirectoriesPrimary(string primaryDirectory) {
+        internal static void RemoveAllEmptyDirectoriesPrimary(string baseDirectory = "") {
             for (int i = 0; i < emptyDirectoriesPrimary.Count; i++) {
                 if (abortTask) {
                     AbortRemoveAllEmptyDirectoriesPrimary(i);
                     abortTask = false;
                     return;
                 }
-                RemoveFile(emptyDirectoriesPrimary[i], primaryDirectory, false, false);
+                RemoveFile(baseDirectory + emptyDirectoriesPrimary[i]);
                 dispatcher.Invoke(() => {
                     progressBar.Value = i * 100f / emptyDirectoriesPrimary.Count;
                     Utility.SetProgress(i, emptyDirectoriesPrimary.Count);
@@ -788,14 +815,14 @@ namespace FileDuplicateFinder {
             emptyDirectoriesPrimary.RemoveRange(0, i);
         }
 
-        internal static void RemoveAllEmptyDirectoriesSecondary(string secondaryDirectory) {
+        internal static void RemoveAllEmptyDirectoriesSecondary(string baseDirectory = "") {
             for (int i = 0; i < emptyDirectoriesSecondary.Count; i++) {
                 if (abortTask) {
                     AbortRemoveAllEmptyDirectoriesSecondary(i);
                     abortTask = false;
                     return;
                 }
-                RemoveFile(emptyDirectoriesSecondary[i], secondaryDirectory, false, false);
+                RemoveFile(baseDirectory + emptyDirectoriesSecondary[i]);
                 dispatcher.Invoke(() => {
                     progressBar.Value = i * 100f / emptyDirectoriesSecondary.Count;
                     Utility.SetProgress(i, emptyDirectoriesSecondary.Count);
@@ -808,14 +835,14 @@ namespace FileDuplicateFinder {
             emptyDirectoriesSecondary.RemoveRange(0, i);
         }
 
-        internal static void RemoveAllEmptyFilesPrimary(string primaryDirectory) {
+        internal static void RemoveAllEmptyFilesPrimary(string baseDirectory = "") {
             for (int i = 0; i < emptyFilesPrimary.Count; i++) {
                 if (abortTask) {
                     AbortRemoveAllEmptyFilesPrimary(i);
                     abortTask = false;
                     return;
                 }
-                RemoveFile(emptyFilesPrimary[i], primaryDirectory, false, false);
+                RemoveFile(baseDirectory + emptyFilesPrimary[i]);
                 dispatcher.Invoke(() => {
                     progressBar.Value = i * 100f / emptyFilesPrimary.Count;
                     Utility.SetProgress(i, emptyFilesPrimary.Count);
@@ -828,14 +855,14 @@ namespace FileDuplicateFinder {
             emptyFilesPrimary.RemoveRange(0, i);
         }
 
-        internal static void RemoveAllEmptyFilesSecondary(string secondaryDirectory) {
+        internal static void RemoveAllEmptyFilesSecondary(string baseDirectory = "") {
             for (int i = 0; i < emptyFilesSecondary.Count; i++) {
                 if (abortTask) {
                     AbortRemoveAllEmptyFilesSecondary(i);
                     abortTask = false;
                     return;
                 }
-                RemoveFile(emptyFilesSecondary[i], secondaryDirectory, false, false);
+                RemoveFile(baseDirectory + emptyFilesSecondary[i]);
                 dispatcher.Invoke(() => {
                     progressBar.Value = i * 100f / emptyFilesSecondary.Count;
                     Utility.SetProgress(i, emptyFilesSecondary.Count);
@@ -848,7 +875,7 @@ namespace FileDuplicateFinder {
             emptyFilesSecondary.RemoveRange(0, i);
         }
 
-        internal static void RemoveAllPrimary(string primaryDirectory) {
+        internal static void RemoveAllPrimary(string baseDirectory = "") {
             int count = duplicatedFiles.Count;
             for (int i = 0; i < duplicatedFiles.Count;) {
                 for (int j = 0; j < duplicatedFiles[i].Item1.Count; j++) {
@@ -857,7 +884,7 @@ namespace FileDuplicateFinder {
                         abortTask = false;
                         return;
                     }
-                    RemoveFile(duplicatedFiles[i].Item1[j].Path, primaryDirectory, false, false);
+                    RemoveFile(baseDirectory + duplicatedFiles[i].Item1[j].Path);
                 }
                 if (duplicatedFiles[i].Item2.Count <= 1) {
                     duplicatedFiles.RemoveAt(i);
@@ -881,7 +908,7 @@ namespace FileDuplicateFinder {
                 duplicatedFiles[i].Item1.Clear();
         }
 
-        internal static void RemoveAllSecondary(string secondaryDirectory) {
+        internal static void RemoveAllSecondary(string baseDirectory = "") {
             int count = duplicatedFiles.Count;
             for (int i = 0; i < duplicatedFiles.Count;) {
                 for (int j = 0; j < duplicatedFiles[i].Item2.Count; j++) {
@@ -890,7 +917,7 @@ namespace FileDuplicateFinder {
                         abortTask = false;
                         return;
                     }
-                    RemoveFile(duplicatedFiles[i].Item2[j].Path, secondaryDirectory, false, false);
+                    RemoveFile(baseDirectory + duplicatedFiles[i].Item2[j].Path);
                 }
                 if (duplicatedFiles[i].Item1.Count <= 1) {
                     duplicatedFiles.RemoveAt(i);
@@ -912,6 +939,19 @@ namespace FileDuplicateFinder {
                 duplicatedFiles.RemoveAt(i);
             else
                 duplicatedFiles[i].Item2.Clear();
+        }
+
+        public static ImageSource GetFileIcon(string filePath) {
+            //TODO Hashtable store
+            ImageSource icon = IconReader.GetFileIcon(filePath, IconReader.IconSize.Small, false);
+            icon?.Freeze();
+            return icon;
+        }
+        public static ImageSource GetFolderIcon(string filePath) {
+            //TODO Hashtable store
+            ImageSource icon = IconReader.GetFolderIcon(filePath, IconReader.IconSize.Small, IconReader.FolderType.Closed);
+            icon?.Freeze();
+            return icon;
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿// log from thread
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -113,6 +114,16 @@ namespace FileDuplicateFinder {
         
         public static void SetProgress(int done, int outOf) {
             progressTextBlock.Text = done + " / " + outOf;
+        }
+
+        public static bool Remove(this List<FileEntry> list, string path) {
+            for (int i = 0; i < list.Count; i++) {
+                if (list[i].Path.Equals(path)) {
+                    list.RemoveAt(i);
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }

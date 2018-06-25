@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?include $(var.ProjectDir)/Config.wxi?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Fragment>
+    <UI>
+      <Dialog Id="LicenseAgreementDlg" Width="370" Height="270" Title="[ProductName] License Agreement" NoMinimize="yes">
+        <Control Id="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="44" TabSkip="no" Text="[BannerBitmap]" />
+        <Control Id="Title" Type="Text" X="15" Y="6" Width="200" Height="15" Transparent="yes" NoPrefix="yes">
+          <Text>!(loc.LicenseAgreementDlgTitle)</Text>
+        </Control>
+        <Control Id="Description" Type="Text" X="25" Y="23" Width="280" Height="15" Transparent="yes" NoPrefix="yes">
+          <Text>!(loc.LicenseAgreementDlgDescription)</Text>
+        </Control>
+        <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="370" Height="0" />
+        
+        <Control Id="AgreementText" Type="ScrollableText" X="20" Y="60" Width="330" Height="136" Sunken="yes" TabSkip="no">
+          <Text SourceFile="$(var.LicensePath)" />
+        </Control>
+        <Control Id="Note" Type="Text" X="20" Y="203" Width="330" Height="24" Transparent="yes" NoPrefix="yes">
+          <Text>!(loc.LicenseAgreementDlgNote)</Text>
+        </Control>
+        
+        <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
+        <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Text="!(loc.Back)"/>
+        <Control Id="IAgree" Type="PushButton" X="236" Y="243" Width="56" Height="17" Default="yes" Text="!(loc.IAgree)"/>
+        <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17" Cancel="yes" Text="!(loc.Cancel)">
+          <Publish Event="SpawnDialog" Value="CancelDlg">1</Publish>
+        </Control>
+      </Dialog>
+    </UI>
+  </Fragment>
+</Wix>

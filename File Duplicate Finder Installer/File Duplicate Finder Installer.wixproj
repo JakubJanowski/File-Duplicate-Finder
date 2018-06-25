@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" InitialTargets="EnsureWixToolsetInstalled" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>3.10</ProductVersion>
+    <ProjectGuid>c8477420-fe84-42e0-b64e-3f64eb08627a</ProjectGuid>
+    <SchemaVersion>2.0</SchemaVersion>
+    <OutputName>FileDuplicateFinderInstaller-$(Configuration)-$(Platform)</OutputName>
+    <OutputType>Package</OutputType>
+    <Name>File Duplicate Finder Installer</Name>
+    <Cultures>;</Cultures>
+    <!-- No cultures -->
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
+    <DefineConstants>Debug</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
+    <DefineConstants>Debug</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Components.wxs" />
+    <Compile Include="Dialogs\AdminBrowseDlg.wxs" />
+    <Compile Include="Dialogs\AdminInstallPointDlg.wxs" />
+    <Compile Include="Dialogs\AdminRegistrationDlg.wxs" />
+    <Compile Include="Dialogs\WaitForCostingDlg.wxs" />
+    <Compile Include="Dialogs\VerifyRepairDlg.wxs" />
+    <Compile Include="Dialogs\VerifyRemoveDlg.wxs" />
+    <Compile Include="Dialogs\SetupTypeDlg.wxs" />
+    <Compile Include="Dialogs\OutOfRbDiskDlg.wxs" />
+    <Compile Include="Dialogs\OutOfDiskDlg.wxs" />
+    <Compile Include="Dialogs\MaintenanceWelcomeDlg.wxs" />
+    <Compile Include="Dialogs\CustomizeDlg.wxs" />
+    <Compile Include="Dialogs\WelcomeDlg.wxs" />
+    <Compile Include="Dialogs\AdminWelcomeDlg.wxs" />
+    <Compile Include="Dialogs\UI_Texts.wxs" />
+    <Compile Include="Dialogs\UserExit.wxs" />
+    <Compile Include="Dialogs\ResumeDlg.wxs" />
+    <Compile Include="Dialogs\ProgressDlg.wxs" />
+    <Compile Include="Dialogs\PrepareDlg.wxs" />
+    <Compile Include="Dialogs\FilesInUse.wxs" />
+    <Compile Include="Dialogs\FatalError.wxs" />
+    <Compile Include="Dialogs\ErrorDlg.wxs" />
+    <Compile Include="Dialogs\DiskCostDlg.wxs" />
+    <Compile Include="Dialogs\BrowseDlg.wxs" />
+    <Compile Include="Dialogs\LicenseAgreementDlg.wxs" />
+    <Compile Include="Dialogs\VerifyReadyDlg.wxs" />
+    <Compile Include="Dialogs\MaintenanceTypeDlg.wxs" />
+    <Compile Include="Dialogs\CancelDlg.wxs" />
+    <Compile Include="Dialogs\DirectoryAndShortcutsDlg.wxs" />
+    <Compile Include="Dialogs\ExitDialog.wxs" />
+    <Compile Include="Directories.wxs" />
+    <Compile Include="Product.wxs" />
+    <Compile Include="UI.wxs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Strings.wxl" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\File Duplicate Finder\File Duplicate Finder.csproj">
+      <Name>File Duplicate Finder</Name>
+      <Project>{f8eced31-975e-4779-8612-60e7722cbf56}</Project>
+      <Private>True</Private>
+      <DoNotHarvest>True</DoNotHarvest>
+      <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
+      <RefTargetDir>APPLICATIONFOLDER</RefTargetDir>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Assets\Background.bmp" />
+    <Content Include="Assets\Banner.bmp" />
+    <Content Include="Assets\License.rtf" />
+    <Content Include="Config.wxi" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Assets" />
+    <Folder Include="Dialogs" />
+  </ItemGroup>
+  <Import Project="$(WixTargetsPath)" Condition=" '$(WixTargetsPath)' != '' " />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets" Condition=" '$(WixTargetsPath)' == '' AND Exists('$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets') " />
+  <Target Name="EnsureWixToolsetInstalled" Condition=" '$(WixTargetsImported)' != 'true' ">
+    <Error Text="The WiX Toolset v3.11 (or newer) build tools must be installed to build this project. To download the WiX Toolset, see http://wixtoolset.org/releases/" />
+  </Target>
+  <Target Name="BeforeBuild">
+    <!--<Exec Command=""/>  Clean previous publish folder
+    <Exec Command=""/>  Build the program-->
+    <!-- Get assembly version -->
+    <GetAssemblyIdentity AssemblyFiles="..\File Duplicate Finder\bin\$(Platform)\$(Configuration)\File Duplicate Finder.exe">
+      <Output TaskParameter="Assemblies" ItemName="AssemblyVersion" />
+    </GetAssemblyIdentity>
+    <!-- Define variable for build version-->
+    <!--
+    <PropertyGroup>
+      <DefineConstants>BuildVersion=%(AssemblyVersion.Version);BasePath=..\File Duplicate Finder\bin\$(Platform)\$(Configuration)\publish</DefineConstants>
+    </PropertyGroup>-->
+    <!-- Harvest file components from publish folder -->
+    <!--<HeatDirectory OutputFile="ComponentsGenerated.wxs" DirectoryRefId="APPLICATIONFOLDER" ComponentGroupName="PublishedComponents" SuppressCom="true" Directory="..\File Duplicate Finder\bin\$(Platform)\$(Configuration)\publish" SuppressFragments="true" SuppressRegistry="true" SuppressRootDirectory="true" AutoGenerateGuids="false" GenerateGuidsNow="true" ToolPath="$(WixToolPath)" PreprocessorVariable="var.BasePath" />-->
+  </Target>
+  <Target Name="AfterBuild">
+    <!-- Get assembly version -->
+    <!--<GetAssemblyIdentity AssemblyFiles="..\File Duplicate Finder\bin\$(Platform)\$(Configuration)\File Duplicate Finder.exe">
+      <Output TaskParameter="Assemblies" ItemName="AssemblyVersion" />
+    </GetAssemblyIdentity>-->
+    <!-- Rename and move final MSI -->
+    <Exec Command="if not exist Installs mkdir Installs" />
+    <Exec Command="move bin\$(Configuration)\$(OutputName).msi Installs\FileDuplicateFinder-%(AssemblyVersion.Version)-$(Configuration)-$(Platform).msi" />
+  </Target>
+</Project>
