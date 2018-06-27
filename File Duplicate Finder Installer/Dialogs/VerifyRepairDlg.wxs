@@ -11,7 +11,7 @@
           <Text>{\DlgTitleFont}Repair [ProductName]</Text>
         </Control>
         <Control Id="Description" Type="Text" X="25" Y="23" Width="300" Height="15" Transparent="yes" NoPrefix="yes">
-          <Text>The [Wizard] is ready to begin the repair of [ProductName].</Text>
+          <Text>The !(loc.Wizard) is ready to begin the repair of [ProductName].</Text>
         </Control>
         <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="370" Height="0" />
         

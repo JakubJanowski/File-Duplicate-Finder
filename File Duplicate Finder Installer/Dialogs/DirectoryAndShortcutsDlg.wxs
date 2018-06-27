@@ -8,9 +8,9 @@
         <Control Id="Description" Type="Text" X="25" Y="23" Width="280" Height="20" Transparent="yes" NoPrefix="yes" Text="!(loc.DirAndShortcutsDlgDescription)" />
         <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="370" Height="0"/>
 
-        <Control Id="FolderLabel" Type="Text" X="20" Y="60" Width="290" Height="12" NoPrefix="yes" Text="!(loc.DirAndShortcutsDlgFolderLabel)" />
-        <Control Id="Folder" Type="PathEdit" X="20" Y="80" Width="320" Height="18" Property="UI_INSTALLDIR" Indirect="yes" />
-        <Control Id="ChangeFolder" Type="PushButton" X="20" Y="100" Width="56" Height="17" Text="!(loc.DirAndShortcutsDlgChange)" />
+        <Control Id="FolderLabel" Type="Text" X="20" Y="60" Width="290" Height="20" NoPrefix="yes" Text="!(loc.DirAndShortcutsDlgFolderLabel)" />
+        <Control Id="Folder" Type="PathEdit" X="20" Y="84" Width="320" Height="18" Property="UI_INSTALLDIR" Indirect="yes" />
+        <Control Id="ChangeFolder" Type="PushButton" X="20" Y="104" Width="56" Height="17" Text="!(loc.DirAndShortcutsDlgChange)" />
         
         <Control Id="DesktopShortcutCheckBox" Type="CheckBox" X="20" Y="189" Width="290" Height="17" Property="INSTALLDESKTOPSHORTCUT" CheckBoxValue="1" Text="!(loc.CreateDesktopShortcutLabel)"/>
         <Control Id="StartMenuShortcutCheckBox" Type="CheckBox" X="20" Y="206" Width="290" Height="17" Property="INSTALLSTARTMENUSHORTCUT" CheckBoxValue="0" Text="!(loc.CreateStartMenuShortcutLabel)"/>

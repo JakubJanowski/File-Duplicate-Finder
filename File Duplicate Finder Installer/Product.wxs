@@ -45,13 +45,13 @@
     <Property Id="ProgressStarted" Value="0" />
 
     <Property Id="BannerBitmap" Value="bannerBmpBin"/>
-    <Property Id="InfoIcon" Value="info"/>
-    <Property Id="CustomSetupIcon" Value="custicon"/>
-    <Property Id="RemoveIcon" Value="removico"/>
-    <Property Id="ExclamationIcon" Value="exclamic"/>
-    <Property Id="CompleteSetupIcon" Value="completi"/>
-    <Property Id="RepairIcon" Value="repairic"/>
-    <Property Id="InstallerIcon" Value="insticon"/>
+    <Property Id="InfoIcon" Value="infoIcon"/>
+    <Property Id="CustomSetupIcon" Value="customIcon"/>
+    <Property Id="RemoveIcon" Value="removeIcon"/>
+    <Property Id="ExclamationIcon" Value="exclamIcon"/>
+    <Property Id="CompleteSetupIcon" Value="completeIcon"/>
+    <Property Id="RepairIcon" Value="repairIcon"/>
+    <Property Id="InstallerIcon" Value="installerIcon"/>
     <Property Id="DialogBitmap" Value="dialogBmpBin"/>
 
     <!-- Create a basic UI for the installer -->
@@ -67,13 +67,13 @@
     <!-- Installer resources -->
     <Binary Id="Up" SourceFile="$(var.ProjectDir)\Assets\Up.ico" />
     <Binary Id="New" SourceFile="$(var.ProjectDir)\Assets\New.ico" />
-    <Binary Id="custicon" SourceFile="$(var.ProjectDir)\Assets\Custom.ico" />
-    <Binary Id="repairic" SourceFile="$(var.ProjectDir)\Assets\Repair.ico" />
-    <Binary Id="exclamic" SourceFile="$(var.ProjectDir)\Assets\Exclam.ico" />
-    <Binary Id="removico" SourceFile="$(var.ProjectDir)\Assets\Remove.ico" />
-    <Binary Id="completi" SourceFile="$(var.ProjectDir)\Assets\Complete.ico" />
-    <Binary Id="insticon" SourceFile="$(var.ProjectDir)\Assets\Typical.ico" />
-    <Binary Id="info" SourceFile="$(var.ProjectDir)\Assets\Info.ico" />
+    <Binary Id="customIcon" SourceFile="$(var.ProjectDir)\Assets\Custom.ico" />
+    <Binary Id="repairIcon" SourceFile="$(var.ProjectDir)\Assets\Repair.ico" />
+    <Binary Id="exclamIcon" SourceFile="$(var.ProjectDir)\Assets\Exclam.ico" />
+    <Binary Id="removeIcon" SourceFile="$(var.ProjectDir)\Assets\Remove.ico" />
+    <Binary Id="completeIcon" SourceFile="$(var.ProjectDir)\Assets\Complete.ico" />
+    <Binary Id="installerIcon" SourceFile="$(var.ProjectDir)\Assets\Typical.ico" />
+    <Binary Id="infoIcon" SourceFile="$(var.ProjectDir)\Assets\Info.ico" />
     <Binary Id="bannerBmpBin" SourceFile="$(var.ProjectDir)\Assets\Banner.bmp" />
     <Binary Id="dialogBmpBin" SourceFile="$(var.ProjectDir)\Assets\Background.bmp" />
   </Product>

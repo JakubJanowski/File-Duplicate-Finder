@@ -4,11 +4,9 @@
   
   <Fragment>
     <ComponentGroup Id="ProductComponents">
-      <!-- Shortcut -->
       <ComponentRef Id="exe"/>
-      <ComponentRef Id="exe_B"/>
-      <ComponentRef Id="exe_D"/>
-      <ComponentRef Id="exe_SM"/>
+      <ComponentRef Id="desktopShortcut"/>
+      <ComponentRef Id="startMenuShortcut"/>
       <ComponentRef Id="exeConfig" />
       <ComponentRef Id="windowsAPICodePackDll" />
       <ComponentRef Id="windowsAPICodePackExtendedLinguisticServicesDll" />
@@ -19,89 +17,38 @@
 
     <!-- Installed files -->
     <DirectoryRef Id="INSTALLDIR" FileSource="$(var.PublishFolder)">
-      <!-- Shortcut to main application -->
-      <!--<Component Id="MainAppShortcut" Guid="{0EFC3F34-F5A5-4F86-9419-2ADE43E3D022}">
-        <Shortcut Id="MainAppShortcut"
+
+      <!-- Intsall exe -->
+      <Component Id="exe" Guid="{1F595452-F9E9-4A6F-99A8-99271B799B28}">
+        <File Id="exeFile" KeyPath="yes" Source="$(var.PublishFolder)\File Duplicate Finder.exe"/>
+      </Component>
+      
+      <!-- Intsall start menu shortcut -->
+      <Component Id="startMenuShortcut" Guid="{8BACEEEA-9F1C-4345-9302-559C6534E2E9}">
+        <Condition>INSTALLSTARTMENUSHORTCUT</Condition>
+        <Shortcut Id="startMenuShortcutFile"
                   Name="!(loc.ProductName)"
+                  Description="File Duplicate Finder ($(var.Platform)) v$(var.Version)"
                   Target="[INSTALLDIR]File Duplicate Finder.exe"
                   Directory="InstallProgramMenuFolder"
                   WorkingDirectory="INSTALLDIR"
                   Icon="icon.ico"/>
-        
-        <Shortcut Id="MainAppDesktopShortcut"
+        <!-- Unique key for this component / shortcut-->
+        <RegistryValue Id="RegShortcutKey_SM" Root="HKCU" Key="SOFTWARE\!(loc.ProductFolderName)" Name="StartMenuShortcut" Value="1" Type="integer" KeyPath="yes"/>
+      </Component>
+
+      <!-- Intsall desktop shortcut -->
+      <Component Id="desktopShortcut" Guid="{F37BC7AA-4985-43FB-B9CC-FF5199288562}">
+        <Condition>INSTALLDESKTOPSHORTCUT</Condition>
+        <Shortcut Id="desktopShortcutFile"
                   Name="!(loc.ProductName)"
-                  Description="File Duplicate Finder ($(var.Platform)) v$(var.BuildVersion)"
+                  Description="File Duplicate Finder ($(var.Platform)) v$(var.Version)"
                   Target="[INSTALLDIR]File Duplicate Finder.exe"
                   Directory="DesktopFolder"
                   WorkingDirectory="INSTALLDIR"
                   Icon="icon.ico"/>
-
-        --><!-- Unique key for this component / shortcut--><!--
-        <RegistryValue Id="RegShortcutKey" Root="HKCU" Key="SOFTWARE\!(loc.ProductFolderName)" Name="Shortcut" Value="1" Type="integer" KeyPath="yes"/>
-        
-         --><!-- Remove start menu items --><!-- 
-        <RemoveFolder Id="RemoveStartMenu" Directory="InstallProgramMenuFolder" On="uninstall"/>
-        
-      </Component>-->
-
-
-      <!-- Intsall start menu and desktop shortcut -->
-      <Component Id="exe_B" Guid="{5B2D147C-FC9E-41F1-B5BF-B9DD0B05D84E}">
-        <File Id="exeFile_B" 
-              KeyPath="yes" 
-              Source="$(var.PublishFolder)\File Duplicate Finder.exe">
-          <Shortcut Id="startMenuShortcut_B" 
-                    Name="!(loc.ProductName)"
-                    Directory="InstallProgramMenuFolder"
-                    WorkingDirectory='INSTALLDIR' 
-                    Icon="icon.ico"
-                    Advertise="yes" />
-          <Shortcut Id="desktopShortcut_B"
-                    Name="!(loc.ProductName)"
-                    Directory="DesktopFolder"
-                    WorkingDirectory='INSTALLDIR'
-                    Icon="icon.ico"
-                    Advertise="yes"/>
-        </File>
-        <Condition>INSTALLDESKTOPSHORTCUT AND INSTALLSTARTMENUSHORTCUT</Condition>
-      </Component>
-      
-      <!-- Intsall only start menu shortcut -->
-      <Component Id="exe_SM" Guid="{8BACEEEA-9F1C-4345-9302-559C6534E2E9}">
-        <File Id="exeFile_SM"
-              KeyPath="yes"
-              Source="$(var.PublishFolder)\File Duplicate Finder.exe">
-          <Shortcut Id="startMenuShortcut_SM"
-                    Name="!(loc.ProductName)"
-                    Directory="InstallProgramMenuFolder"
-                    WorkingDirectory='INSTALLDIR'
-                    Icon="icon.ico"
-                    Advertise="yes" />
-        </File>
-        <Condition>NOT INSTALLDESKTOPSHORTCUT AND INSTALLSTARTMENUSHORTCUT</Condition>
-      </Component>
-
-      <!-- Intsall only desktop shortcut -->
-      <Component Id="exe_D" Guid="{F37BC7AA-4985-43FB-B9CC-FF5199288562}">
-        <File Id="exeFile_D"
-              KeyPath="yes"
-              Source="$(var.PublishFolder)\File Duplicate Finder.exe">
-          <Shortcut Id="desktopShortcut_D"
-                    Name="!(loc.ProductName)"
-                    Directory="DesktopFolder"
-                    WorkingDirectory='INSTALLDIR'
-                    Icon="icon.ico"
-                    Advertise="yes"/>
-        </File>
-        <Condition>INSTALLDESKTOPSHORTCUT AND NOT INSTALLSTARTMENUSHORTCUT</Condition>
-      </Component>
-      
-      <!-- Intsall no shortcuts -->
-      <Component Id="exe" Guid="{1F595452-F9E9-4A6F-99A8-99271B799B28}">
-        <File Id="exeFile"
-              KeyPath="yes"
-              Source="$(var.PublishFolder)\File Duplicate Finder.exe"/>
-        <Condition>NOT INSTALLDESKTOPSHORTCUT AND NOT INSTALLSTARTMENUSHORTCUT</Condition>
+        <!-- Unique key for this component / shortcut-->
+        <RegistryValue Id="RegShortcutKey_D" Root="HKCU" Key="SOFTWARE\!(loc.ProductFolderName)" Name="DesktopShortcut" Value="1" Type="integer" KeyPath="yes"/>
       </Component>
       
       <!-- Other files and dependencies -->

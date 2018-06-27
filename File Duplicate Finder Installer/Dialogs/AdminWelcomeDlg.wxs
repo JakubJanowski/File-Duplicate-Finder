@@ -17,11 +17,11 @@
         <Control Id="Bitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="234" TabSkip="no" Text="[DialogBitmap]" />
         <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Disabled="yes" Text="!(loc.Back)" />
         <Control Id="Description" Type="Text" X="135" Y="70" Width="220" Height="30" Transparent="yes" NoPrefix="yes">
-          <Text>The [Wizard] will create a server image of [ProductName], at a specified network location. Click Next to continue or Cancel to exit the [Wizard].</Text>
+          <Text>The !(loc.Wizard) will create a server image of [ProductName], at a specified network location. Click Next to continue or Cancel to exit the !(loc.Wizard).</Text>
         </Control>
         <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
         <Control Id="Title" Type="Text" X="135" Y="20" Width="220" Height="60" Transparent="yes" NoPrefix="yes">
-          <Text>{\VerdanaBold13}Welcome to the [ProductName] [Wizard]</Text>
+          <Text>{\VerdanaBold13}Welcome to the [ProductName] !(loc.Wizard)</Text>
         </Control>
       </Dialog>
     </UI>
