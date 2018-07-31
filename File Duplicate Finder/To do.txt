@@ -1,0 +1,32 @@
+﻿recognize identical subpath
+show file size checkbox
+remove/ignore/show in explorer on restore list
+scroll propagate down to main list
+ clean up hidden checkboxes or add their functionality
+ restructurize code
+ switch visibility for tabitems after pressing find duplicates button not the checkbox for primaryonly
+ clicking on buttons does not always work in listview when it is being constantly updated
+ ignore group
+ show number of results or some other statistics
+ buttons on hover flicker on refresh
+ scroll doesn't adjust size to listitem height but to listitemcount   VirtualizingPanel.ScrollUnit="Item" or pixel
+ when deleting from appdata with noadmin rights it did nothing not even logged errors
+test primary only Touro/backup/kuba janowski old    and remove file from duplicated list
+ checkbox remove from list when only one element left whit no other to compare to (do not delete elements from list after ignoring other for sure
+  add watermark text after removing files from list because they don't have a duplicate saying something like "Files that did not have a duplicate after your operation were removed from this list" OR gray out the name of alone file
+ config file with ignored directories in search and mayby open last checked
+ start progressbar when started searching for duplicates, during initialization make progressbar shift green area constantly
+ ikonki folderów
+ dont store names as guids but as normal name but make sure the names don't collide easiest way - add guid at the end, can use some base64 number of files in this directory past max or etc
+ do something with hiding list elements on remove all, the <= 1 is bad as default as it's scary to see all elements disappear, maybe add an information, make them collapse into subgroup or make a checkbox to make it an opitonal feature
+ don't always steal focus with logs
+ change GetFileLength() < 0 with other wrapping function
+ after stopping change view to found duplicates tab
+ make 'remove all' buttons and similiar enabled only after first search has completed 
+ Features:
+ look at files in archives too
+ show files with match percentage above given treshold
+ regex search names (add tooltip because it's hard to use - "If you want to search for files with some extension write *.jpg, see full guide online link")
+ show progress on taskbar icon / make a notification sound when finished?
+ show estimated reamining time m minutes, s seconds remaining
+ let user choose between size unit B, KiB, Mib... or B, kB, MB

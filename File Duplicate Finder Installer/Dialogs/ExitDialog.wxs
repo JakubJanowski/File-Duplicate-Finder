@@ -4,7 +4,9 @@
 
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
   <Fragment>
-    <CustomAction Id="LaunchFile" FileKey="exeFile" ExeCommand="" Return="asyncNoWait" />
+    <Property Id="WixShellExecTarget" Value="[#exeFile]" />
+    <CustomAction Id="LaunchFile" BinaryKey="WixCA" DllEntry="WixShellExec" Impersonate="yes" />
+    <!--<CustomAction Id="LaunchFile" FileKey="exeFile" ExeCommand="" Return="asyncNoWait" Execute="deferred" Impersonate="no"/>-->
     <UI>
       <Dialog Id="ExitDialog" Width="370" Height="270" Title="[ProductName] !(loc.Setup)" NoMinimize="yes">
         <Control Id="Bitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="234" TabSkip="no" Text="[DialogBitmap]" />

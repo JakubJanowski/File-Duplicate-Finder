@@ -29,6 +29,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
     <OutputPath>bin\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
+    <DefineConstants>Debug;</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Components.wxs" />
@@ -81,12 +82,27 @@
   <ItemGroup>
     <Content Include="Assets\Background.bmp" />
     <Content Include="Assets\Banner.bmp" />
+    <Content Include="Assets\Complete.ico" />
+    <Content Include="Assets\Custom.ico" />
+    <Content Include="Assets\Exclam.ico" />
+    <Content Include="Assets\Info.ico" />
     <Content Include="Assets\License.rtf" />
+    <Content Include="Assets\New.ico" />
+    <Content Include="Assets\Remove.ico" />
+    <Content Include="Assets\Repair.ico" />
+    <Content Include="Assets\Typical.ico" />
+    <Content Include="Assets\Up.ico" />
     <Content Include="Config.wxi" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Assets" />
     <Folder Include="Dialogs" />
+  </ItemGroup>
+  <ItemGroup>
+    <WixExtension Include="WixUtilExtension">
+      <HintPath>$(WixExtDir)\WixUtilExtension.dll</HintPath>
+      <Name>WixUtilExtension</Name>
+    </WixExtension>
   </ItemGroup>
   <Import Project="$(WixTargetsPath)" Condition=" '$(WixTargetsPath)' != '' " />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets" Condition=" '$(WixTargetsPath)' == '' AND Exists('$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets') " />

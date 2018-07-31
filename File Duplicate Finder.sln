@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "File Duplicate Finder", "Fi
 EndProject
 Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "File Duplicate Finder Installer", "File Duplicate Finder Installer\File Duplicate Finder Installer.wixproj", "{C8477420-FE84-42E0-B64E-3F64EB08627A}"
 EndProject
+Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "SetupProject1", "SetupProject1\SetupProject1.wixproj", "{A7073A48-06C1-446D-B7C8-EA31611BB77F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -23,12 +25,18 @@ Global
 		{F8ECED31-975E-4779-8612-60E7722CBF56}.Release|x64.Build.0 = Release|x64
 		{F8ECED31-975E-4779-8612-60E7722CBF56}.Release|x86.ActiveCfg = Release|x86
 		{F8ECED31-975E-4779-8612-60E7722CBF56}.Release|x86.Build.0 = Release|x86
-		{C8477420-FE84-42E0-B64E-3F64EB08627A}.Debug|x64.ActiveCfg = Debug|x86
+		{C8477420-FE84-42E0-B64E-3F64EB08627A}.Debug|x64.ActiveCfg = Debug|x64
 		{C8477420-FE84-42E0-B64E-3F64EB08627A}.Debug|x86.ActiveCfg = Debug|x86
 		{C8477420-FE84-42E0-B64E-3F64EB08627A}.Debug|x86.Build.0 = Debug|x86
 		{C8477420-FE84-42E0-B64E-3F64EB08627A}.Release|x64.ActiveCfg = Release|x64
 		{C8477420-FE84-42E0-B64E-3F64EB08627A}.Release|x86.ActiveCfg = Release|x86
 		{C8477420-FE84-42E0-B64E-3F64EB08627A}.Release|x86.Build.0 = Release|x86
+		{A7073A48-06C1-446D-B7C8-EA31611BB77F}.Debug|x64.ActiveCfg = Debug|x86
+		{A7073A48-06C1-446D-B7C8-EA31611BB77F}.Debug|x86.ActiveCfg = Debug|x86
+		{A7073A48-06C1-446D-B7C8-EA31611BB77F}.Debug|x86.Build.0 = Debug|x86
+		{A7073A48-06C1-446D-B7C8-EA31611BB77F}.Release|x64.ActiveCfg = Release|x64
+		{A7073A48-06C1-446D-B7C8-EA31611BB77F}.Release|x86.ActiveCfg = Release|x86
+		{A7073A48-06C1-446D-B7C8-EA31611BB77F}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

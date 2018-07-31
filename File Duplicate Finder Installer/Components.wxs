@@ -21,6 +21,7 @@
       <!-- Intsall exe -->
       <Component Id="exe" Guid="{1F595452-F9E9-4A6F-99A8-99271B799B28}">
         <File Id="exeFile" KeyPath="yes" Source="$(var.PublishFolder)\File Duplicate Finder.exe"/>
+        <RemoveFolder Id="removeStartMenu" Directory="InstallProgramMenuFolder" On="uninstall"/>
       </Component>
       
       <!-- Intsall start menu shortcut -->
@@ -54,7 +55,6 @@
       <!-- Other files and dependencies -->
       <Component Id="exeConfig" Guid="{1E6528E8-2DD2-41FE-87AB-67454F591489}">
         <File Id="exeConfigFile" KeyPath="yes" Source="$(var.PublishFolder)\File Duplicate Finder.exe.config" />
-        <RemoveFolder Id="removeStartMenu" Directory="InstallProgramMenuFolder" On="uninstall"/>
       </Component>
       <Component Id="windowsAPICodePackDll" Guid="{EF697F20-81F7-49FA-B678-FB8CD5590EA8}">
         <File Id="windowsAPICodePackDllFile" KeyPath="yes" Source="$(var.PublishFolder)\Microsoft.WindowsAPICodePack.dll" />

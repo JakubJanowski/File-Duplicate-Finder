@@ -53,6 +53,9 @@
     <Property Id="RepairIcon" Value="repairIcon"/>
     <Property Id="InstallerIcon" Value="installerIcon"/>
     <Property Id="DialogBitmap" Value="dialogBmpBin"/>
+    <!--<Property Id="InstallMode" Value="Remove"/>-->
+    <Property Id="Progress1" Value="Installing"/>
+    <Property Id="Progress2" Value="installs"/>
 
     <!-- Create a basic UI for the installer -->
     <UIRef Id="UI"/>

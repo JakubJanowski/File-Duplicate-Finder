@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -9,8 +10,9 @@ namespace FileDuplicateFinder {
     /// Interaction logic for RestoreFileDialog.xaml
     /// </summary>
     public partial class RestoreFileDialog: Window {
-        List<Tuple<string, string>> storedFiles;
-        public RestoreFileDialog(List<Tuple<string, string>> storedFiles) {
+        ObservableRangeCollection<Tuple<string, string>> storedFiles;
+        /// could pass just a list? what if a new file will get removed while the window is open?
+        public RestoreFileDialog(ObservableRangeCollection<Tuple<string, string>> storedFiles) {
             InitializeComponent();
             this.storedFiles = storedFiles;
             restoreFileListView.ItemsSource = storedFiles;
@@ -27,7 +29,6 @@ namespace FileDuplicateFinder {
                         fileInfo.MoveTo(path);
                     }
                     storedFiles.RemoveAt(i);
-                    restoreFileListView.Items.Refresh();
                     break;
                 }
             }
