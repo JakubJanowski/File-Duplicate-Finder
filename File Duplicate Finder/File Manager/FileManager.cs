@@ -1,15 +1,16 @@
-﻿using FileDuplicateFinder.View;
+﻿using FileDuplicateFinder.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Windows;
-using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Media;
 using System.Windows.Threading;
 
 namespace FileDuplicateFinder {
+    using FileEntryCollection = ObservableRangeCollection<FileEntry>;
     internal static class FileManager {
         public static string tmpDirectory;
         private const int megaByte = 1048576;
@@ -21,58 +22,48 @@ namespace FileDuplicateFinder {
         public static List<string> primaryFiles = new List<string>();
         // holds relative path to all files in secondary directory
         public static List<string> secondaryFiles = new List<string>();
-        // should I make internal lists ObservableRangeCollection too?
-        public static ObservableSortableCollection<Tuple<ObservableRangeCollection<FileEntry>, ObservableRangeCollection<FileEntry>>> duplicatedFiles = new ObservableSortableCollection<Tuple<ObservableRangeCollection<FileEntry>, ObservableRangeCollection<FileEntry>>>();
-        // should I make internal list ObservableRangeCollection too?
-        public static ObservableSortableCollection<ObservableRangeCollection<FileEntry>> duplicatedFilesPrimaryOnly = new ObservableSortableCollection<ObservableRangeCollection<FileEntry>>();
+        public static ObservableSortableCollection<Tuple<FileEntryCollection, FileEntryCollection>> duplicatedFiles = new ObservableSortableCollection<Tuple<FileEntryCollection, FileEntryCollection>>();
+        public static ObservableSortableCollection<FileEntryCollection> duplicatedFilesPrimaryOnly = new ObservableSortableCollection<FileEntryCollection>();
         public static Dictionary<int, int> duplicateIndexingPrimary = new Dictionary<int, int>();
         public static Dictionary<int, int> duplicateIndexingSecondary = new Dictionary<int, int>();
-        public static ObservableRangeCollection<FileEntry> emptyDirectoriesPrimary = new ObservableRangeCollection<FileEntry>();
-        ///public static object duplicatedFiles
-        public static ObservableRangeCollection<FileEntry> emptyDirectoriesSecondary = new ObservableRangeCollection<FileEntry>();
-        public static ObservableRangeCollection<FileEntry> emptyFilesPrimary = new ObservableRangeCollection<FileEntry>();
-        public static ObservableRangeCollection<FileEntry> emptyFilesSecondary = new ObservableRangeCollection<FileEntry>();
+        public static FileEntryCollection emptyDirectoriesPrimary = new FileEntryCollection();
+        public static FileEntryCollection emptyDirectoriesSecondary = new FileEntryCollection();
+        public static FileEntryCollection emptyFilesPrimary = new FileEntryCollection();
+        public static FileEntryCollection emptyFilesSecondary = new FileEntryCollection();
         // should I make storedFiles list ObservableRangeCollection in RestoreFileDialog class too?
         public static ObservableRangeCollection<Tuple<string, string>> storedFiles = new ObservableRangeCollection<Tuple<string, string>>();
 
-        internal static StatusBarView statusBarView;
-
+        internal static StatusBarViewModel statusBarViewModel;
         internal static Dispatcher dispatcher;
-        //internal static TextBlock stateTextBlock;
-        //internal static ProgressBar progressBar;
-        internal static ListView emptyDirectoriesPrimaryOnlyListView;
-        internal static ListView emptyFilesPrimaryOnlyListView;
-        //internal static TextBlock progressTextBlock;
-        internal static ListView duplicatedFilesPrimaryOnlyListView;
-        internal static ListView emptyDirectoriesPrimaryListView;
-        internal static ListView emptyFilesPrimaryListView;
-        internal static ListView emptyDirectoriesSecondaryListView;
-        internal static ListView emptyFilesSecondaryListView;
-        internal static ListView duplicatedFilesListView;
 
         public static void StopTask() {
             stopTask = true;
         }
 
+        /// <summary>
+        /// Search for duplicated files in primary directory only
+        /// </summary>
+        /// <param name="directory">the base directory to start recursive search in</param>
+        /// <param name="showBasePaths">flag whether absolute path or relative should be displayed</param>
         public static void FindDuplicatedFiles(string directory, bool showBasePaths) {
-            dispatcher.BeginInvoke((Action)(() => {
-                statusBarView.ViewModel.State = "Processing directory";
-                statusBarView.ViewModel.Progress = 2;
-            }));
+            SetProgressStatus("Processing directory", true);
             List<FileEntry> localEmptyDirectories = new List<FileEntry>();
             List<FileEntry> localEmptyFiles = new List<FileEntry>();
-            ProcessDirectory(directory, primaryFiles, localEmptyDirectories, localEmptyFiles, directory);
+
+            ProcessDirectory(directory, primaryFiles, localEmptyDirectories, localEmptyFiles, directory, showBasePaths);
+
             if (stopTask) {
                 stopTask = false;
                 return;
             }
+
+
             dispatcher.BeginInvoke((Action)(() => {
                 emptyDirectoriesPrimary.AddRange(localEmptyDirectories);
                 emptyFilesPrimary.AddRange(localEmptyFiles);
-                statusBarView.ViewModel.State = "Sorting files by size";
-                statusBarView.ViewModel.Progress = 5;
                 localEmptyDirectories.Clear();
                 localEmptyFiles.Clear();
+                statusBarViewModel.State = "Sorting files by size";
             }));
 
             bool sorted = false;
@@ -104,27 +95,22 @@ namespace FileDuplicateFinder {
                         }
                         continue;
                     }
-                }
-                catch (TaskAbortedException) {
-                    stopTask = false;
-                    return;
+                    else if (ex.InnerException is TaskAbortedException) {
+                        stopTask = false;
+                        return;
+                    }
                 }
                 sorted = true;
             }
 
-            dispatcher.BeginInvoke((Action)(() => {
-                statusBarView.ViewModel.State = "Searching for duplicates...";
-                statusBarView.ViewModel.Progress = 11;
-                statusBarView.ViewModel.ShowProgress = true;
-                Utility.SetProgress(0, primaryFiles.Count);
-            }));
+            SetProgressStatus("Searching for duplicates...", 0, primaryFiles.Count);
 
             int index = 0;
             int otherIndex;
             long length;
             long otherLength;
             int groupIndex;
-            List<ObservableRangeCollection<FileEntry>> localList = new List<ObservableRangeCollection<FileEntry>>();
+            List<FileEntryCollection> localList = new List<FileEntryCollection>();
             for (; index < primaryFiles.Count - 1; index++) {
                 if (stopTask) {
                     stopTask = false;
@@ -168,10 +154,14 @@ namespace FileDuplicateFinder {
                                     string absolutePathOther = directory + primaryFiles[otherIndex];
                                     groupIndex = localList.Count;
                                     duplicateIndexingPrimary[otherIndex] = localList.Count;
-                                    ObservableRangeCollection<FileEntry> list = new ObservableRangeCollection<FileEntry> {
+                                    FileEntryCollection list = new FileEntryCollection {
                                         new FileEntry(primaryFiles[index], Utility.PrettyPrintSize(length), GetFileIcon(absolutePath)),
                                         new FileEntry(primaryFiles[otherIndex], Utility.PrettyPrintSize(length), GetFileIcon(absolutePathOther))
                                     };
+
+                                    ///
+                                    Utility.BeginInvoke(() => BindingOperations.EnableCollectionSynchronization(list, new object()));
+
                                     localList.Add(list);
                                 }
                             }
@@ -183,18 +173,16 @@ namespace FileDuplicateFinder {
                         for (int i = 0; i < localList.Count; i++)
                             for (int j = 0; j < localList[i].Count; j++)
                                 localList[i][j].Path = directory + localList[i][j].Path;
-                    AddRangeToCollection(duplicatedFilesPrimaryOnly, new List<ObservableRangeCollection<FileEntry>>(localList));
+                    AddRangeToCollection(duplicatedFilesPrimaryOnly, new List<FileEntryCollection>(localList));
                     localList.Clear();
                 }
 
-                dispatcher.BeginInvoke((Action)(() => {///
-                    statusBarView.ViewModel.Progress = (otherIndex * 89) / primaryFiles.Count + 11;
-                    Utility.SetProgress(otherIndex, primaryFiles.Count);
-                }));
+                SetProgressStatus(otherIndex);
             }
+            stopTask = false;
         }
 
-        private static void AbortFindDuplicateFilesOneDirectory(bool showBasePaths, List<ObservableRangeCollection<FileEntry>> localList, string directory) {
+        private static void AbortFindDuplicateFilesOneDirectory(bool showBasePaths, List<FileEntryCollection> localList, string directory) {
             duplicateIndexingPrimary.Clear();
             if (showBasePaths)
                 for (int i = 0; i < localList.Count; i++)
@@ -207,37 +195,38 @@ namespace FileDuplicateFinder {
         }
 
         public static void FindDuplicatedFiles(string primaryDirectory, string secondaryDirectory, bool showBasePaths) {
-            dispatcher.BeginInvoke((Action)(() => { /// needed at all?
-                statusBarView.ViewModel.State = "Processing primary directory";
-                statusBarView.ViewModel.Progress = 1;
-            }));
+            SetProgressStatus("Processing primary directory", true);
             List<FileEntry> localEmptyDirectoriesPrimary = new List<FileEntry>();
             List<FileEntry> localEmptyFilesPrimary = new List<FileEntry>();
-            ProcessDirectory(primaryDirectory, primaryFiles, localEmptyDirectoriesPrimary, localEmptyFilesPrimary, primaryDirectory);
+
+            ProcessDirectory(primaryDirectory, primaryFiles, localEmptyDirectoriesPrimary, localEmptyFilesPrimary, primaryDirectory, showBasePaths);
+
             if (stopTask) {
                 stopTask = false;
                 return;
             }
+
             dispatcher.BeginInvoke((Action)(() => {
                 emptyDirectoriesPrimary.AddRange(localEmptyDirectoriesPrimary);
                 emptyFilesPrimary.AddRange(localEmptyFilesPrimary);
-                statusBarView.ViewModel.State = "Processing secondary directory";
-                statusBarView.ViewModel.Progress = 4;
+                statusBarViewModel.State = "Processing secondary directory";
                 localEmptyDirectoriesPrimary.Clear();
                 localEmptyFilesPrimary.Clear();
             }));
             List<FileEntry> localEmptyDirectoriesSecondary = new List<FileEntry>();
             List<FileEntry> localEmptyFilesSecondary = new List<FileEntry>();
-            ProcessDirectory(secondaryDirectory, secondaryFiles, localEmptyDirectoriesSecondary, localEmptyFilesSecondary, secondaryDirectory);
+
+            ProcessDirectory(secondaryDirectory, secondaryFiles, localEmptyDirectoriesSecondary, localEmptyFilesSecondary, secondaryDirectory, showBasePaths);
+
             if (stopTask) {
                 stopTask = false;
                 return;
             }
+
             dispatcher.BeginInvoke((Action)(() => {
                 emptyDirectoriesSecondary.AddRange(localEmptyDirectoriesSecondary);
                 emptyFilesSecondary.AddRange(localEmptyFilesSecondary);
-                statusBarView.ViewModel.State = "Sorting files by size in primary directory";
-                statusBarView.ViewModel.Progress = 7;
+                statusBarViewModel.State = "Sorting files by size in primary directory";
                 localEmptyDirectoriesSecondary.Clear();
                 localEmptyFilesSecondary.Clear();
             }));
@@ -246,9 +235,8 @@ namespace FileDuplicateFinder {
             while (!sorted) {
                 try {
                     primaryFiles.Sort((a, b) => {
-                        if (stopTask) {
+                        if (stopTask)
                             throw new TaskAbortedException();
-                        }
                         long aLength = GetFileLength(primaryDirectory + a);
                         if (aLength < 0) {
                             primaryFiles.Remove(a);
@@ -272,26 +260,22 @@ namespace FileDuplicateFinder {
                         }
                         continue;
                     }
-                }
-                catch (TaskAbortedException) {
-                    stopTask = false;
-                    return;
+                    else if (ex.InnerException is TaskAbortedException) {
+                        stopTask = false;
+                        return;
+                    }
                 }
                 sorted = true;
             }
 
-            dispatcher.BeginInvoke((Action)(() => {
-                statusBarView.ViewModel.State = "Sorting files by size in secondary directory";
-                statusBarView.ViewModel.Progress = 9;
-            }));
+            SetProgressStatus("Sorting files by size in secondary directory");
 
             sorted = false;
             while (!sorted) {
                 try {
                     secondaryFiles.Sort((a, b) => {
-                        if (stopTask) {
+                        if (stopTask)
                             throw new TaskAbortedException();
-                        }
                         long aLength = GetFileLength(secondaryDirectory + a);
                         if (aLength < 0) {
                             secondaryFiles.Remove(a);
@@ -315,43 +299,27 @@ namespace FileDuplicateFinder {
                         }
                         continue;
                     }
-                }
-                catch (TaskAbortedException) {
-                    stopTask = false;
-                    return;
+                    else if (ex.InnerException is TaskAbortedException) {
+                        stopTask = false;
+                        return;
+                    }
                 }
                 sorted = true;
             }
 
-            dispatcher.BeginInvoke((Action)(() => {
-                /// no need tp change bound properties from UI thread
-                statusBarView.ViewModel.State = "Searching for duplicates...";
-                statusBarView.ViewModel.Progress = 11;
-                statusBarView.ViewModel.ShowProgress = true;
-                Utility.SetProgress(0, primaryFiles.Count + secondaryFiles.Count);
-            }));
+            SetProgressStatus("Searching for duplicates...", 0, primaryFiles.Count + secondaryFiles.Count);
 
             int indexPrimary = 0;
             int indexSecondary = 0;
             long lengthPrimary, lengthSecondary;
-            List<Tuple<ObservableRangeCollection<FileEntry>, ObservableRangeCollection<FileEntry>>> localList = new List<Tuple<ObservableRangeCollection<FileEntry>, ObservableRangeCollection<FileEntry>>>();
+            List<Tuple<FileEntryCollection, FileEntryCollection>> localList = new List<Tuple<FileEntryCollection, FileEntryCollection>>();
             while (indexPrimary < primaryFiles.Count && indexSecondary < secondaryFiles.Count) {
                 if (stopTask) {
                     stopTask = false;
                     return;
                 }
-                if (primaryFiles.Count < secondaryFiles.Count) {
-                    dispatcher.BeginInvoke((Action)(() => {
-                        statusBarView.ViewModel.Progress = (indexPrimary * 89) / primaryFiles.Count + 11;
-                        Utility.SetProgress(indexPrimary + indexSecondary, primaryFiles.Count + secondaryFiles.Count);
-                    }));
-                }
-                else {
-                    dispatcher.BeginInvoke((Action)(() => {
-                        statusBarView.ViewModel.Progress = (indexSecondary * 89) / secondaryFiles.Count + 11;
-                        Utility.SetProgress(indexPrimary + indexSecondary, primaryFiles.Count + secondaryFiles.Count);
-                    }));
-                }
+
+                SetProgressStatus(indexPrimary + indexSecondary);
 
                 lengthPrimary = GetFileLength(primaryDirectory + primaryFiles[indexPrimary]);
                 if (lengthPrimary < 0) {
@@ -410,7 +378,14 @@ namespace FileDuplicateFinder {
                                     string absolutePathSecondary = secondaryDirectory + secondaryFiles[indexSecondary];
                                     duplicateIndexingPrimary[indexPrimary] = localList.Count;
                                     duplicateIndexingSecondary[indexSecondary] = localList.Count;
-                                    Tuple<ObservableRangeCollection<FileEntry>, ObservableRangeCollection<FileEntry>> tuple = Tuple.Create(new ObservableRangeCollection<FileEntry>(), new ObservableRangeCollection<FileEntry>());
+                                    Tuple<FileEntryCollection, FileEntryCollection> tuple = Tuple.Create(new FileEntryCollection(), new FileEntryCollection());
+
+                                    ///
+                                    Utility.BeginInvoke(() => {
+                                        BindingOperations.EnableCollectionSynchronization(tuple.Item1, new object());
+                                        BindingOperations.EnableCollectionSynchronization(tuple.Item2, new object());
+                                    });
+
                                     tuple.Item1.Add(new FileEntry(primaryFiles[indexPrimary], Utility.PrettyPrintSize(commonLength), GetFileIcon(absolutePathPrimary)));
                                     tuple.Item2.Add(new FileEntry(secondaryFiles[indexSecondary], Utility.PrettyPrintSize(commonLength), GetFileIcon(absolutePathSecondary)));
                                     localList.Add(tuple);
@@ -428,7 +403,7 @@ namespace FileDuplicateFinder {
                                 localList[i].Item2[j].Path = secondaryDirectory + localList[i].Item2[j].Path;
                         }
                     }
-                    AddRangeToCollection(duplicatedFiles, new List<Tuple<ObservableRangeCollection<FileEntry>, ObservableRangeCollection<FileEntry>>>(localList));
+                    AddRangeToCollection(duplicatedFiles, new List<Tuple<FileEntryCollection, FileEntryCollection>>(localList));
                     localList.Clear();
                 }
                 else if (lengthPrimary < lengthSecondary)
@@ -436,9 +411,10 @@ namespace FileDuplicateFinder {
                 else
                     indexSecondary++;
             }
+            stopTask = false;
         }
 
-        private static void AbortFindDuplicateFiles(bool showBasePaths, List<Tuple<ObservableRangeCollection<FileEntry>, ObservableRangeCollection<FileEntry>>> localList, string primaryDirectory, string secondaryDirectory) {
+        private static void AbortFindDuplicateFiles(bool showBasePaths, List<Tuple<FileEntryCollection, FileEntryCollection>> localList, string primaryDirectory, string secondaryDirectory) {
             duplicateIndexingPrimary.Clear();
             duplicateIndexingSecondary.Clear();
             if (showBasePaths) {
@@ -455,7 +431,7 @@ namespace FileDuplicateFinder {
             }));
         }
 
-        private static void ProcessDirectory(string targetDirectory, List<string> fileList, List<FileEntry> emptyDirectories, List<FileEntry> emptyFiles, string originalDirectory) {
+        private static void ProcessDirectory(string targetDirectory, List<string> fileList, List<FileEntry> emptyDirectories, List<FileEntry> emptyFiles, string originalDirectory, bool showBasePaths) {
             if (stopTask)
                 return;
             string[] files;
@@ -467,25 +443,34 @@ namespace FileDuplicateFinder {
                 return;
             }
             if (files.Length == 0) {
-                if (Directory.GetDirectories(targetDirectory).Length == 0)
-                    emptyDirectories.Add(new FileEntry(new string(targetDirectory.Skip(originalDirectory.Length).ToArray()), GetFolderIcon(targetDirectory)));
+                if (Directory.GetDirectories(targetDirectory).Length == 0) {
+                    if (showBasePaths)
+                        emptyDirectories.Add(new FileEntry(targetDirectory, GetFolderIcon(targetDirectory)));
+                    else
+                        emptyDirectories.Add(new FileEntry(new string(targetDirectory.Skip(originalDirectory.Length).ToArray()), GetFolderIcon(targetDirectory)));
+                }
             }
             else {
                 foreach (var file in files) {
                     long fileLength = GetFileLength(file);
                     string relativePath = new string(file.Skip(originalDirectory.Length).ToArray());
-                    if (fileLength == 0)
-                        emptyFiles.Add(new FileEntry(relativePath, GetFileIcon(file)));
-                    else if (fileLength > 0)
+                    if (fileLength == 0) {
+                        if (showBasePaths)
+                            emptyFiles.Add(new FileEntry(file, GetFileIcon(file)));
+                        else
+                            emptyFiles.Add(new FileEntry(relativePath, GetFileIcon(file)));
+                    }
+                    else if (fileLength > 0) {
                         fileList.Add(relativePath);
+                    }
                 }
             }
             // Recurse into subdirectories of this directory.
             foreach (var subdirectory in Directory.GetDirectories(targetDirectory))
-                ProcessDirectory(subdirectory, fileList, emptyDirectories, emptyFiles, originalDirectory);
+                ProcessDirectory(subdirectory, fileList, emptyDirectories, emptyFiles, originalDirectory, showBasePaths);
         }
 
-        public static long GetFileLength(string path) {///private
+        private static long GetFileLength(string path) {
             try {
                 return new FileInfo(path).Length;
             }
@@ -665,10 +650,9 @@ namespace FileDuplicateFinder {
         }
 
 
-        /// region Sorting functions
-
+        #region Sorting functions
         internal static void SortAlphabetically() {
-            duplicatedFiles.Sort(Comparer<Tuple<ObservableRangeCollection<FileEntry>, ObservableRangeCollection<FileEntry>>>.Create((a, b) => a.Item1[0].Path.CompareTo(b.Item1[0].Path)));
+            duplicatedFiles.Sort(Comparer<Tuple<FileEntryCollection, FileEntryCollection>>.Create((a, b) => a.Item1[0].Path.CompareTo(b.Item1[0].Path)));
         }
 
         /// could do simpler sort as follows:
@@ -677,16 +661,21 @@ namespace FileDuplicateFinder {
             bool sorted = false;
             while (!sorted) {
                 try {
-                    duplicatedFiles.Sort(Comparer<Tuple<ObservableRangeCollection<FileEntry>, ObservableRangeCollection<FileEntry>>>.Create((a, b) => {
-                        long aLength = GetFileLength(baseDirectory + a.Item1[0].Path);
-                        if (aLength < 0) {
-                            a.Item1.RemoveAt(0);
-                            throw new SortException();
+                    duplicatedFiles.Sort(Comparer<Tuple<FileEntryCollection, FileEntryCollection>>.Create((a, b) => {
+                        long aLength = 0, bLength = 0;
+                        if (a.Item1.Count > 0) {
+                            aLength = GetFileLength(baseDirectory + a.Item1[0].Path);
+                            if (aLength < 0) {
+                                a.Item1.RemoveAt(0);
+                                throw new SortException();
+                            }
                         }
-                        long bLength = GetFileLength(baseDirectory + b.Item1[0].Path);
-                        if (bLength < 0) {
-                            b.Item1.RemoveAt(0);
-                            throw new SortException();
+                        if (b.Item1.Count > 0) {
+                            bLength = GetFileLength(baseDirectory + b.Item1[0].Path);
+                            if (bLength < 0) {
+                                b.Item1.RemoveAt(0);
+                                throw new SortException();
+                            }
                         }
                         return aLength.CompareTo(bLength);
                     }));
@@ -719,14 +708,14 @@ namespace FileDuplicateFinder {
         }
 
         internal static void SortAlphabeticallyPrimaryOnly() {
-            duplicatedFilesPrimaryOnly.Sort(Comparer<ObservableRangeCollection<FileEntry>>.Create((a, b) => a[0].Path.CompareTo(b[0].Path)));
+            duplicatedFilesPrimaryOnly.Sort(Comparer<FileEntryCollection>.Create((a, b) => a[0].Path.CompareTo(b[0].Path)));
         }
 
         internal static void SortBySizePrimaryOnly(string baseDirectory = "") {
             bool sorted = false;
             while (!sorted) {
                 try {
-                    duplicatedFilesPrimaryOnly.Sort(Comparer<ObservableRangeCollection<FileEntry>>.Create((a, b) => {
+                    duplicatedFilesPrimaryOnly.Sort(Comparer<FileEntryCollection>.Create((a, b) => {
                         long aLength = GetFileLength(baseDirectory + a[0].Path);
                         if (aLength < 0) {
                             a.RemoveAt(0);
@@ -764,19 +753,19 @@ namespace FileDuplicateFinder {
                 sorted = true;
             }
         }
+        #endregion
+
 
         internal static void RemoveAllEmptyDirectoriesPrimary(string baseDirectory = "") {
+            SetProgressStatus(0, emptyDirectoriesPrimary.Count);
             for (int i = 0; i < emptyDirectoriesPrimary.Count; i++) {
                 if (stopTask) {
                     AbortRemoveAllEmptyDirectoriesPrimary(i);
                     stopTask = false;
                     return;
                 }
-                RemoveFile(baseDirectory + emptyDirectoriesPrimary[i]);
-                dispatcher.BeginInvoke((Action)(() => { /// no need for dispatcher
-                    statusBarView.ViewModel.Progress = i * 100f / emptyDirectoriesPrimary.Count;
-                    Utility.SetProgress(i, emptyDirectoriesPrimary.Count);
-                }));
+                RemoveFile(baseDirectory + emptyDirectoriesPrimary[i].Path);
+                SetProgressStatus(i);
             }
             emptyDirectoriesPrimary.Clear();
         }
@@ -786,17 +775,15 @@ namespace FileDuplicateFinder {
         }
 
         internal static void RemoveAllEmptyDirectoriesSecondary(string baseDirectory = "") {
+            SetProgressStatus(0, emptyDirectoriesSecondary.Count);
             for (int i = 0; i < emptyDirectoriesSecondary.Count; i++) {
                 if (stopTask) {
                     AbortRemoveAllEmptyDirectoriesSecondary(i);
                     stopTask = false;
                     return;
                 }
-                RemoveFile(baseDirectory + emptyDirectoriesSecondary[i]);
-                dispatcher.BeginInvoke((Action)(() => { ///
-                    statusBarView.ViewModel.Progress = i * 100f / emptyDirectoriesSecondary.Count;
-                    Utility.SetProgress(i, emptyDirectoriesSecondary.Count);
-                }));
+                RemoveFile(baseDirectory + emptyDirectoriesSecondary[i].Path);
+                SetProgressStatus(i);
             }
             emptyDirectoriesSecondary.Clear();
         }
@@ -806,17 +793,15 @@ namespace FileDuplicateFinder {
         }
 
         internal static void RemoveAllEmptyFilesPrimary(string baseDirectory = "") {
+            SetProgressStatus(0, emptyFilesPrimary.Count);
             for (int i = 0; i < emptyFilesPrimary.Count; i++) {
                 if (stopTask) {
                     AbortRemoveAllEmptyFilesPrimary(i);
                     stopTask = false;
                     return;
                 }
-                RemoveFile(baseDirectory + emptyFilesPrimary[i]);
-                dispatcher.BeginInvoke((Action)(() => {
-                    statusBarView.ViewModel.Progress = i * 100f / emptyFilesPrimary.Count;
-                    Utility.SetProgress(i, emptyFilesPrimary.Count);
-                }));
+                RemoveFile(baseDirectory + emptyFilesPrimary[i].Path);
+                SetProgressStatus(i);
             }
             emptyFilesPrimary.Clear();
         }
@@ -826,17 +811,15 @@ namespace FileDuplicateFinder {
         }
 
         internal static void RemoveAllEmptyFilesSecondary(string baseDirectory = "") {
+            SetProgressStatus(0, emptyFilesSecondary.Count);
             for (int i = 0; i < emptyFilesSecondary.Count; i++) {
                 if (stopTask) {
                     AbortRemoveAllEmptyFilesSecondary(i);
                     stopTask = false;
                     return;
                 }
-                RemoveFile(baseDirectory + emptyFilesSecondary[i]);
-                dispatcher.BeginInvoke((Action)(() => {
-                    statusBarView.ViewModel.Progress = i * 100f / emptyFilesSecondary.Count;
-                    Utility.SetProgress(i, emptyFilesSecondary.Count);
-                }));
+                RemoveFile(baseDirectory + emptyFilesSecondary[i].Path);
+                SetProgressStatus(i);
             }
             emptyFilesSecondary.Clear();
         }
@@ -846,8 +829,8 @@ namespace FileDuplicateFinder {
         }
 
         internal static void RemoveAllPrimary(string baseDirectory = "") {
-            int count = duplicatedFiles.Count;
-            for (int i = 0; i < duplicatedFiles.Count;) {
+            SetProgressStatus(0, duplicatedFiles.Count);
+            for (int i = 0, progress = 0; i < duplicatedFiles.Count; progress++) {
                 for (int j = 0; j < duplicatedFiles[i].Item1.Count; j++) {
                     if (stopTask) {
                         AbortRemoveAllPrimary(i);
@@ -856,18 +839,14 @@ namespace FileDuplicateFinder {
                     }
                     RemoveFile(baseDirectory + duplicatedFiles[i].Item1[j].Path);
                 }
-                if (duplicatedFiles[i].Item2.Count <= 1) {
-                    duplicatedFiles.RemoveAt(i);
+                if (duplicatedFiles[i].Item2.Count <= 1) {/// <= 0 ? then no need for count variable probably
+                    duplicatedFiles.RemoveAt(i);    ///this is slow when right side is removed and on the left every single needs to be erased exclusively instead of bulk clear
                 }
                 else {
                     duplicatedFiles[i].Item1.Clear();
                     i++;
                 }
-                dispatcher.BeginInvoke((Action)(() => {
-                    int progress = i + count - duplicatedFiles.Count;
-                    statusBarView.ViewModel.Progress = progress * 100f / count;
-                    Utility.SetProgress(progress, duplicatedFiles.Count);
-                }));
+                SetProgressStatus(progress);
             }
         }
 
@@ -879,8 +858,8 @@ namespace FileDuplicateFinder {
         }
 
         internal static void RemoveAllSecondary(string baseDirectory = "") {
-            int count = duplicatedFiles.Count;
-            for (int i = 0; i < duplicatedFiles.Count;) {
+            SetProgressStatus(0, duplicatedFiles.Count);
+            for (int i = 0, progress = 0; i < duplicatedFiles.Count; progress++) {
                 for (int j = 0; j < duplicatedFiles[i].Item2.Count; j++) {
                     if (stopTask) {
                         AbortRemoveAllSecondary(i);
@@ -889,26 +868,65 @@ namespace FileDuplicateFinder {
                     }
                     RemoveFile(baseDirectory + duplicatedFiles[i].Item2[j].Path);
                 }
-                if (duplicatedFiles[i].Item1.Count <= 1) {
+                if (duplicatedFiles[i].Item1.Count <= 1) {///
                     duplicatedFiles.RemoveAt(i);
                 }
                 else {
                     duplicatedFiles[i].Item2.Clear();
                     i++;
                 }
-                dispatcher.BeginInvoke((Action)(() => {
-                    int progress = i + count - duplicatedFiles.Count;
-                    statusBarView.ViewModel.Progress = progress * 100f / count;
-                    Utility.SetProgress(progress, duplicatedFiles.Count);
-                }));
+                SetProgressStatus(progress);
             }
         }
 
+        /// put abort functions as extension to observablecollection
         private static void AbortRemoveAllSecondary(int i) {
             if (duplicatedFiles[i].Item1.Count <= 1)
                 duplicatedFiles.RemoveAt(i);
             else
                 duplicatedFiles[i].Item2.Clear();
+        }
+
+        ///
+        private static void SetProgressStatus(int progress) {
+            string stateInfo = progress + " / " + statusBarViewModel.MaxProgress;
+            dispatcher.BeginInvoke((Action)(() => {
+                statusBarViewModel.StateInfo = stateInfo;
+                statusBarViewModel.Progress = progress;
+            }));
+        }
+
+        private static void SetProgressStatus(int progress, int maxProgress) {
+            string stateInfo = progress + " / " + maxProgress;
+            dispatcher.BeginInvoke((Action)(() => {
+                statusBarViewModel.StateInfo = stateInfo;
+                statusBarViewModel.MaxProgress = maxProgress;
+                statusBarViewModel.Progress = progress;
+            }));
+        }
+        
+        private static void SetProgressStatus(string state) {
+            dispatcher.BeginInvoke((Action)(() => {
+                statusBarViewModel.State = state;
+            }));
+        }
+
+        private static void SetProgressStatus(string state, bool isIndeterminate) {
+            dispatcher.BeginInvoke((Action)(() => {
+                statusBarViewModel.State = state;
+                statusBarViewModel.IsIndeterminate = isIndeterminate;
+            }));
+        }
+
+        private static void SetProgressStatus(string state, int progress, int maxProgress) {
+            string stateInfo = progress + " / " + maxProgress;
+            dispatcher.BeginInvoke((Action)(() => {
+                statusBarViewModel.State = state;
+                statusBarViewModel.StateInfo = stateInfo;
+                statusBarViewModel.IsIndeterminate = false;
+                statusBarViewModel.MaxProgress = maxProgress;
+                statusBarViewModel.Progress = progress;
+            }));
         }
 
         private static void AddRangeToCollection<T>(ObservableRangeCollection<T> collection, List<T> list) {

@@ -1,7 +1,9 @@
 ﻿namespace FileDuplicateFinder.ViewModel {
     class StatusBarViewModel: ObjectBase {
         private bool showProgress = false;
-        private double progress = 0;
+        private bool isIndeterminate = false;
+        private int progress = 0;
+        private int maxProgress = 100;
         private string state = "Ready";
         private string stateInfo = "";
 
@@ -15,12 +17,32 @@
             }
         }
 
-        public double Progress {
+        public bool IsIndeterminate {
+            get => isIndeterminate;
+            set {
+                if (isIndeterminate != value) {
+                    isIndeterminate = value;
+                    OnPropertyChanged("IsIndeterminate");
+                }
+            }
+        }
+
+        public int Progress {
             get => progress;
             set {
                 if (progress != value) {
                     progress = value;
                     OnPropertyChanged("Progress");
+                }
+            }
+        }
+
+        public int MaxProgress {
+            get => maxProgress;
+            set {
+                if (maxProgress != value) {
+                    maxProgress = value;
+                    OnPropertyChanged("MaxProgress");
                 }
             }
         }

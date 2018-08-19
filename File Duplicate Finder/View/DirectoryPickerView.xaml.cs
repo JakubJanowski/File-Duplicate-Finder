@@ -55,13 +55,5 @@ namespace FileDuplicateFinder.View {
             secondaryDirectoryTextBox.Focus();
             secondaryDirectoryTextBox.CaretIndex = secondaryDirectoryTextBox.Text.Length;
         }
-
-        public void LockGUI() {
-            ViewModel.IsGUIEnabled = false;
-        }
-
-        public void UnlockGUI() {
-            ViewModel.IsGUIEnabled = true;
-        }
     }
 }

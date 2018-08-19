@@ -1,4 +1,4 @@
-﻿using FileDuplicateFinder.View;
+﻿using FileDuplicateFinder.ViewModel;
 using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -14,7 +14,7 @@ namespace FileDuplicateFinder {
         internal static ListView logListView;
         internal static TabItem logTabItem;
         internal static Dispatcher dispatcher;
-        internal static StatusBarView statusBarView;
+        internal static StatusBarViewModel statusBarViewModel;
 
         public static void CheckDirectories(string primaryDirectory, string secondaryDirectory, ref bool error) {
             try {
@@ -89,9 +89,8 @@ namespace FileDuplicateFinder {
         public static void LogFromNonGUIThread(string message) {
             dispatcher.BeginInvoke((Action)(() => Log(message)));
         }
-
-        /// begin
-        public static void BeginInvokeFromNonGUIThread(Action callback) {
+        
+        public static void BeginInvoke(Action callback) {
             dispatcher.BeginInvoke(callback);
         }
 
@@ -140,7 +139,7 @@ namespace FileDuplicateFinder {
             //    suffix = nameof(B);
             //}
             //else if (bytes < MiB) {
-            //    remainder = (ushort)(bytes % 1024);
+            //    remainder = (ushort)(bytes % 1024);   //x % 1024 === x & 0x3ff
             //    size = bytes / 1024;
             //    suffix = nameof(KiB);
             //}
@@ -169,11 +168,6 @@ namespace FileDuplicateFinder {
             //    size = bytes / EiB + (bytes % EiB) / 1024;
             //    suffix = nameof(EiB);
             //}
-        }
-
-        // move to stateBarViewModel
-        public static void SetProgress(int done, int outOf) {
-            statusBarView.ViewModel.StateInfo = done + " / " + outOf;
         }
 
         /// IEnumerable?

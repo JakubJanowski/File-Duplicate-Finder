@@ -5,6 +5,7 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using Prism.Commands;
 
 namespace FileDuplicateFinder.ViewModel {
     class MainTabControlViewModel: ObjectBase {
@@ -13,11 +14,10 @@ namespace FileDuplicateFinder.ViewModel {
 
         private bool showBasePaths = false;
         private volatile bool stopTask = false;
-        //tmp
-        //public View.MainTabControlView mainTabControlView;
         private bool primaryOnly = false;
 
         internal DirectoryPickerViewModel DirectoryPickerViewModel { private get; set; }
+        internal MainWindowViewModel MainWindowViewModel { private get; set; }
         internal StatusBarViewModel StatusBarViewModel { private get; set; }
 
         public MainTabControlViewModel() {
@@ -40,18 +40,17 @@ namespace FileDuplicateFinder.ViewModel {
             DuplicatedFilesPrimaryOnlyRemoveFileCommand = new DelegateCommand<object>(DuplicatedFilesPrimaryOnlyRemoveFile);
             DuplicatedFilesPrimaryOnlyIgnoreFileCommand = new DelegateCommand<object>(DuplicatedFilesPrimaryOnlyIgnoreFile);
 
-            RemoveAllEmptyDirectoriesPrimaryCommand = new DelegateCommand<object>(RemoveAllEmptyDirectoriesPrimary, (o) => IsGUIEnabled);
-            RemoveAllEmptyDirectoriesSecondaryCommand = new DelegateCommand<object>(RemoveAllEmptyDirectoriesSecondary, (o) => IsGUIEnabled);
-            RemoveAllEmptyFilesPrimaryCommand = new DelegateCommand<object>(RemoveAllEmptyFilesPrimary, (o) => IsGUIEnabled);
-            RemoveAllEmptyFilesSecondaryCommand = new DelegateCommand<object>(RemoveAllEmptyFilesSecondary, (o) => IsGUIEnabled);
-            RemoveAllPrimaryCommand = new DelegateCommand<object>(RemoveAllPrimary, (o) => IsGUIEnabled);
-            RemoveAllSecondaryCommand = new DelegateCommand<object>(RemoveAllSecondary, (o) => IsGUIEnabled);
+            RemoveAllEmptyDirectoriesPrimaryCommand = new DelegateCommand<object>(RemoveAllEmptyDirectoriesPrimary, (o) => IsGUIEnabled).ObservesProperty(() => IsGUIEnabled);
+            RemoveAllEmptyDirectoriesSecondaryCommand = new DelegateCommand<object>(RemoveAllEmptyDirectoriesSecondary, (o) => IsGUIEnabled).ObservesProperty(() => IsGUIEnabled);
+            RemoveAllEmptyFilesPrimaryCommand = new DelegateCommand<object>(RemoveAllEmptyFilesPrimary, (o) => IsGUIEnabled).ObservesProperty(() => IsGUIEnabled);
+            RemoveAllEmptyFilesSecondaryCommand = new DelegateCommand<object>(RemoveAllEmptyFilesSecondary, (o) => IsGUIEnabled).ObservesProperty(() => IsGUIEnabled);
+            RemoveAllPrimaryCommand = new DelegateCommand<object>(RemoveAllPrimary, (o) => IsGUIEnabled).ObservesProperty(() => IsGUIEnabled);
+            RemoveAllSecondaryCommand = new DelegateCommand<object>(RemoveAllSecondary, (o) => IsGUIEnabled).ObservesProperty(() => IsGUIEnabled);
 
             SortAlphabeticallyCommand = new DelegateCommand<object>(SortAlphabetically);
             SortBySizeCommand = new DelegateCommand<object>(SortBySize);
             SortAlphabeticallyPrimaryOnlyCommand = new DelegateCommand<object>(SortAlphabeticallyPrimaryOnly);
             SortBySizePrimaryOnlyCommand = new DelegateCommand<object>(SortBySizePrimaryOnly);
-
         }
 
         public bool IsGUIEnabled {
@@ -82,6 +81,14 @@ namespace FileDuplicateFinder.ViewModel {
                     OnPropertyChanged("ShowBasePaths");
                 }
             }
+        }
+
+        internal void LockGUI() {
+            IsGUIEnabled = false;
+        }
+
+        internal void UnlockGUI() {
+            IsGUIEnabled = true;
         }
 
         public void ShowButtons(object sender, System.Windows.Input.MouseEventArgs e) {
@@ -283,7 +290,7 @@ namespace FileDuplicateFinder.ViewModel {
 
         private void RemoveFile(string path, string baseDirectory) {
             /// temporary solution
-            ((MainWindow)Application.Current.MainWindow).RemoveFile(path, baseDirectory);
+            MainWindowViewModel.RemoveFile(path, baseDirectory);
         }
 
 
@@ -292,19 +299,18 @@ namespace FileDuplicateFinder.ViewModel {
         public void RemoveAllEmptyDirectoriesPrimary(object obj) {
             if (MessageBox.Show("Are you sure you want to delete all files from " + DirectoryPickerViewModel.PrimaryDirectory + "? Backup files will not be stored.", "Warning", MessageBoxButton.YesNo) == MessageBoxResult.No)
                 return;
-            InitProgress("Removing files...");
-            Utility.SetProgress(0, FileManager.emptyDirectoriesPrimary.Count);
+            InitRemoveAllProgress("Removing files...");
             /// temporary solution
-            ((MainWindow)Application.Current.MainWindow).LockGUI();
+            MainWindowViewModel.LockGUI();
             new Thread(() => {
                 if (showBasePaths)
                     FileManager.RemoveAllEmptyDirectoriesPrimary();
                 else
                     FileManager.RemoveAllEmptyDirectoriesPrimary(DirectoryPickerViewModel.PrimaryDirectory);
-                Utility.BeginInvokeFromNonGUIThread(() => {
+                Utility.BeginInvoke(() => {
                     FinishProgress("Done");
                     /// temporary solution
-                    ((MainWindow)Application.Current.MainWindow).UnlockGUI();
+                    MainWindowViewModel.UnlockGUI();
                 });
             }).Start();
         }
@@ -313,19 +319,18 @@ namespace FileDuplicateFinder.ViewModel {
         public void RemoveAllEmptyDirectoriesSecondary(object obj) {
             if (MessageBox.Show("Are you sure you want to delete all files from " + DirectoryPickerViewModel.SecondaryDirectory + "? Backup files will not be stored.", "Warning", MessageBoxButton.YesNo) == MessageBoxResult.No)
                 return;
-            InitProgress("Removing files...");
-            Utility.SetProgress(0, FileManager.emptyDirectoriesSecondary.Count);
+            InitRemoveAllProgress("Removing files...");
             /// temporary solution
-            ((MainWindow)Application.Current.MainWindow).LockGUI();
+            MainWindowViewModel.LockGUI();
             new Thread(() => {
                 if (showBasePaths)
                     FileManager.RemoveAllEmptyDirectoriesSecondary();
                 else
                     FileManager.RemoveAllEmptyDirectoriesSecondary(DirectoryPickerViewModel.SecondaryDirectory);
-                Utility.BeginInvokeFromNonGUIThread(() => {
+                Utility.BeginInvoke(() => {
                     FinishProgress("Done");
                     /// temporary solution
-                    ((MainWindow)Application.Current.MainWindow).UnlockGUI();
+                    MainWindowViewModel.UnlockGUI();
                 });
             }).Start();
         }
@@ -334,20 +339,19 @@ namespace FileDuplicateFinder.ViewModel {
         public void RemoveAllEmptyFilesPrimary(object obj) {
             if (MessageBox.Show("Are you sure you want to delete all files from " + DirectoryPickerViewModel.PrimaryDirectory + "? Backup files will not be stored.", "Warning", MessageBoxButton.YesNo) == MessageBoxResult.No)
                 return;
-            InitProgress("Removing files...");
-            Utility.SetProgress(0, FileManager.emptyFilesPrimary.Count);
+            InitRemoveAllProgress("Removing files...");
             /// temporary solution
-            ((MainWindow)Application.Current.MainWindow).LockGUI();
+            MainWindowViewModel.LockGUI();
             StatusBarViewModel.State = "Removing files...";
             new Thread(() => {
                 if (showBasePaths)
                     FileManager.RemoveAllEmptyFilesPrimary();
                 else
                     FileManager.RemoveAllEmptyFilesPrimary(DirectoryPickerViewModel.PrimaryDirectory);
-                Utility.BeginInvokeFromNonGUIThread(() => {
+                Utility.BeginInvoke(() => {
                     FinishProgress("Done");
                     /// temporary solution
-                    ((MainWindow)Application.Current.MainWindow).UnlockGUI();
+                    MainWindowViewModel.UnlockGUI();
                 });
             }).Start();
         }
@@ -356,19 +360,18 @@ namespace FileDuplicateFinder.ViewModel {
         public void RemoveAllEmptyFilesSecondary(object obj) {
             if (MessageBox.Show("Are you sure you want to delete all files from " + DirectoryPickerViewModel.SecondaryDirectory + "? Backup files will not be stored.", "Warning", MessageBoxButton.YesNo) == MessageBoxResult.No)
                 return;
-            InitProgress("Removing files...");
-            Utility.SetProgress(0, FileManager.emptyFilesSecondary.Count);
+            InitRemoveAllProgress("Removing files...");
             /// temporary solution
-            ((MainWindow)Application.Current.MainWindow).LockGUI();
+            MainWindowViewModel.LockGUI();
             new Thread(() => {
                 if (showBasePaths)
                     FileManager.RemoveAllEmptyFilesSecondary();
                 else
                     FileManager.RemoveAllEmptyFilesSecondary(DirectoryPickerViewModel.SecondaryDirectory);
-                Utility.BeginInvokeFromNonGUIThread(() => {
+                Utility.BeginInvoke(() => {
                     FinishProgress("Done");
                     /// temporary solution
-                    ((MainWindow)Application.Current.MainWindow).UnlockGUI();
+                    MainWindowViewModel.UnlockGUI();
                 });
             }).Start();
         }
@@ -377,19 +380,18 @@ namespace FileDuplicateFinder.ViewModel {
         public void RemoveAllPrimary(object obj) {
             if (MessageBox.Show("Are you sure you want to delete all files from " + DirectoryPickerViewModel.PrimaryDirectory + "? Backup files will not be stored.", "Warning", MessageBoxButton.YesNo) == MessageBoxResult.No)
                 return;
-            InitProgress("Removing files...");
-            Utility.SetProgress(0, FileManager.duplicatedFiles.Count);
+            InitRemoveAllProgress("Removing files...");
             /// temporary solution
-            ((MainWindow)Application.Current.MainWindow).LockGUI();
+            MainWindowViewModel.LockGUI();
             new Thread(() => {
                 if (showBasePaths)
                     FileManager.RemoveAllPrimary();
                 else
                     FileManager.RemoveAllPrimary(DirectoryPickerViewModel.PrimaryDirectory);
-                Utility.BeginInvokeFromNonGUIThread(() => {
+                Utility.BeginInvoke(() => {
                     FinishProgress("Done");
                     /// temporary solution
-                    ((MainWindow)Application.Current.MainWindow).UnlockGUI();
+                    MainWindowViewModel.UnlockGUI();
                 });
             }).Start();
         }
@@ -398,27 +400,27 @@ namespace FileDuplicateFinder.ViewModel {
         public void RemoveAllSecondary(object obj) {
             if (MessageBox.Show("Are you sure you want to delete all files from " + DirectoryPickerViewModel.SecondaryDirectory + "? Backup files will not be stored.", "Warning", MessageBoxButton.YesNo) == MessageBoxResult.No)
                 return;
-            InitProgress("Removing files...");
-            Utility.SetProgress(0, FileManager.duplicatedFiles.Count);
+            InitRemoveAllProgress("Removing files...");
             /// temporary solution
-            ((MainWindow)Application.Current.MainWindow).LockGUI();
+            MainWindowViewModel.LockGUI();
             new Thread(() => {
                 if (showBasePaths)
                     FileManager.RemoveAllSecondary();
                 else
                     FileManager.RemoveAllSecondary(DirectoryPickerViewModel.SecondaryDirectory);
-                Utility.BeginInvokeFromNonGUIThread(() => {  /// check if this could be changed to not use invoke at all, then this utility method can be erased
+                Utility.BeginInvoke(() => {
                     FinishProgress("Done");
                     /// temporary solution
-                    ((MainWindow)Application.Current.MainWindow).UnlockGUI();
+                    MainWindowViewModel.UnlockGUI();
                 });
             }).Start();
         }
 
-        private void InitProgress(string state) {
+        private void InitRemoveAllProgress(string state) {
             StatusBarViewModel.Progress = 0;
-            StatusBarViewModel.ShowProgress = true;
             StatusBarViewModel.State = state;
+            StatusBarViewModel.IsIndeterminate = false;
+            StatusBarViewModel.ShowProgress = true;
         }
 
         private void FinishProgress(string state) {
@@ -439,14 +441,14 @@ namespace FileDuplicateFinder.ViewModel {
 
         public DelegateCommand<object> SortAlphabeticallyCommand { get; private set; }
         public void SortAlphabetically(object obj) {
-            ((MainWindow)Application.Current.MainWindow).SortBySize = false;
+            MainWindowViewModel.SortBySize = false;
             FileManager.SortAlphabetically();
         }
 
         public DelegateCommand<object> SortBySizeCommand { get; private set; }
         public void SortBySize(object obj) {
             ///
-            ((MainWindow)Application.Current.MainWindow).SortBySize = true;
+            MainWindowViewModel.SortBySize = true;
             if (showBasePaths)
                 FileManager.SortBySize();
             else
@@ -456,14 +458,14 @@ namespace FileDuplicateFinder.ViewModel {
         public DelegateCommand<object> SortAlphabeticallyPrimaryOnlyCommand { get; private set; }
         public void SortAlphabeticallyPrimaryOnly(object obj) {
             ///
-            ((MainWindow)Application.Current.MainWindow).SortBySizePrimaryOnly = false;
+            MainWindowViewModel.SortBySizePrimaryOnly = false;
             FileManager.SortAlphabeticallyPrimaryOnly();
         }
 
         public DelegateCommand<object> SortBySizePrimaryOnlyCommand { get; private set; }
         public void SortBySizePrimaryOnly(object obj) {
             ///
-            ((MainWindow)Application.Current.MainWindow).SortBySizePrimaryOnly = true;
+            MainWindowViewModel.SortBySizePrimaryOnly = true;
             if (showBasePaths)
                 FileManager.SortBySizePrimaryOnly();
             else

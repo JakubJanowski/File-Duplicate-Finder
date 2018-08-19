@@ -8,6 +8,7 @@ namespace FileDuplicateFinder.View {
         internal MainTabControlViewModel ViewModel { get; } = new MainTabControlViewModel();
 
         private DirectoryPickerView directoryPickerView;
+        private MainWindowView mainWindowView;
         private StatusBarView statusBarView;
 
         internal DirectoryPickerView DirectoryPickerView {
@@ -18,6 +19,14 @@ namespace FileDuplicateFinder.View {
             }
         }
 
+        internal MainWindowView MainWindowView {
+            private get => mainWindowView;
+            set {
+                mainWindowView = value;
+                ViewModel.MainWindowViewModel = value.ViewModel;
+            }
+        }
+
         internal StatusBarView StatusBarView {
             private get => statusBarView;
             set {
@@ -25,10 +34,9 @@ namespace FileDuplicateFinder.View {
                 ViewModel.StatusBarViewModel = value.ViewModel;
             }
         }
-
+        
         public MainTabControlView() {
             InitializeComponent();
-            ///ViewModel.mainTabControlView = this;
             DataContext = ViewModel;
 
             Utility.logListView = logListView;
@@ -46,7 +54,7 @@ namespace FileDuplicateFinder.View {
             duplicatedFilesPrimaryOnlyListView.ItemsSource = FileManager.duplicatedFilesPrimaryOnly;
 
             //this or stick to refresh and no use for observable
-            BindingOperations.EnableCollectionSynchronization(FileManager.emptyDirectoriesPrimary, new object());
+            BindingOperations.EnableCollectionSynchronization(FileManager.emptyDirectoriesPrimary, new object()); /// store objects
             BindingOperations.EnableCollectionSynchronization(FileManager.emptyFilesPrimary, new object());
             BindingOperations.EnableCollectionSynchronization(FileManager.emptyDirectoriesSecondary, new object());
             BindingOperations.EnableCollectionSynchronization(FileManager.emptyFilesSecondary, new object());
@@ -54,23 +62,21 @@ namespace FileDuplicateFinder.View {
             BindingOperations.EnableCollectionSynchronization(FileManager.emptyDirectoriesPrimary, new object());
             BindingOperations.EnableCollectionSynchronization(FileManager.emptyFilesPrimary, new object());
             BindingOperations.EnableCollectionSynchronization(FileManager.duplicatedFilesPrimaryOnly, new object());
-
-            FileManager.emptyDirectoriesPrimaryOnlyListView = emptyDirectoriesPrimaryOnlyListView;
-            FileManager.emptyFilesPrimaryOnlyListView = emptyFilesPrimaryOnlyListView;
-            FileManager.duplicatedFilesPrimaryOnlyListView = duplicatedFilesPrimaryOnlyListView;
-            FileManager.emptyDirectoriesPrimaryListView = emptyDirectoriesPrimaryListView;
-            FileManager.emptyFilesPrimaryListView = emptyFilesPrimaryListView;
-            FileManager.emptyDirectoriesSecondaryListView = emptyDirectoriesSecondaryListView;
-            FileManager.emptyFilesSecondaryListView = emptyFilesSecondaryListView;
-            FileManager.duplicatedFilesListView = duplicatedFilesListView;
         }
 
-        internal void LockGUI() {
-            ViewModel.IsGUIEnabled = false;
-        }
-
-        internal void UnlockGUI() {
-            ViewModel.IsGUIEnabled = true;
+        internal void RefreshListViews() {
+            if (directoryPickerView.PrimaryOnly) {
+                duplicatedFilesPrimaryOnlyListView.Items.Refresh();
+                emptyDirectoriesPrimaryOnlyListView.Items.Refresh();
+                emptyFilesPrimaryOnlyListView.Items.Refresh();
+            }
+            else {
+                duplicatedFilesListView.Items.Refresh();
+                emptyDirectoriesPrimaryListView.Items.Refresh();
+                emptyFilesPrimaryListView.Items.Refresh();
+                emptyDirectoriesSecondaryListView.Items.Refresh();
+                emptyFilesSecondaryListView.Items.Refresh();
+            }
         }
 
         // push these as commands to other classes  and make private
@@ -84,7 +90,7 @@ namespace FileDuplicateFinder.View {
         }
 
 
-        // do something with these
+        /// do something with these
         private void IdenticalSubpathChecked(object sender, RoutedEventArgs e) {
 
         }

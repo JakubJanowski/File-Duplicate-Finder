@@ -34,7 +34,7 @@
                     <ColumnDefinition Width="auto"/>
                 </Grid.ColumnDefinitions>
                 <TextBox x:Name="secondaryDirectoryTextBox" Grid.Column="0" Margin="0,5,0,5" HorizontalAlignment="Stretch" Text="{Binding SecondaryDirectory}" IsEnabled="{c:Binding !PrimaryOnly and IsGUIEnabled}"/>
-                <Button x:Name="secondaryDirectoryDialogButton" Grid.Column="1" Margin="0,5,5,5" Width="18" Click="SecondaryDirectoryDialog" IsEnabled="{c:Binding !PrimaryOnly and IsGUIEnabled}">...</Button>
+                <Button x:Name="secondaryDirectoryDialogButton" Grid.Column="1" Margin="0,5,5,5" Width="18" IsEnabled="{c:Binding !PrimaryOnly and IsGUIEnabled}" Click="SecondaryDirectoryDialog">...</Button>
             </Grid>
         </Grid>
         <CheckBox x:Name="primaryOnlyCheckBox" Margin="5" IsEnabled="{Binding IsGUIEnabled}" IsChecked="{Binding PrimaryOnly}">Find duplicated files in primary directory only</CheckBox>

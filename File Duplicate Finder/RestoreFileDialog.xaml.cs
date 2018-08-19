@@ -6,9 +6,6 @@ using System.Windows;
 using System.Windows.Controls;
 
 namespace FileDuplicateFinder {
-    /// <summary>
-    /// Interaction logic for RestoreFileDialog.xaml
-    /// </summary>
     public partial class RestoreFileDialog: Window {
         ObservableRangeCollection<Tuple<string, string>> storedFiles;
         /// could pass just a list? what if a new file will get removed while the window is open?

@@ -1,4 +1,4 @@
-﻿<Window x:Class="FileDuplicateFinder.MainWindow"
+﻿<Window x:Class="FileDuplicateFinder.View.MainWindowView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -22,20 +22,20 @@
                     <ColumnDefinition Width="auto"/>
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0">
-                    <CheckBox x:Name="basePathsCheckBox" IsChecked="{Binding ShowBasePaths}">Show base paths</CheckBox>
-                    <CheckBox x:Name="backupFilesCheckBox" Checked="BackupFilesChecked" Unchecked="BackupFilesUnchecked" IsChecked="True">Store backup files</CheckBox>
-                    <CheckBox x:Name="askLargeCheckBox" Checked="AskLargeChecked" Unchecked="AskLargeUnchecked" IsChecked="True">Ask when deleting large files without backup</CheckBox>
+                    <CheckBox x:Name="basePathsCheckBox" IsEnabled="{Binding IsGUIEnabled}" Checked="basePathsCheckBox_Checked" Unchecked="basePathsCheckBox_Unchecked">Show base paths</CheckBox>
+                    <CheckBox x:Name="backupFilesCheckBox" IsChecked="{Binding BackupFiles}">Store backup files</CheckBox>
+                    <CheckBox x:Name="askLargeCheckBox" IsChecked="{Binding AskLarge}">Ask when deleting large files without backup</CheckBox>
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="auto"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="auto"/>
                         </Grid.ColumnDefinitions>
-                        <Button x:Name="restoreButton" IsEnabled="False" Grid.Column="0" Click="RestoreFiles">Restore files</Button>
-                        <Button x:Name="stopButton" IsEnabled="False" Width="60" Grid.Column="2" Click="StopTask">Stop</Button>
+                        <Button Grid.Column="0" Command="{Binding RestoreFilesCommand}">Restore files</Button>
+                        <Button Grid.Column="2" Width="60" Command="{Binding StopTaskCommand}">Stop</Button>
                     </Grid>
                 </StackPanel>
-                <Button x:Name="findButton" Grid.Column="1" Margin="10,0,0,0" Click="FindDuplicatedFiles">Find duplicated files</Button>
+                <Button Grid.Column="1" Margin="10,0,0,0" Command="{Binding FindDuplicatedFilesCommand}">Find duplicated files</Button>
             </Grid>
         </StackPanel>
         <view:MainTabControlView x:Name="mainTabControlView" Grid.Row="1" Margin="5"/>
