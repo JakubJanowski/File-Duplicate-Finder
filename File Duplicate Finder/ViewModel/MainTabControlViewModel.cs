@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
@@ -10,54 +11,105 @@ using Prism.Commands;
 namespace FileDuplicateFinder.ViewModel {
     class MainTabControlViewModel: ObjectBase {
         private const int pathChildPosition = 1;
-        private bool isGUIEnabled = true;
-
-        private bool showBasePaths = false;
         private volatile bool stopTask = false;
-        private bool primaryOnly = false;
 
-        internal DirectoryPickerViewModel DirectoryPickerViewModel { private get; set; }
-        internal MainWindowViewModel MainWindowViewModel { private get; set; }
+        private bool isGUIEnabled = true;
+        private bool primaryOnly = false;
+        private bool showBasePaths = false;
+
+        private DirectoryPickerViewModel directoryPickerViewModel;
+        private MainWindowViewModel mainWindowViewModel;
+
+        private DuplicatedFilesTabViewModel duplicatedFilesTabViewModel;
+        private EmptyDirectoriesTabControlViewModel emptyDirectoriesTabControlViewModel;
+        private EmptyFilesTabControlViewModel emptyFilesTabControlViewModel;
+        private PrimaryOnlyDuplicatedFilesTabViewModel primaryOnlyDuplicatedFilesTabViewModel;
+        private PrimaryOnlyEmptyDirectoriesTabViewModel primaryOnlyEmptyDirectoriesTabViewModel;
+        private PrimaryOnlyEmptyFilesTabViewModel primaryOnlyEmptyFilesTabViewModel;
+
+        internal DirectoryPickerViewModel DirectoryPickerViewModel {
+            private get => directoryPickerViewModel;
+            set {
+                directoryPickerViewModel = value;
+                DuplicatedFilesTabViewModel.DirectoryPickerViewModel = value;
+                EmptyDirectoriesTabControlViewModel.DirectoryPickerViewModel = value;
+                EmptyFilesTabControlViewModel.DirectoryPickerViewModel = value;
+                PrimaryOnlyDuplicatedFilesTabViewModel.DirectoryPickerViewModel = value;
+                PrimaryOnlyEmptyDirectoriesTabViewModel.DirectoryPickerViewModel = value;
+                PrimaryOnlyEmptyFilesTabViewModel.DirectoryPickerViewModel = value;
+            }
+        }
+
+        internal DuplicatedFilesTabViewModel DuplicatedFilesTabViewModel {
+            private get => duplicatedFilesTabViewModel;
+            set {
+                duplicatedFilesTabViewModel = value;
+                value.MainTabControlViewModel = this;
+            }
+        }
+
+        internal EmptyDirectoriesTabControlViewModel EmptyDirectoriesTabControlViewModel {
+            private get => emptyDirectoriesTabControlViewModel;
+            set {
+                emptyDirectoriesTabControlViewModel = value;
+                value.MainTabControlViewModel = this;
+            }
+        }
+
+        internal EmptyFilesTabControlViewModel EmptyFilesTabControlViewModel {
+            private get => emptyFilesTabControlViewModel;
+            set {
+                emptyFilesTabControlViewModel = value;
+                value.MainTabControlViewModel = this;
+            }
+        }
+
+        internal PrimaryOnlyDuplicatedFilesTabViewModel PrimaryOnlyDuplicatedFilesTabViewModel {
+            private get => primaryOnlyDuplicatedFilesTabViewModel;
+            set {
+                primaryOnlyDuplicatedFilesTabViewModel = value;
+                value.MainTabControlViewModel = this;
+            }
+        }
+
+        internal PrimaryOnlyEmptyDirectoriesTabViewModel PrimaryOnlyEmptyDirectoriesTabViewModel {
+            private get => primaryOnlyEmptyDirectoriesTabViewModel;
+            set {
+                primaryOnlyEmptyDirectoriesTabViewModel = value;
+                value.MainTabControlViewModel = this;
+            }
+        }
+
+        internal PrimaryOnlyEmptyFilesTabViewModel PrimaryOnlyEmptyFilesTabViewModel {
+            private get => primaryOnlyEmptyFilesTabViewModel;
+            set {
+                primaryOnlyEmptyFilesTabViewModel = value;
+                value.MainTabControlViewModel = this;
+            }
+        }
+
+        internal MainWindowViewModel MainWindowViewModel {
+            private get => mainWindowViewModel;
+            set {
+                mainWindowViewModel = value;
+                duplicatedFilesTabViewModel.MainWindowViewModel = value;
+                primaryOnlyDuplicatedFilesTabViewModel.MainWindowViewModel = value;
+            }
+        }
         internal StatusBarViewModel StatusBarViewModel { private get; set; }
 
-        public MainTabControlViewModel() {
-            OpenDirectoryPrimaryCommand = new DelegateCommand<object>(OpenDirectoryPrimary);
-            OpenDirectorySecondaryCommand = new DelegateCommand<object>(OpenDirectorySecondary);
-            OpenFileDirectoryPrimaryCommand = new DelegateCommand<object>(OpenFileDirectoryPrimary);
-            OpenFileDirectorySecondaryCommand = new DelegateCommand<object>(OpenFileDirectorySecondary);
-            EmptyDirectoriesPrimaryRemoveFileCommand = new DelegateCommand<object>(EmptyDirectoriesPrimaryRemoveFile);
-            EmptyDirectoriesPrimaryIgnoreFileCommand = new DelegateCommand<object>(EmptyDirectoriesPrimaryIgnoreFile);
-            EmptyFilesPrimaryRemoveFileCommand = new DelegateCommand<object>(EmptyFilesPrimaryRemoveFile);
-            EmptyFilesPrimaryIgnoreFileCommand = new DelegateCommand<object>(EmptyFilesPrimaryIgnoreFile);
-            EmptyDirectoriesSecondaryRemoveFileCommand = new DelegateCommand<object>(EmptyDirectoriesSecondaryRemoveFile);
-            EmptyDirectoriesSecondaryIgnoreFileCommand = new DelegateCommand<object>(EmptyDirectoriesSecondaryIgnoreFile);
-            EmptyFilesSecondaryRemoveFileCommand = new DelegateCommand<object>(EmptyFilesSecondaryRemoveFile);
-            EmptyFilesSecondaryIgnoreFileCommand = new DelegateCommand<object>(EmptyFilesSecondaryIgnoreFile);
-            DuplicatedFilesPrimaryRemoveFileCommand = new DelegateCommand<object>(DuplicatedFilesPrimaryRemoveFile);
-            DuplicatedFilesPrimaryIgnoreFileCommand = new DelegateCommand<object>(DuplicatedFilesPrimaryIgnoreFile);
-            DuplicatedFilesSecondaryRemoveFileCommand = new DelegateCommand<object>(DuplicatedFilesSecondaryRemoveFile);
-            DuplicatedFilesSecondaryIgnoreFileCommand = new DelegateCommand<object>(DuplicatedFilesSecondaryIgnoreFile);
-            DuplicatedFilesPrimaryOnlyRemoveFileCommand = new DelegateCommand<object>(DuplicatedFilesPrimaryOnlyRemoveFile);
-            DuplicatedFilesPrimaryOnlyIgnoreFileCommand = new DelegateCommand<object>(DuplicatedFilesPrimaryOnlyIgnoreFile);
-
-            RemoveAllEmptyDirectoriesPrimaryCommand = new DelegateCommand<object>(RemoveAllEmptyDirectoriesPrimary, (o) => IsGUIEnabled).ObservesProperty(() => IsGUIEnabled);
-            RemoveAllEmptyDirectoriesSecondaryCommand = new DelegateCommand<object>(RemoveAllEmptyDirectoriesSecondary, (o) => IsGUIEnabled).ObservesProperty(() => IsGUIEnabled);
-            RemoveAllEmptyFilesPrimaryCommand = new DelegateCommand<object>(RemoveAllEmptyFilesPrimary, (o) => IsGUIEnabled).ObservesProperty(() => IsGUIEnabled);
-            RemoveAllEmptyFilesSecondaryCommand = new DelegateCommand<object>(RemoveAllEmptyFilesSecondary, (o) => IsGUIEnabled).ObservesProperty(() => IsGUIEnabled);
-            RemoveAllPrimaryCommand = new DelegateCommand<object>(RemoveAllPrimary, (o) => IsGUIEnabled).ObservesProperty(() => IsGUIEnabled);
-            RemoveAllSecondaryCommand = new DelegateCommand<object>(RemoveAllSecondary, (o) => IsGUIEnabled).ObservesProperty(() => IsGUIEnabled);
-
-            SortAlphabeticallyCommand = new DelegateCommand<object>(SortAlphabetically);
-            SortBySizeCommand = new DelegateCommand<object>(SortBySize);
-            SortAlphabeticallyPrimaryOnlyCommand = new DelegateCommand<object>(SortAlphabeticallyPrimaryOnly);
-            SortBySizePrimaryOnlyCommand = new DelegateCommand<object>(SortBySizePrimaryOnly);
-        }
+        public MainTabControlViewModel() {}
 
         public bool IsGUIEnabled {
             get => isGUIEnabled;
             set {
                 if (isGUIEnabled != value) {
                     isGUIEnabled = value;
+                    DuplicatedFilesTabViewModel.IsGUIEnabled = value;
+                    EmptyDirectoriesTabControlViewModel.IsGUIEnabled = value;
+                    EmptyFilesTabControlViewModel.IsGUIEnabled = value;
+                    PrimaryOnlyEmptyDirectoriesTabViewModel.IsGUIEnabled = value;
+                    PrimaryOnlyEmptyFilesTabViewModel.IsGUIEnabled = value;
                     OnPropertyChanged("IsGUIEnabled");
                 }
             }
@@ -78,6 +130,8 @@ namespace FileDuplicateFinder.ViewModel {
             set {
                 if (showBasePaths != value) {
                     showBasePaths = value;
+                    DuplicatedFilesTabViewModel.ShowBasePaths = value;
+                    PrimaryOnlyDuplicatedFilesTabViewModel.ShowBasePaths = value;
                     OnPropertyChanged("ShowBasePaths");
                 }
             }
@@ -91,7 +145,7 @@ namespace FileDuplicateFinder.ViewModel {
             IsGUIEnabled = true;
         }
 
-        public void ShowButtons(object sender, System.Windows.Input.MouseEventArgs e) {
+        public void ShowButtons(object sender) {
             Border border = sender as Border;
             Grid grid = border.Child as Grid;
             border.Background = Brushes.AliceBlue;
@@ -100,7 +154,7 @@ namespace FileDuplicateFinder.ViewModel {
                     ((Button)child).Visibility = Visibility.Visible;
         }
 
-        public void HideButtons(object sender, System.Windows.Input.MouseEventArgs e) {
+        public void HideButtons(object sender) {
             Border border = sender as Border;
             Grid grid = border.Child as Grid;
             border.Background = Brushes.Transparent;
@@ -111,8 +165,8 @@ namespace FileDuplicateFinder.ViewModel {
 
         public DelegateCommand<object> OpenDirectoryPrimaryCommand { get; private set; }
         public void OpenDirectoryPrimary(object sender) {
-            // set this once per search maybe
-            //string DirectoryPickerViewModel.PrimaryDirectory = DirectoryPickerViewModel.PrimaryDirectory;
+            /// set this once per search maybe
+            ///string DirectoryPickerViewModel.PrimaryDirectory = DirectoryPickerViewModel.PrimaryDirectory;
             string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[pathChildPosition]).Text;
             if (!showBasePaths)
                 path = DirectoryPickerViewModel.PrimaryDirectory + path;
@@ -197,95 +251,41 @@ namespace FileDuplicateFinder.ViewModel {
             }
         }
 
-        public DelegateCommand<object> EmptyDirectoriesPrimaryRemoveFileCommand { get; private set; }
-        public void EmptyDirectoriesPrimaryRemoveFile(object sender) {
+        ///check which methods can be private in this class
+        public void RemoveFileTemplate(object sender, string directory, Action<string> action) {
             string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[pathChildPosition]).Text;
-            RemoveFile(path, DirectoryPickerViewModel.PrimaryDirectory);
-            FileManager.EmptyDirectoriesPrimaryIgnoreFile(path);
+            RemoveFile(path, directory);
+            action(path);
         }
 
-        public DelegateCommand<object> EmptyDirectoriesPrimaryIgnoreFileCommand { get; private set; }
-        public void EmptyDirectoriesPrimaryIgnoreFile(object sender) {
+        public void IgnoreFileTemplate(object sender, Action<string> action) {
             string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[pathChildPosition]).Text;
-            FileManager.EmptyDirectoriesPrimaryIgnoreFile(path);
+            action(path);
         }
 
-        public DelegateCommand<object> EmptyFilesPrimaryRemoveFileCommand { get; private set; }
-        public void EmptyFilesPrimaryRemoveFile(object sender) {
-            string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[pathChildPosition]).Text;
-            RemoveFile(path, DirectoryPickerViewModel.PrimaryDirectory);
-            FileManager.EmptyFilesPrimaryIgnoreFile(path);
+        public delegate void RemoveAllAction(string baseDirectory = "");
+
+        public void RemoveAllTemplate(string directory, RemoveAllAction action) {
+            if (MessageBox.Show("Are you sure you want to delete all files from " + directory + "? Backup files will not be stored.", "Warning", MessageBoxButton.YesNo) == MessageBoxResult.No)
+                return;
+            InitRemoveAllProgress("Removing files...");
+            /// temporary solution
+            MainWindowViewModel.LockGUI();
+            new Thread(() => {
+                if (ShowBasePaths)
+                    action();
+                else
+                    action(directory);
+                Utility.BeginInvoke(() => {
+                    FinishProgress("Done");
+                    /// temporary solution
+                    MainWindowViewModel.UnlockGUI();
+                });
+            }).Start();
         }
 
-        public DelegateCommand<object> EmptyFilesPrimaryIgnoreFileCommand { get; private set; }
-        public void EmptyFilesPrimaryIgnoreFile(object sender) {
-            string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[pathChildPosition]).Text;
-            FileManager.EmptyFilesPrimaryIgnoreFile(path);
-        }
-
-        public DelegateCommand<object> EmptyDirectoriesSecondaryRemoveFileCommand { get; private set; }
-        public void EmptyDirectoriesSecondaryRemoveFile(object sender) {
-            string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[pathChildPosition]).Text;
-            RemoveFile(path, DirectoryPickerViewModel.SecondaryDirectory);
-            FileManager.EmptyDirectoriesSecondaryIgnoreFile(path);
-        }
-
-        public DelegateCommand<object> EmptyDirectoriesSecondaryIgnoreFileCommand { get; private set; }
-        public void EmptyDirectoriesSecondaryIgnoreFile(object sender) {
-            string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[pathChildPosition]).Text;
-            FileManager.EmptyDirectoriesSecondaryIgnoreFile(path);
-        }
-
-        public DelegateCommand<object> EmptyFilesSecondaryRemoveFileCommand { get; private set; }
-        public void EmptyFilesSecondaryRemoveFile(object sender) {
-            string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[pathChildPosition]).Text;
-            RemoveFile(path, DirectoryPickerViewModel.SecondaryDirectory);
-            FileManager.EmptyFilesSecondaryIgnoreFile(path);
-        }
-
-        public DelegateCommand<object> EmptyFilesSecondaryIgnoreFileCommand { get; private set; }
-        public void EmptyFilesSecondaryIgnoreFile(object sender) {
-            string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[pathChildPosition]).Text;
-            FileManager.EmptyFilesSecondaryIgnoreFile(path);
-        }
-
-        public DelegateCommand<object> DuplicatedFilesPrimaryRemoveFileCommand { get; private set; }
-        public void DuplicatedFilesPrimaryRemoveFile(object sender) {
-            string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[pathChildPosition]).Text;
-            RemoveFile(path, DirectoryPickerViewModel.PrimaryDirectory);
-            FileManager.DuplicatedFilesPrimaryIgnoreFile(path);
-        }
-
-        public DelegateCommand<object> DuplicatedFilesPrimaryIgnoreFileCommand { get; private set; }
-        public void DuplicatedFilesPrimaryIgnoreFile(object sender) {
-            string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[pathChildPosition]).Text;
-            FileManager.DuplicatedFilesPrimaryIgnoreFile(path);
-        }
-
-        public DelegateCommand<object> DuplicatedFilesSecondaryRemoveFileCommand { get; private set; }
-        public void DuplicatedFilesSecondaryRemoveFile(object sender) {
-            string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[pathChildPosition]).Text;
-            RemoveFile(path, DirectoryPickerViewModel.SecondaryDirectory);
-            FileManager.DuplicatedFilesSecondaryIgnoreFile(path);
-        }
-
-        public DelegateCommand<object> DuplicatedFilesSecondaryIgnoreFileCommand { get; private set; }
-        public void DuplicatedFilesSecondaryIgnoreFile(object sender) {
-            string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[pathChildPosition]).Text;
-            FileManager.DuplicatedFilesSecondaryIgnoreFile(path);
-        }
-
-        public DelegateCommand<object> DuplicatedFilesPrimaryOnlyRemoveFileCommand { get; private set; }
-        public void DuplicatedFilesPrimaryOnlyRemoveFile(object sender) {
-            string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[pathChildPosition]).Text;
-            RemoveFile(path, DirectoryPickerViewModel.PrimaryDirectory);
-            FileManager.DuplicatedFilesPrimaryOnlyIgnoreFile(path);
-        }
-
-        public DelegateCommand<object> DuplicatedFilesPrimaryOnlyIgnoreFileCommand { get; private set; }
-        public void DuplicatedFilesPrimaryOnlyIgnoreFile(object sender) {
-            string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[pathChildPosition]).Text;
-            FileManager.DuplicatedFilesPrimaryOnlyIgnoreFile(path);
+        public void StopTask() {
+            stopTask = true;
         }
 
         private void RemoveFile(string path, string baseDirectory) {
@@ -293,128 +293,6 @@ namespace FileDuplicateFinder.ViewModel {
             MainWindowViewModel.RemoveFile(path, baseDirectory);
         }
 
-
-
-        public DelegateCommand<object> RemoveAllEmptyDirectoriesPrimaryCommand { get; private set; }
-        public void RemoveAllEmptyDirectoriesPrimary(object obj) {
-            if (MessageBox.Show("Are you sure you want to delete all files from " + DirectoryPickerViewModel.PrimaryDirectory + "? Backup files will not be stored.", "Warning", MessageBoxButton.YesNo) == MessageBoxResult.No)
-                return;
-            InitRemoveAllProgress("Removing files...");
-            /// temporary solution
-            MainWindowViewModel.LockGUI();
-            new Thread(() => {
-                if (showBasePaths)
-                    FileManager.RemoveAllEmptyDirectoriesPrimary();
-                else
-                    FileManager.RemoveAllEmptyDirectoriesPrimary(DirectoryPickerViewModel.PrimaryDirectory);
-                Utility.BeginInvoke(() => {
-                    FinishProgress("Done");
-                    /// temporary solution
-                    MainWindowViewModel.UnlockGUI();
-                });
-            }).Start();
-        }
-
-        public DelegateCommand<object> RemoveAllEmptyDirectoriesSecondaryCommand { get; private set; }
-        public void RemoveAllEmptyDirectoriesSecondary(object obj) {
-            if (MessageBox.Show("Are you sure you want to delete all files from " + DirectoryPickerViewModel.SecondaryDirectory + "? Backup files will not be stored.", "Warning", MessageBoxButton.YesNo) == MessageBoxResult.No)
-                return;
-            InitRemoveAllProgress("Removing files...");
-            /// temporary solution
-            MainWindowViewModel.LockGUI();
-            new Thread(() => {
-                if (showBasePaths)
-                    FileManager.RemoveAllEmptyDirectoriesSecondary();
-                else
-                    FileManager.RemoveAllEmptyDirectoriesSecondary(DirectoryPickerViewModel.SecondaryDirectory);
-                Utility.BeginInvoke(() => {
-                    FinishProgress("Done");
-                    /// temporary solution
-                    MainWindowViewModel.UnlockGUI();
-                });
-            }).Start();
-        }
-
-        public DelegateCommand<object> RemoveAllEmptyFilesPrimaryCommand { get; private set; }
-        public void RemoveAllEmptyFilesPrimary(object obj) {
-            if (MessageBox.Show("Are you sure you want to delete all files from " + DirectoryPickerViewModel.PrimaryDirectory + "? Backup files will not be stored.", "Warning", MessageBoxButton.YesNo) == MessageBoxResult.No)
-                return;
-            InitRemoveAllProgress("Removing files...");
-            /// temporary solution
-            MainWindowViewModel.LockGUI();
-            StatusBarViewModel.State = "Removing files...";
-            new Thread(() => {
-                if (showBasePaths)
-                    FileManager.RemoveAllEmptyFilesPrimary();
-                else
-                    FileManager.RemoveAllEmptyFilesPrimary(DirectoryPickerViewModel.PrimaryDirectory);
-                Utility.BeginInvoke(() => {
-                    FinishProgress("Done");
-                    /// temporary solution
-                    MainWindowViewModel.UnlockGUI();
-                });
-            }).Start();
-        }
-
-        public DelegateCommand<object> RemoveAllEmptyFilesSecondaryCommand { get; private set; }
-        public void RemoveAllEmptyFilesSecondary(object obj) {
-            if (MessageBox.Show("Are you sure you want to delete all files from " + DirectoryPickerViewModel.SecondaryDirectory + "? Backup files will not be stored.", "Warning", MessageBoxButton.YesNo) == MessageBoxResult.No)
-                return;
-            InitRemoveAllProgress("Removing files...");
-            /// temporary solution
-            MainWindowViewModel.LockGUI();
-            new Thread(() => {
-                if (showBasePaths)
-                    FileManager.RemoveAllEmptyFilesSecondary();
-                else
-                    FileManager.RemoveAllEmptyFilesSecondary(DirectoryPickerViewModel.SecondaryDirectory);
-                Utility.BeginInvoke(() => {
-                    FinishProgress("Done");
-                    /// temporary solution
-                    MainWindowViewModel.UnlockGUI();
-                });
-            }).Start();
-        }
-
-        public DelegateCommand<object> RemoveAllPrimaryCommand { get; private set; }
-        public void RemoveAllPrimary(object obj) {
-            if (MessageBox.Show("Are you sure you want to delete all files from " + DirectoryPickerViewModel.PrimaryDirectory + "? Backup files will not be stored.", "Warning", MessageBoxButton.YesNo) == MessageBoxResult.No)
-                return;
-            InitRemoveAllProgress("Removing files...");
-            /// temporary solution
-            MainWindowViewModel.LockGUI();
-            new Thread(() => {
-                if (showBasePaths)
-                    FileManager.RemoveAllPrimary();
-                else
-                    FileManager.RemoveAllPrimary(DirectoryPickerViewModel.PrimaryDirectory);
-                Utility.BeginInvoke(() => {
-                    FinishProgress("Done");
-                    /// temporary solution
-                    MainWindowViewModel.UnlockGUI();
-                });
-            }).Start();
-        }
-
-        public DelegateCommand<object> RemoveAllSecondaryCommand { get; private set; }
-        public void RemoveAllSecondary(object obj) {
-            if (MessageBox.Show("Are you sure you want to delete all files from " + DirectoryPickerViewModel.SecondaryDirectory + "? Backup files will not be stored.", "Warning", MessageBoxButton.YesNo) == MessageBoxResult.No)
-                return;
-            InitRemoveAllProgress("Removing files...");
-            /// temporary solution
-            MainWindowViewModel.LockGUI();
-            new Thread(() => {
-                if (showBasePaths)
-                    FileManager.RemoveAllSecondary();
-                else
-                    FileManager.RemoveAllSecondary(DirectoryPickerViewModel.SecondaryDirectory);
-                Utility.BeginInvoke(() => {
-                    FinishProgress("Done");
-                    /// temporary solution
-                    MainWindowViewModel.UnlockGUI();
-                });
-            }).Start();
-        }
 
         private void InitRemoveAllProgress(string state) {
             StatusBarViewModel.Progress = 0;
@@ -432,44 +310,6 @@ namespace FileDuplicateFinder.ViewModel {
             }
             else
                 StatusBarViewModel.State = state;
-        }
-
-        public void StopTask() {
-            stopTask = true;
-        }
-
-
-        public DelegateCommand<object> SortAlphabeticallyCommand { get; private set; }
-        public void SortAlphabetically(object obj) {
-            MainWindowViewModel.SortBySize = false;
-            FileManager.SortAlphabetically();
-        }
-
-        public DelegateCommand<object> SortBySizeCommand { get; private set; }
-        public void SortBySize(object obj) {
-            ///
-            MainWindowViewModel.SortBySize = true;
-            if (showBasePaths)
-                FileManager.SortBySize();
-            else
-                FileManager.SortBySize(DirectoryPickerViewModel.PrimaryDirectory);
-        }
-
-        public DelegateCommand<object> SortAlphabeticallyPrimaryOnlyCommand { get; private set; }
-        public void SortAlphabeticallyPrimaryOnly(object obj) {
-            ///
-            MainWindowViewModel.SortBySizePrimaryOnly = false;
-            FileManager.SortAlphabeticallyPrimaryOnly();
-        }
-
-        public DelegateCommand<object> SortBySizePrimaryOnlyCommand { get; private set; }
-        public void SortBySizePrimaryOnly(object obj) {
-            ///
-            MainWindowViewModel.SortBySizePrimaryOnly = true;
-            if (showBasePaths)
-                FileManager.SortBySizePrimaryOnly();
-            else
-                FileManager.SortBySizePrimaryOnly(DirectoryPickerViewModel.PrimaryDirectory);
         }
     }
 }

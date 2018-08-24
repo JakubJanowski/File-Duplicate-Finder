@@ -165,8 +165,7 @@ namespace FileDuplicateFinder.ViewModel {
 
         private void FindDuplicatedFilesInPrimaryOnly() {
             bool error = false;
-            // chk empty or null string please specify directory to search in
-            primaryDirectory = Utility.NormalizePath(primaryDirectory);
+            //// chk empty or null string please specify directory to search in
 
             try {
                 Directory.GetAccessControl(primaryDirectory);
@@ -204,8 +203,7 @@ namespace FileDuplicateFinder.ViewModel {
 
         private void FindDuplicatedFilesInBoth() {
             bool error = false;
-            primaryDirectory = Utility.NormalizePath(primaryDirectory);
-            secondaryDirectory = Utility.NormalizePath(secondaryDirectory);
+
             if (primaryDirectory.ToUpperInvariant() == secondaryDirectory.ToUpperInvariant()) {
                 error = true;
                 Utility.LogFromNonGUIThread("Primary and secondary directories must be different.");

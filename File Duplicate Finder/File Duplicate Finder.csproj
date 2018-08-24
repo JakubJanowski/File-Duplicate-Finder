@@ -172,12 +172,36 @@
     <Compile Include="ViewModel\DirectoryPickerViewModel.cs" />
     <Compile Include="ViewModel\MainTabControlViewModel.cs" />
     <Compile Include="ViewModel\MainWindowViewModel.cs" />
+    <Compile Include="ViewModel\Tabs\DuplicatedFilesTabViewModel.cs" />
+    <Compile Include="ViewModel\Tabs\PrimaryOnlyDuplicatedFilesTabViewModel.cs" />
+    <Compile Include="ViewModel\Tabs\EmptyFilesTabControlViewModel.cs" />
+    <Compile Include="ViewModel\Tabs\EmptyDirectoriesTabControlViewModel.cs" />
+    <Compile Include="ViewModel\Tabs\PrimaryOnlyEmptyFilesTabViewModel.cs" />
+    <Compile Include="ViewModel\Tabs\PrimaryOnlyEmptyDirectoriesTabViewModel.cs" />
     <Compile Include="ViewModel\StatusBarViewModel.cs" />
     <Compile Include="View\DirectoryPickerView.xaml.cs">
       <DependentUpon>DirectoryPickerView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="View\Tabs\DuplicatedFilesTabView.xaml.cs">
+      <DependentUpon>DuplicatedFilesTabView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Tabs\PrimaryOnlyDuplicatedFilesTabView.xaml.cs">
+      <DependentUpon>PrimaryOnlyDuplicatedFilesTabView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="View\MainTabControlView.xaml.cs">
       <DependentUpon>MainTabControlView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Tabs\EmptyFilesTabControlView.xaml.cs">
+      <DependentUpon>EmptyFilesTabControlView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Tabs\EmptyDirectoriesTabControlView.xaml.cs">
+      <DependentUpon>EmptyDirectoriesTabControlView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Tabs\PrimaryOnlyEmptyFilesTabView.xaml.cs">
+      <DependentUpon>PrimaryOnlyEmptyFilesTabView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Tabs\PrimaryOnlyEmptyDirectoriesTabView.xaml.cs">
+      <DependentUpon>PrimaryOnlyEmptyDirectoriesTabView.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\StatusBarView.xaml.cs">
       <DependentUpon>StatusBarView.xaml</DependentUpon>
@@ -202,7 +226,31 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="View\Tabs\DuplicatedFilesTabView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="View\Tabs\PrimaryOnlyDuplicatedFilesTabView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="View\MainTabControlView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Tabs\EmptyFilesTabControlView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="View\Tabs\EmptyDirectoriesTabControlView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="View\Tabs\PrimaryOnlyEmptyFilesTabView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="View\Tabs\PrimaryOnlyEmptyDirectoriesTabView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

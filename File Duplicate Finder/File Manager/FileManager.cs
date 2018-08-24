@@ -11,6 +11,8 @@ using System.Windows.Threading;
 
 namespace FileDuplicateFinder {
     using FileEntryCollection = ObservableRangeCollection<FileEntry>;
+    using TupleOfFileEntryCollections = Tuple<ObservableRangeCollection<FileEntry>, ObservableRangeCollection<FileEntry>>;
+
     internal static class FileManager {
         public static string tmpDirectory;
         private const int megaByte = 1048576;
@@ -22,7 +24,7 @@ namespace FileDuplicateFinder {
         public static List<string> primaryFiles = new List<string>();
         // holds relative path to all files in secondary directory
         public static List<string> secondaryFiles = new List<string>();
-        public static ObservableSortableCollection<Tuple<FileEntryCollection, FileEntryCollection>> duplicatedFiles = new ObservableSortableCollection<Tuple<FileEntryCollection, FileEntryCollection>>();
+        public static ObservableSortableCollection<TupleOfFileEntryCollections> duplicatedFiles = new ObservableSortableCollection<TupleOfFileEntryCollections>();
         public static ObservableSortableCollection<FileEntryCollection> duplicatedFilesPrimaryOnly = new ObservableSortableCollection<FileEntryCollection>();
         public static Dictionary<int, int> duplicateIndexingPrimary = new Dictionary<int, int>();
         public static Dictionary<int, int> duplicateIndexingSecondary = new Dictionary<int, int>();
@@ -30,11 +32,23 @@ namespace FileDuplicateFinder {
         public static FileEntryCollection emptyDirectoriesSecondary = new FileEntryCollection();
         public static FileEntryCollection emptyFilesPrimary = new FileEntryCollection();
         public static FileEntryCollection emptyFilesSecondary = new FileEntryCollection();
-        // should I make storedFiles list ObservableRangeCollection in RestoreFileDialog class too?
+        /// should I make storedFiles list ObservableRangeCollection in RestoreFileDialog class too?
         public static ObservableRangeCollection<Tuple<string, string>> storedFiles = new ObservableRangeCollection<Tuple<string, string>>();
 
         internal static StatusBarViewModel statusBarViewModel;
         internal static Dispatcher dispatcher;
+
+        static FileManager() {
+            ///this or stick to refresh and no use for observable
+            BindingOperations.EnableCollectionSynchronization(emptyDirectoriesPrimary, new object ()); /// store objects
+            BindingOperations.EnableCollectionSynchronization(emptyFilesPrimary, new object ());
+            BindingOperations.EnableCollectionSynchronization(emptyDirectoriesSecondary, new object ());
+            BindingOperations.EnableCollectionSynchronization(emptyFilesSecondary, new object ());
+            BindingOperations.EnableCollectionSynchronization(duplicatedFiles, new object ());
+            BindingOperations.EnableCollectionSynchronization(emptyDirectoriesPrimary, new object ());
+            BindingOperations.EnableCollectionSynchronization(emptyFilesPrimary, new object ());
+            BindingOperations.EnableCollectionSynchronization(duplicatedFilesPrimaryOnly, new object ());
+        }
 
         public static void StopTask() {
             stopTask = true;

@@ -25,7 +25,7 @@ namespace FileDuplicateFinder.ViewModel {
             set {
                 if (primaryOnly != value) {
                     primaryOnly = value;
-                    // later change this in settingsVM and use it from settings in MainTabControlViewModel
+                    /// later change this in settingsVM and use it from settings in MainTabControlViewModel
                     MainTabControlViewModel.PrimaryOnly = value;
                     StatusBarViewModel.State = "Ready";
                     OnPropertyChanged("PrimaryOnly");
@@ -37,7 +37,7 @@ namespace FileDuplicateFinder.ViewModel {
             get => primaryDirectory;
             set {
                 if (primaryDirectory != value) {
-                    primaryDirectory = value;
+                    primaryDirectory = Utility.NormalizePath(value);
                     StatusBarViewModel.State = "Ready";
                     OnPropertyChanged("PrimaryDirectory");
                 }
@@ -48,7 +48,7 @@ namespace FileDuplicateFinder.ViewModel {
             get => secondaryDirectory;
             set {
                 if (secondaryDirectory != value) {
-                    secondaryDirectory = value;
+                    secondaryDirectory = Utility.NormalizePath(value);
                     StatusBarViewModel.State = "Ready";
                     OnPropertyChanged("SecondaryDirectory");
                 }
