@@ -1,4 +1,6 @@
-﻿using Prism.Commands;
+﻿using FileDuplicateFinder.Models;
+using Prism.Commands;
+using System;
 
 namespace FileDuplicateFinder.ViewModel {
     class PrimaryOnlyDuplicatedFilesTabViewModel: ObjectBase {
@@ -6,6 +8,7 @@ namespace FileDuplicateFinder.ViewModel {
         private bool showBasePaths = false;
 
         private MainTabControlViewModel mainTabControlViewModel;
+        private readonly ApplicationState state;
 
         internal MainTabControlViewModel MainTabControlViewModel {
             private get => mainTabControlViewModel;
@@ -18,7 +21,8 @@ namespace FileDuplicateFinder.ViewModel {
         internal DirectoryPickerViewModel DirectoryPickerViewModel { private get; set; }
         internal MainWindowViewModel MainWindowViewModel { private get; set; }
 
-        public PrimaryOnlyDuplicatedFilesTabViewModel() {
+        public PrimaryOnlyDuplicatedFilesTabViewModel(ApplicationState state) {
+            this.state = state;
             DuplicatedFilesPrimaryOnlyRemoveFileCommand = new DelegateCommand<object>(DuplicatedFilesPrimaryOnlyRemoveFile);
             DuplicatedFilesPrimaryOnlyIgnoreFileCommand = new DelegateCommand<object>(DuplicatedFilesPrimaryOnlyIgnoreFile);
             SortAlphabeticallyPrimaryOnlyCommand = new DelegateCommand<object>(SortAlphabeticallyPrimaryOnly);
@@ -45,7 +49,7 @@ namespace FileDuplicateFinder.ViewModel {
         }
 
         public DelegateCommand<object> OpenFileDirectoryPrimaryCommand { get; private set; }
-        
+
         public DelegateCommand<object> DuplicatedFilesPrimaryOnlyRemoveFileCommand { get; private set; }
         public void DuplicatedFilesPrimaryOnlyRemoveFile(object sender) {
             MainTabControlViewModel.RemoveFileTemplate(sender, DirectoryPickerViewModel.PrimaryDirectory, FileManager.DuplicatedFilesPrimaryOnlyIgnoreFile);

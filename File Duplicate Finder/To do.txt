@@ -25,8 +25,11 @@
 	ask when deleting large files without backup misguides when pressing remove all button always asks for confirmation (besides it being a different feature)
 	put LockGUI function in Utilities
 	inconsistent normalize path when given: D:\ the paths in results don't start with \, but when a path like D:\Something\ is given the last \ is truncated and results start with \
+	Only the “parent” view has a reference to the view model, other views are not allowed to access another view’s view model (except unit test classes).
 
  Features:
+	group files together if whole folders contain the same content and mark it somehow
+	setting to match only files with the same names and/or content  + it could be marked somehow when not checked and eg. files will be grouped in the same folder but with different names
 	recognize identical subpath
 	show file size checkbox
 	show number of results or some other statistics
@@ -38,10 +41,12 @@
 	show estimated reamining time m minutes, s seconds remaining
 	let user choose between size unit B, KiB, Mib... or B, kB, MB
 	add searchbar for filename
+	 search by directory tree visual structure
 	add setting for recursive search (default on)
 	add settings column animate sliding it on top of everything from the right after clicking on gear icon
 	Use some theme
 	clear log button
+	sort buttons above columns with path and size instead of radiobuttons
 
  Optimise:
 	Show full path only for displayed not for every file 

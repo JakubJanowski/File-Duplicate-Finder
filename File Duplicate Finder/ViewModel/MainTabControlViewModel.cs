@@ -6,6 +6,7 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using FileDuplicateFinder.Models;
 using Prism.Commands;
 
 namespace FileDuplicateFinder.ViewModel {
@@ -13,9 +14,9 @@ namespace FileDuplicateFinder.ViewModel {
         private const int pathChildPosition = 1;
         private volatile bool stopTask = false;
 
-        private bool isGUIEnabled = true;
         private bool primaryOnly = false;
         private bool showBasePaths = false;
+        private ApplicationState state;
 
         private DirectoryPickerViewModel directoryPickerViewModel;
         private MainWindowViewModel mainWindowViewModel;
@@ -40,49 +41,58 @@ namespace FileDuplicateFinder.ViewModel {
             }
         }
 
-        internal DuplicatedFilesTabViewModel DuplicatedFilesTabViewModel {
-            private get => duplicatedFilesTabViewModel;
-            set {
+        internal void OnUpdateGUIEnabled() {
+            DuplicatedFilesTabViewModel.OnUpdateGUIEnabled();
+            EmptyDirectoriesTabControlViewModel.OnUpdateGUIEnabled();
+            EmptyFilesTabControlViewModel.OnUpdateGUIEnabled();
+            PrimaryOnlyEmptyDirectoriesTabViewModel.OnUpdateGUIEnabled();
+            PrimaryOnlyEmptyFilesTabViewModel.OnUpdateGUIEnabled();
+            OnPropertyChanged("IsGUIEnabled");
+        }
+
+        public DuplicatedFilesTabViewModel DuplicatedFilesTabViewModel {
+            get => duplicatedFilesTabViewModel;
+            private set {
                 duplicatedFilesTabViewModel = value;
                 value.MainTabControlViewModel = this;
             }
         }
 
-        internal EmptyDirectoriesTabControlViewModel EmptyDirectoriesTabControlViewModel {
-            private get => emptyDirectoriesTabControlViewModel;
-            set {
+        public EmptyDirectoriesTabControlViewModel EmptyDirectoriesTabControlViewModel {
+            get => emptyDirectoriesTabControlViewModel;
+            private set {
                 emptyDirectoriesTabControlViewModel = value;
                 value.MainTabControlViewModel = this;
             }
         }
 
-        internal EmptyFilesTabControlViewModel EmptyFilesTabControlViewModel {
-            private get => emptyFilesTabControlViewModel;
-            set {
+        public EmptyFilesTabControlViewModel EmptyFilesTabControlViewModel {
+            get => emptyFilesTabControlViewModel;
+            private set {
                 emptyFilesTabControlViewModel = value;
                 value.MainTabControlViewModel = this;
             }
         }
 
-        internal PrimaryOnlyDuplicatedFilesTabViewModel PrimaryOnlyDuplicatedFilesTabViewModel {
-            private get => primaryOnlyDuplicatedFilesTabViewModel;
-            set {
+        public PrimaryOnlyDuplicatedFilesTabViewModel PrimaryOnlyDuplicatedFilesTabViewModel {
+            get => primaryOnlyDuplicatedFilesTabViewModel;
+            private set {
                 primaryOnlyDuplicatedFilesTabViewModel = value;
                 value.MainTabControlViewModel = this;
             }
         }
 
-        internal PrimaryOnlyEmptyDirectoriesTabViewModel PrimaryOnlyEmptyDirectoriesTabViewModel {
-            private get => primaryOnlyEmptyDirectoriesTabViewModel;
-            set {
+        public PrimaryOnlyEmptyDirectoriesTabViewModel PrimaryOnlyEmptyDirectoriesTabViewModel {
+            get => primaryOnlyEmptyDirectoriesTabViewModel;
+            private set {
                 primaryOnlyEmptyDirectoriesTabViewModel = value;
                 value.MainTabControlViewModel = this;
             }
         }
 
-        internal PrimaryOnlyEmptyFilesTabViewModel PrimaryOnlyEmptyFilesTabViewModel {
-            private get => primaryOnlyEmptyFilesTabViewModel;
-            set {
+        public PrimaryOnlyEmptyFilesTabViewModel PrimaryOnlyEmptyFilesTabViewModel {
+            get => primaryOnlyEmptyFilesTabViewModel;
+            private set {
                 primaryOnlyEmptyFilesTabViewModel = value;
                 value.MainTabControlViewModel = this;
             }
@@ -98,21 +108,10 @@ namespace FileDuplicateFinder.ViewModel {
         }
         internal StatusBarViewModel StatusBarViewModel { private get; set; }
 
-        public MainTabControlViewModel() {}
+
 
         public bool IsGUIEnabled {
-            get => isGUIEnabled;
-            set {
-                if (isGUIEnabled != value) {
-                    isGUIEnabled = value;
-                    DuplicatedFilesTabViewModel.IsGUIEnabled = value;
-                    EmptyDirectoriesTabControlViewModel.IsGUIEnabled = value;
-                    EmptyFilesTabControlViewModel.IsGUIEnabled = value;
-                    PrimaryOnlyEmptyDirectoriesTabViewModel.IsGUIEnabled = value;
-                    PrimaryOnlyEmptyFilesTabViewModel.IsGUIEnabled = value;
-                    OnPropertyChanged("IsGUIEnabled");
-                }
-            }
+            get => state.IsGUIEnabled;
         }
 
         public bool PrimaryOnly {
@@ -137,13 +136,16 @@ namespace FileDuplicateFinder.ViewModel {
             }
         }
 
-        internal void LockGUI() {
-            IsGUIEnabled = false;
+        public MainTabControlViewModel(ApplicationState state) {
+            this.state = state;
+            DuplicatedFilesTabViewModel = new DuplicatedFilesTabViewModel(state);
+            EmptyDirectoriesTabControlViewModel = new EmptyDirectoriesTabControlViewModel(state);
+            EmptyFilesTabControlViewModel = new EmptyFilesTabControlViewModel(state);
+            PrimaryOnlyDuplicatedFilesTabViewModel = new PrimaryOnlyDuplicatedFilesTabViewModel(state);
+            PrimaryOnlyEmptyDirectoriesTabViewModel = new PrimaryOnlyEmptyDirectoriesTabViewModel(state);
+            PrimaryOnlyEmptyFilesTabViewModel = new PrimaryOnlyEmptyFilesTabViewModel(state);
         }
 
-        internal void UnlockGUI() {
-            IsGUIEnabled = true;
-        }
 
         public void ShowButtons(object sender) {
             Border border = sender as Border;
@@ -172,8 +174,7 @@ namespace FileDuplicateFinder.ViewModel {
                 path = DirectoryPickerViewModel.PrimaryDirectory + path;
             try {
                 Process.Start(path);
-            }
-            catch (Win32Exception) {
+            } catch (Win32Exception) {
                 FileManager.emptyDirectoriesPrimary.Remove(((TextBlock)((Grid)((Button)sender).Parent).Children[pathChildPosition]).Text);
                 Utility.Log("Directory \"" + path + "\" no longer exists.");
             }
@@ -186,14 +187,14 @@ namespace FileDuplicateFinder.ViewModel {
                 path = DirectoryPickerViewModel.SecondaryDirectory + path;
             try {
                 Process.Start(path);
-            }
-            catch (Win32Exception) {
+            } catch (Win32Exception) {
                 FileManager.emptyDirectoriesSecondary.Remove(((TextBlock)((Grid)((Button)sender).Parent).Children[pathChildPosition]).Text);
                 Utility.Log("Directory \"" + path + "\" no longer exists.");
             }
         }
 
         public DelegateCommand<object> OpenFileDirectoryPrimaryCommand { get; private set; }
+
         public void OpenFileDirectoryPrimary(object sender) {
             string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[pathChildPosition]).Text;
             if (!showBasePaths)
@@ -221,7 +222,8 @@ namespace FileDuplicateFinder.ViewModel {
                             break;
                         }
                     }
-                    OpenFileDirectoryPrimaryFound:;
+                    OpenFileDirectoryPrimaryFound:
+                    ;
                 }
                 Utility.Log("File \"" + path + "\" no longer exists.");
             }
@@ -269,7 +271,7 @@ namespace FileDuplicateFinder.ViewModel {
             if (MessageBox.Show("Are you sure you want to delete all files from " + directory + "? Backup files will not be stored.", "Warning", MessageBoxButton.YesNo) == MessageBoxResult.No)
                 return;
             InitRemoveAllProgress("Removing files...");
-            /// temporary solution
+            /// temporary solution use parent.lockgui
             MainWindowViewModel.LockGUI();
             new Thread(() => {
                 if (ShowBasePaths)
@@ -293,7 +295,6 @@ namespace FileDuplicateFinder.ViewModel {
             MainWindowViewModel.RemoveFile(path, baseDirectory);
         }
 
-
         private void InitRemoveAllProgress(string state) {
             StatusBarViewModel.Progress = 0;
             StatusBarViewModel.State = state;
@@ -307,8 +308,7 @@ namespace FileDuplicateFinder.ViewModel {
             if (stopTask) {
                 stopTask = false;
                 StatusBarViewModel.State = "Stopped";
-            }
-            else
+            } else
                 StatusBarViewModel.State = state;
         }
     }

@@ -1,4 +1,6 @@
-﻿using Prism.Commands;
+﻿using FileDuplicateFinder.Models;
+using Prism.Commands;
+using System;
 
 namespace FileDuplicateFinder.ViewModel {
     class DuplicatedFilesTabViewModel: ObjectBase {
@@ -20,7 +22,10 @@ namespace FileDuplicateFinder.ViewModel {
         internal DirectoryPickerViewModel DirectoryPickerViewModel { private get; set; }
         internal MainWindowViewModel MainWindowViewModel { private get; set; }
 
-        public DuplicatedFilesTabViewModel() {
+        private ApplicationState state;
+
+        public DuplicatedFilesTabViewModel(ApplicationState state) {
+            this.state = state;
             DuplicatedFilesPrimaryRemoveFileCommand = new DelegateCommand<object>(DuplicatedFilesPrimaryRemoveFile);
             DuplicatedFilesPrimaryIgnoreFileCommand = new DelegateCommand<object>(DuplicatedFilesPrimaryIgnoreFile);
             DuplicatedFilesSecondaryRemoveFileCommand = new DelegateCommand<object>(DuplicatedFilesSecondaryRemoveFile);
@@ -42,14 +47,10 @@ namespace FileDuplicateFinder.ViewModel {
             }
         }
 
+        internal void OnUpdateGUIEnabled() => OnPropertyChanged("IsGUIEnabled");
+
         public bool IsGUIEnabled {
-            get => isGUIEnabled;
-            set {
-                if (isGUIEnabled != value) {
-                    isGUIEnabled = value;
-                    OnPropertyChanged("IsGUIEnabled");
-                }
-            }
+            get => state.IsGUIEnabled;
         }
 
         public void ShowButtons(object sender) {

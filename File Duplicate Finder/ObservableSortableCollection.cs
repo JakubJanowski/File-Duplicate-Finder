@@ -1,7 +1,6 @@
 ﻿namespace System.Collections.ObjectModel {
     using System.Collections.Generic;
     using System.Collections.Specialized;
-    using System.ComponentModel;
     using System.Linq;
 
     public enum SortDirection { Ascending, Descending }
@@ -15,7 +14,8 @@
 
         protected override void OnCollectionChanged(NotifyCollectionChangedEventArgs e) {
             base.OnCollectionChanged(e);
-            if (reordering) return;
+            if (reordering)
+                return;
             switch (e.Action) {
                 case NotifyCollectionChangedAction.Remove:
                 case NotifyCollectionChangedAction.Reset:

@@ -73,6 +73,10 @@
 
         #region Public Methods
 
+        public void Refresh() {
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+        }
+
         public int FindIndex(Predicate<T> match) {
             for (int i = 0; i < Count; i++)
                 if (match(Items[i]))

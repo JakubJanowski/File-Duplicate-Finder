@@ -7,5 +7,7 @@ namespace FileDuplicateFinder {
         protected internal void OnPropertyChanged(string propertyName) {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
+
+        //public abstract void Initialize();
     }
 }

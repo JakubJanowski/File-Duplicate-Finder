@@ -1,11 +1,11 @@
-﻿using Prism.Commands;
+﻿using FileDuplicateFinder.Models;
+using Prism.Commands;
+using System;
 
 namespace FileDuplicateFinder.ViewModel {
     class PrimaryOnlyEmptyDirectoriesTabViewModel: ObjectBase {
-        private const int pathChildPosition = 1;
-        private bool isGUIEnabled = true;
-
         private MainTabControlViewModel mainTabControlViewModel;
+        private readonly ApplicationState state;
 
         internal MainTabControlViewModel MainTabControlViewModel {
             private get => mainTabControlViewModel;
@@ -17,20 +17,15 @@ namespace FileDuplicateFinder.ViewModel {
 
         internal DirectoryPickerViewModel DirectoryPickerViewModel { private get; set; }
 
-        public PrimaryOnlyEmptyDirectoriesTabViewModel() {
+        public PrimaryOnlyEmptyDirectoriesTabViewModel(ApplicationState state) {
+            this.state = state;
             EmptyDirectoriesPrimaryRemoveFileCommand = new DelegateCommand<object>(EmptyDirectoriesPrimaryRemoveFile);
             EmptyDirectoriesPrimaryIgnoreFileCommand = new DelegateCommand<object>(EmptyDirectoriesPrimaryIgnoreFile);
             RemoveAllEmptyDirectoriesPrimaryCommand = new DelegateCommand<object>(RemoveAllEmptyDirectoriesPrimary, (o) => IsGUIEnabled).ObservesProperty(() => IsGUIEnabled);
         }
 
         public bool IsGUIEnabled {
-            get => isGUIEnabled;
-            set {
-                if (isGUIEnabled != value) {
-                    isGUIEnabled = value;
-                    OnPropertyChanged("IsGUIEnabled");
-                }
-            }
+            get => state.IsGUIEnabled;
         }
 
         public void ShowButtons(object sender) {
@@ -52,6 +47,8 @@ namespace FileDuplicateFinder.ViewModel {
         public void EmptyDirectoriesPrimaryIgnoreFile(object sender) {
             MainTabControlViewModel.IgnoreFileTemplate(sender, FileManager.EmptyDirectoriesPrimaryIgnoreFile);
         }
+
+        internal void OnUpdateGUIEnabled() => OnPropertyChanged("IsGUIEnabled");
 
         public DelegateCommand<object> RemoveAllEmptyDirectoriesPrimaryCommand { get; private set; }
         public void RemoveAllEmptyDirectoriesPrimary(object obj) {

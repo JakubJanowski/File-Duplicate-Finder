@@ -1,4 +1,6 @@
-﻿using Prism.Commands;
+﻿using FileDuplicateFinder.Models;
+using Prism.Commands;
+using System;
 
 namespace FileDuplicateFinder.ViewModel {
     class EmptyFilesTabControlViewModel: ObjectBase {
@@ -6,6 +8,7 @@ namespace FileDuplicateFinder.ViewModel {
         private bool isGUIEnabled = true;
 
         private MainTabControlViewModel mainTabControlViewModel;
+        private readonly ApplicationState state;
 
         internal MainTabControlViewModel MainTabControlViewModel {
             private get => mainTabControlViewModel;
@@ -18,7 +21,8 @@ namespace FileDuplicateFinder.ViewModel {
 
         internal DirectoryPickerViewModel DirectoryPickerViewModel { private get; set; }
 
-        public EmptyFilesTabControlViewModel() {
+        public EmptyFilesTabControlViewModel(ApplicationState state) {
+            this.state = state;
             EmptyFilesPrimaryRemoveAllCommand = new DelegateCommand<object>(RemoveAllEmptyFilesPrimary, (o) => IsGUIEnabled).ObservesProperty(() => IsGUIEnabled);
             EmptyFilesPrimaryRemoveFileCommand = new DelegateCommand<object>(EmptyFilesPrimaryRemoveFile);
             EmptyFilesPrimaryIgnoreFileCommand = new DelegateCommand<object>(EmptyFilesPrimaryIgnoreFile);
@@ -28,13 +32,7 @@ namespace FileDuplicateFinder.ViewModel {
         }
 
         public bool IsGUIEnabled {
-            get => isGUIEnabled;
-            set {
-                if (isGUIEnabled != value) {
-                    isGUIEnabled = value;
-                    OnPropertyChanged("IsGUIEnabled");
-                }
-            }
+            get => state.IsGUIEnabled;
         }
 
         public void ShowButtons(object sender) {
@@ -46,8 +44,12 @@ namespace FileDuplicateFinder.ViewModel {
         }
 
         public DelegateCommand<object> OpenFileDirectoryPrimaryCommand { get; private set; }
+
+        internal void OnUpdateGUIEnabled() => OnPropertyChanged("IsGUIEnabled");
+
         public DelegateCommand<object> OpenFileDirectorySecondaryCommand { get; private set; }
-        
+
+
         public DelegateCommand<object> EmptyFilesPrimaryRemoveAllCommand { get; private set; }
         public void RemoveAllEmptyFilesPrimary(object obj) {
             MainTabControlViewModel.RemoveAllTemplate(DirectoryPickerViewModel.PrimaryDirectory, FileManager.RemoveAllEmptyFilesPrimary);

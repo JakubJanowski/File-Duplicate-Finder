@@ -1,23 +1,18 @@
-﻿using System;
+﻿using FileDuplicateFinder.Models;
+using System;
 
 namespace FileDuplicateFinder.ViewModel {
     class DirectoryPickerViewModel: ObjectBase {
         internal MainTabControlViewModel MainTabControlViewModel { private get; set; }
         internal StatusBarViewModel StatusBarViewModel { private get; set; }
 
-        private bool isGUIEnabled = true;
         private bool primaryOnly = false;
         private string primaryDirectory = "";
         private string secondaryDirectory = "";
+        private ApplicationState state;
 
         public bool IsGUIEnabled {
-            get => isGUIEnabled;
-            set {
-                if (isGUIEnabled != value) {
-                    isGUIEnabled = value;
-                    OnPropertyChanged("IsGUIEnabled");
-                }
-            }
+            get => state.IsGUIEnabled;
         }
 
         public bool PrimaryOnly {
@@ -44,6 +39,8 @@ namespace FileDuplicateFinder.ViewModel {
             }
         }
 
+        internal void OnUpdateGUIEnabled() => OnPropertyChanged("IsGUIEnabled");
+
         public string SecondaryDirectory {
             get => secondaryDirectory;
             set {
@@ -54,13 +51,9 @@ namespace FileDuplicateFinder.ViewModel {
                 }
             }
         }
-        
-        public void LockGUI() {
-            IsGUIEnabled = false;
-        }
 
-        public void UnlockGUI() {
-            IsGUIEnabled = true;
+        public DirectoryPickerViewModel(ApplicationState state) {
+            this.state = state;
         }
     }
 }

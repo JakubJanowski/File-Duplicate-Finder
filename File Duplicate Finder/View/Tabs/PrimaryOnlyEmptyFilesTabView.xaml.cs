@@ -3,11 +3,8 @@ using System.Windows.Controls;
 
 namespace FileDuplicateFinder.View {
     public partial class PrimaryOnlyEmptyFilesTabView: UserControl {
-        internal PrimaryOnlyEmptyFilesTabViewModel ViewModel { get; } = new PrimaryOnlyEmptyFilesTabViewModel();
-
         public PrimaryOnlyEmptyFilesTabView() {
             InitializeComponent();
-            DataContext = ViewModel;
 
             emptyFilesPrimaryOnlyListView.ItemsSource = FileManager.emptyFilesPrimary;
         }
@@ -17,11 +14,11 @@ namespace FileDuplicateFinder.View {
         }
 
         public void ShowButtons(object sender, System.Windows.Input.MouseEventArgs e) {
-            ViewModel.ShowButtons(sender);
+            (DataContext as PrimaryOnlyEmptyFilesTabViewModel).ShowButtons(sender);
         }
 
         public void HideButtons(object sender, System.Windows.Input.MouseEventArgs e) {
-            ViewModel.HideButtons(sender);
+            (DataContext as PrimaryOnlyEmptyFilesTabViewModel).HideButtons(sender);
         }
     }
 }

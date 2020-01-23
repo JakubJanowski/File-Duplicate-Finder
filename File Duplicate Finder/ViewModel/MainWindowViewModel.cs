@@ -4,13 +4,14 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using FileDuplicateFinder.Models;
 using Prism.Commands;
 
 namespace FileDuplicateFinder.ViewModel {
     class MainWindowViewModel: ObjectBase {
-        internal DirectoryPickerViewModel DirectoryPickerViewModel { private get; set; }
-        internal MainTabControlViewModel MainTabControlViewModel { private get; set; }
-        internal StatusBarViewModel StatusBarViewModel { private get; set; }
+        public DirectoryPickerViewModel DirectoryPickerViewModel { get; private set; }
+        public MainTabControlViewModel MainTabControlViewModel { get; private set; }
+        public StatusBarViewModel StatusBarViewModel { private get; set; }
 
         internal string tmpDirectory;
 
@@ -18,7 +19,7 @@ namespace FileDuplicateFinder.ViewModel {
         private string primaryDirectory;
         private string secondaryDirectory;
 
-        private bool isGUIEnabled = true;
+        private ApplicationState state = new ApplicationState();
         private bool isRestorePossible = false;
         private bool showBasePaths = false;
         private bool backupFiles = true;
@@ -29,10 +30,12 @@ namespace FileDuplicateFinder.ViewModel {
 
         /// make isGUIEnabled common model
         public bool IsGUIEnabled {
-            get => isGUIEnabled;
+            get => state.IsGUIEnabled;
             set {
-                if (isGUIEnabled != value) {
-                    isGUIEnabled = value;
+                if (state.IsGUIEnabled != value) {
+                    state.IsGUIEnabled = value;
+                    DirectoryPickerViewModel.OnUpdateGUIEnabled();
+                    MainTabControlViewModel.OnUpdateGUIEnabled();
                     OnPropertyChanged("IsGUIEnabled");
                 }
             }
@@ -54,11 +57,11 @@ namespace FileDuplicateFinder.ViewModel {
             set {
                 if (showBasePaths != value) {
                     showBasePaths = value;
-                    MainTabControlViewModel.ShowBasePaths = value;
                     if (value)
-                        ShowBasePathsChecked();
+                        ShowFileBasePaths();
                     else
-                        ShowBasePathsUnchecked();
+                        HideFileBasePaths();
+                    MainTabControlViewModel.ShowBasePaths = value;
                     OnPropertyChanged("ShowBasePaths");
                 }
             }
@@ -94,9 +97,17 @@ namespace FileDuplicateFinder.ViewModel {
             FindDuplicatedFilesCommand = new DelegateCommand<object>(FindDuplicatedFiles, (o) => IsGUIEnabled).ObservesProperty(() => IsGUIEnabled);
             RestoreFilesCommand = new DelegateCommand<object>(RestoreFiles, (o) => IsRestorePossible).ObservesProperty(() => IsRestorePossible);
             StopTaskCommand = new DelegateCommand<object>(StopTask, (o) => !IsGUIEnabled).ObservesProperty(() => IsGUIEnabled);
+            DirectoryPickerViewModel = new DirectoryPickerViewModel(state);
+            MainTabControlViewModel = new MainTabControlViewModel(state);
+            DirectoryPickerViewModel.MainTabControlViewModel = MainTabControlViewModel;
+            MainTabControlViewModel.DirectoryPickerViewModel = DirectoryPickerViewModel;
+            //MainTabControlViewModel.StatusBarViewModel = StatusBarViewModel;///
+            MainTabControlViewModel.MainWindowViewModel = this;
         }
-        
-        private void ShowBasePathsChecked() {
+
+       
+
+        private void ShowFileBasePaths() {
             /// in different thread maybe? then also in view + pass specific listview to update first (sender)
             if (DirectoryPickerViewModel.PrimaryOnly) {
                 for (int i = 0; i < FileManager.duplicatedFilesPrimaryOnly.Count; i++)
@@ -106,8 +117,11 @@ namespace FileDuplicateFinder.ViewModel {
                     FileManager.emptyDirectoriesPrimary[i].Path = primaryDirectory + FileManager.emptyDirectoriesPrimary[i].Path;
                 for (int i = 0; i < FileManager.emptyFilesPrimary.Count; i++)
                     FileManager.emptyFilesPrimary[i].Path = primaryDirectory + FileManager.emptyFilesPrimary[i].Path;
-            }
-            else {
+
+                FileManager.duplicatedFilesPrimaryOnly.Refresh();
+                FileManager.emptyDirectoriesPrimary.Refresh();
+                FileManager.emptyFilesPrimary.Refresh();
+            } else {
                 for (int i = 0; i < FileManager.duplicatedFiles.Count; i++) {
                     for (int p = 0; p < FileManager.duplicatedFiles[i].Item1.Count; p++)
                         FileManager.duplicatedFiles[i].Item1[p].Path = primaryDirectory + FileManager.duplicatedFiles[i].Item1[p].Path;
@@ -122,10 +136,16 @@ namespace FileDuplicateFinder.ViewModel {
                     FileManager.emptyDirectoriesSecondary[i].Path = secondaryDirectory + FileManager.emptyDirectoriesSecondary[i].Path;
                 for (int i = 0; i < FileManager.emptyFilesSecondary.Count; i++)
                     FileManager.emptyFilesSecondary[i].Path = secondaryDirectory + FileManager.emptyFilesSecondary[i].Path;
+
+                FileManager.duplicatedFiles.Refresh();
+                FileManager.emptyDirectoriesPrimary.Refresh();
+                FileManager.emptyFilesPrimary.Refresh();
+                FileManager.emptyDirectoriesSecondary.Refresh();
+                FileManager.emptyFilesSecondary.Refresh();
             }
         }
 
-        private void ShowBasePathsUnchecked() {
+        private void HideFileBasePaths() {
             if (DirectoryPickerViewModel.PrimaryOnly) {
                 for (int i = 0; i < FileManager.duplicatedFilesPrimaryOnly.Count; i++)
                     for (int p = 0; p < FileManager.duplicatedFilesPrimaryOnly[i].Count; p++)
@@ -134,8 +154,11 @@ namespace FileDuplicateFinder.ViewModel {
                     FileManager.emptyDirectoriesPrimary[i].Path = new string(FileManager.emptyDirectoriesPrimary[i].Path.Skip(primaryDirectory.Length).ToArray());
                 for (int i = 0; i < FileManager.emptyFilesPrimary.Count; i++)
                     FileManager.emptyFilesPrimary[i].Path = new string(FileManager.emptyFilesPrimary[i].Path.Skip(primaryDirectory.Length).ToArray());
-            }
-            else {
+
+                FileManager.duplicatedFilesPrimaryOnly.Refresh();
+                FileManager.emptyDirectoriesPrimary.Refresh();
+                FileManager.emptyFilesPrimary.Refresh();
+            } else {
                 for (int i = 0; i < FileManager.duplicatedFiles.Count; i++) {
                     for (int p = 0; p < FileManager.duplicatedFiles[i].Item1.Count; p++)
                         FileManager.duplicatedFiles[i].Item1[p].Path = new string(FileManager.duplicatedFiles[i].Item1[p].Path.Skip(primaryDirectory.Length).ToArray());
@@ -150,6 +173,12 @@ namespace FileDuplicateFinder.ViewModel {
                     FileManager.emptyDirectoriesSecondary[i].Path = new string(FileManager.emptyDirectoriesSecondary[i].Path.Skip(secondaryDirectory.Length).ToArray());
                 for (int i = 0; i < FileManager.emptyFilesSecondary.Count; i++)
                     FileManager.emptyFilesSecondary[i].Path = new string(FileManager.emptyFilesSecondary[i].Path.Skip(secondaryDirectory.Length).ToArray());
+
+                FileManager.duplicatedFiles.Refresh();
+                FileManager.emptyDirectoriesPrimary.Refresh();
+                FileManager.emptyFilesPrimary.Refresh();
+                FileManager.emptyDirectoriesSecondary.Refresh();
+                FileManager.emptyFilesSecondary.Refresh();
             }
         }
 
@@ -169,12 +198,10 @@ namespace FileDuplicateFinder.ViewModel {
 
             try {
                 Directory.GetAccessControl(primaryDirectory);
-            }
-            catch (UnauthorizedAccessException) {
+            } catch (UnauthorizedAccessException) {
                 error = true;
                 Utility.LogFromNonGUIThread("Primary directory is not accessible.");
-            }
-            catch {
+            } catch {
                 error = true;
                 if (!Directory.Exists(primaryDirectory))
                     Utility.LogFromNonGUIThread("Primary directory does not exist.");
@@ -241,8 +268,7 @@ namespace FileDuplicateFinder.ViewModel {
             if (stopTask) {
                 stopTask = false;
                 StatusBarViewModel.State = "Stopped";
-            }
-            else
+            } else
                 StatusBarViewModel.State = "Done";
             StatusBarViewModel.ShowProgress = false;
             StatusBarViewModel.StateInfo = "";
@@ -271,7 +297,8 @@ namespace FileDuplicateFinder.ViewModel {
         }
 
         private void InitializeDuplicateFinding() {
-            LockGUI();
+            ///LockGUI();
+            IsGUIEnabled = false;
             StatusBarViewModel.State = "Initializing";
             StatusBarViewModel.Progress = 0;
             StatusBarViewModel.IsIndeterminate = false;
@@ -292,7 +319,7 @@ namespace FileDuplicateFinder.ViewModel {
 
             primaryDirectory = DirectoryPickerViewModel.PrimaryDirectory;
             secondaryDirectory = DirectoryPickerViewModel.SecondaryDirectory;
-            ClearTmpDirectory();
+            FileManager.ClearDirectory(tmpDirectory);
             FileManager.storedFiles.Clear();
             IsRestorePossible = false;
         }
@@ -300,28 +327,16 @@ namespace FileDuplicateFinder.ViewModel {
         ///make private
         public void LockGUI() {
             IsGUIEnabled = false;
-            DirectoryPickerViewModel.LockGUI();
-            MainTabControlViewModel.LockGUI();
         }
 
         ///make private
         public void UnlockGUI() {
             IsGUIEnabled = true;
-            DirectoryPickerViewModel.UnlockGUI();
-            MainTabControlViewModel.UnlockGUI();
         }
 
         internal void WindowClosing() {
             StopTask();
             FileManager.ClearDirectory(tmpDirectory);
-        }
-
-        private void ClearTmpDirectory() {
-            DirectoryInfo directoryInfo = new DirectoryInfo(tmpDirectory);
-            foreach (FileInfo file in directoryInfo.GetFiles())
-                file.Delete();
-            foreach (DirectoryInfo dir in directoryInfo.GetDirectories())
-                dir.Delete(true);
         }
     }
 }

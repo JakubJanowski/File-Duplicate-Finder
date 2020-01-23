@@ -1,4 +1,6 @@
-﻿using Prism.Commands;
+﻿using FileDuplicateFinder.Models;
+using Prism.Commands;
+using System;
 
 namespace FileDuplicateFinder.ViewModel {
     class EmptyDirectoriesTabControlViewModel: ObjectBase {
@@ -18,7 +20,8 @@ namespace FileDuplicateFinder.ViewModel {
 
         internal DirectoryPickerViewModel DirectoryPickerViewModel { private get; set; }
 
-        public EmptyDirectoriesTabControlViewModel() {
+        public EmptyDirectoriesTabControlViewModel(ApplicationState state) {
+            this.state = state;
             EmptyDirectoriesPrimaryIgnoreCommand = new DelegateCommand<object>(EmptyDirectoriesPrimaryIgnore);
             EmptyDirectoriesPrimaryRemoveAllCommand = new DelegateCommand<object>(RemoveAllEmptyDirectoriesPrimary, (o) => IsGUIEnabled).ObservesProperty(() => IsGUIEnabled);
             EmptyDirectoriesPrimaryRemoveCommand = new DelegateCommand<object>(EmptyDirectoriesPrimaryRemove);
@@ -28,13 +31,7 @@ namespace FileDuplicateFinder.ViewModel {
         }
 
         public bool IsGUIEnabled {
-            get => isGUIEnabled;
-            set {
-                if (isGUIEnabled != value) {
-                    isGUIEnabled = value;
-                    OnPropertyChanged("IsGUIEnabled");
-                }
-            }
+            get => state.IsGUIEnabled;
         }
 
         public void ShowButtons(object sender) {
@@ -45,8 +42,12 @@ namespace FileDuplicateFinder.ViewModel {
             MainTabControlViewModel.HideButtons(sender);
         }
 
+        internal void OnUpdateGUIEnabled() => OnPropertyChanged("IsGUIEnabled");
+
         public DelegateCommand<object> OpenDirectoryPrimaryCommand { get; private set; }
         public DelegateCommand<object> OpenDirectorySecondaryCommand { get; private set; }
+
+        private readonly ApplicationState state;
 
         //// truncate method names PrimaryIgnoreFileCommand etc.
 

@@ -6,12 +6,32 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:conv="clr-namespace:FileDuplicateFinder.Converter"
              xmlns:view="clr-namespace:FileDuplicateFinder.View"
+             xmlns:vm="clr-namespace:FileDuplicateFinder.ViewModel"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     
     <UserControl.Resources>
         <conv:BooleanToVisibilityCollapsedConverter x:Key="BoolToVisCollapsed"/>
         <conv:NotBooleanToVisibilityCollapsedConverter x:Key="NotBoolToVisCollapsed"/>
+
+        <DataTemplate DataType="{x:Type vm:EmptyDirectoriesTabControlViewModel}">
+            <view:EmptyDirectoriesTabControlView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:EmptyFilesTabControlViewModel}">
+            <view:EmptyFilesTabControlView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:DuplicatedFilesTabViewModel}">
+            <view:DuplicatedFilesTabView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:PrimaryOnlyEmptyDirectoriesTabViewModel}">
+            <view:PrimaryOnlyEmptyDirectoriesTabView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:PrimaryOnlyEmptyFilesTabViewModel}">
+            <view:PrimaryOnlyEmptyFilesTabView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:PrimaryOnlyDuplicatedFilesTabViewModel}">
+            <view:PrimaryOnlyDuplicatedFilesTabView />
+        </DataTemplate>
     </UserControl.Resources>
 
 
@@ -22,24 +42,24 @@
         
         <!-- Primary and secondary tabs -->
         <TabItem Header="Empty Directories" Visibility="{Binding PrimaryOnly, Converter={StaticResource NotBoolToVisCollapsed}}">
-            <view:EmptyDirectoriesTabControlView x:Name="emptyDirectoriesTabControlView"/>
+            <ContentControl x:Name="emptyDirectoriesTabControlView" Content="{Binding EmptyDirectoriesTabControlViewModel}" />
         </TabItem>
         <TabItem Header="Empty Files" Visibility="{Binding PrimaryOnly, Converter={StaticResource NotBoolToVisCollapsed}}">
-            <view:EmptyFilesTabControlView x:Name="emptyFilesTabControlView"/>
+            <ContentControl x:Name="emptyFilesTabControlView" Content="{Binding EmptyFilesTabControlViewModel}" />
         </TabItem>
         <TabItem Header="Duplicated Files" Visibility="{Binding PrimaryOnly, Converter={StaticResource NotBoolToVisCollapsed}}">
-            <view:DuplicatedFilesTabView x:Name="duplicatedFilesTabView"/>
+            <ContentControl x:Name="duplicatedFilesTabView" Content="{Binding DuplicatedFilesTabViewModel}" />
         </TabItem>
         
         <!-- Primary only tabs -->
         <TabItem Header="Empty Directories" Visibility="{Binding PrimaryOnly, Converter={StaticResource BoolToVisCollapsed}}">
-            <view:PrimaryOnlyEmptyDirectoriesTabView x:Name="primaryOnlyEmptyDirectoriesTabView"/>
+            <ContentControl x:Name="primaryOnlyEmptyDirectoriesTabView" Content="{Binding PrimaryOnlyEmptyDirectoriesTabViewModel}" />
         </TabItem>
         <TabItem Header="Empty Files" Visibility="{Binding PrimaryOnly, Converter={StaticResource BoolToVisCollapsed}}">
-            <view:PrimaryOnlyEmptyFilesTabView x:Name="primaryOnlyEmptyFilesTabView"/>
+            <ContentControl x:Name="primaryOnlyEmptyFilesTabView" Content="{Binding PrimaryOnlyEmptyFilesTabViewModel}" />
         </TabItem>
         <TabItem Header="Duplicated Files" Visibility="{Binding PrimaryOnly, Converter={StaticResource BoolToVisCollapsed}}">
-            <view:PrimaryOnlyDuplicatedFilesTabView x:Name="primaryOnlyDuplicatedFilesTabView"/>
+            <ContentControl x:Name="primaryOnlyDuplicatedFilesTabView" Content="{Binding PrimaryOnlyDuplicatedFilesTabViewModel}" />
         </TabItem>
     </TabControl>
 </UserControl>

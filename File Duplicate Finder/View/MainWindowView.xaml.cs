@@ -7,25 +7,21 @@ using System.Windows;
 
 namespace FileDuplicateFinder.View {
     public partial class MainWindowView: Window {
-        internal MainWindowViewModel ViewModel { get; } = new MainWindowViewModel();
-        /// add to settings only
+        internal MainWindowViewModel ViewModel { get; }
+        /// add to settings only and make modifiable
         private string tmpDirectory = AppDomain.CurrentDomain.BaseDirectory + "tmp/";
         
         public MainWindowView() {
             SetCulture();
             InitializeComponent();
-            DataContext = ViewModel;
 
-            ViewModel.DirectoryPickerViewModel = directoryPickerView.ViewModel;
-            ViewModel.MainTabControlViewModel = mainTabControlView.ViewModel;
+            ViewModel = DataContext as MainWindowViewModel;
+
             ViewModel.StatusBarViewModel = statusBarView.ViewModel;
             ViewModel.tmpDirectory = tmpDirectory;
-            
-            directoryPickerView.StatusBarView = statusBarView;
-            directoryPickerView.MainTabControlView = mainTabControlView;
-            mainTabControlView.DirectoryPickerView = directoryPickerView;
-            mainTabControlView.StatusBarView = statusBarView;
-            mainTabControlView.MainWindowView = this;
+
+            ViewModel.DirectoryPickerViewModel.StatusBarViewModel = statusBarView.ViewModel;
+            ViewModel.MainTabControlViewModel.StatusBarViewModel = statusBarView.ViewModel;
 
             Utility.statusBarViewModel = statusBarView.ViewModel;
             Utility.dispatcher = Dispatcher;
@@ -49,12 +45,10 @@ namespace FileDuplicateFinder.View {
 
         private void basePathsCheckBox_Checked(object sender, RoutedEventArgs e) {
             ViewModel.ShowBasePaths = true;
-            mainTabControlView.RefreshListViews();
         }
 
         private void basePathsCheckBox_Unchecked(object sender, RoutedEventArgs e) {
             ViewModel.ShowBasePaths = false;
-            mainTabControlView.RefreshListViews();
 
         }
     }

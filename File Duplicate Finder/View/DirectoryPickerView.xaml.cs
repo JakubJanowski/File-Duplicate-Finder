@@ -5,33 +5,15 @@ using System.Windows.Controls;
 
 namespace FileDuplicateFinder.View {
     public partial class DirectoryPickerView: UserControl {
-        internal DirectoryPickerViewModel ViewModel { get; } = new DirectoryPickerViewModel();
         private StatusBarView statusBarView;
         private MainTabControlView mainTabControlView;
 
-        internal StatusBarView StatusBarView {
-            private get => statusBarView;
-            set {
-                statusBarView = value;
-                ViewModel.StatusBarViewModel = value.ViewModel;
-            }
-        }
-
-        internal MainTabControlView MainTabControlView {
-            private get => mainTabControlView;
-            set {
-                mainTabControlView = value;
-                ViewModel.MainTabControlViewModel = value.ViewModel;
-            }
-        }
-
-        public string PrimaryDirectory { get => ViewModel.PrimaryDirectory; }
-        public string SecondaryDirectory { get => ViewModel.SecondaryDirectory; }
-        public bool PrimaryOnly { get => ViewModel.PrimaryOnly; }
+        public string PrimaryDirectory { get => (DataContext as DirectoryPickerViewModel).PrimaryDirectory; }
+        public string SecondaryDirectory { get => (DataContext as DirectoryPickerViewModel).SecondaryDirectory; }
+        public bool PrimaryOnly { get => (DataContext as DirectoryPickerViewModel).PrimaryOnly; }
 
         public DirectoryPickerView() {
             InitializeComponent();
-            DataContext = ViewModel;
         }
 
         private void PrimaryDirectoryDialog(object sender, RoutedEventArgs e) {
@@ -39,7 +21,7 @@ namespace FileDuplicateFinder.View {
             CommonFileDialogResult result = dialog.ShowDialog();
 
             if (result == CommonFileDialogResult.Ok)
-                ViewModel.PrimaryDirectory = dialog.FileName;
+                (DataContext as DirectoryPickerViewModel).PrimaryDirectory = dialog.FileName;
 
             primaryDirectoryTextBox.Focus();
             primaryDirectoryTextBox.CaretIndex = primaryDirectoryTextBox.Text.Length;
@@ -50,7 +32,7 @@ namespace FileDuplicateFinder.View {
             CommonFileDialogResult result = dialog.ShowDialog();
 
             if (result == CommonFileDialogResult.Ok)
-                ViewModel.SecondaryDirectory = dialog.FileName;
+                (DataContext as DirectoryPickerViewModel).SecondaryDirectory = dialog.FileName;
 
             secondaryDirectoryTextBox.Focus();
             secondaryDirectoryTextBox.CaretIndex = secondaryDirectoryTextBox.Text.Length;
