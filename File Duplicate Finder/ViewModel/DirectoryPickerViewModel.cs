@@ -1,29 +1,24 @@
 ﻿using FileDuplicateFinder.Models;
-using System;
 
 namespace FileDuplicateFinder.ViewModel {
     class DirectoryPickerViewModel: ObjectBase {
-        internal MainTabControlViewModel MainTabControlViewModel { private get; set; }
-        internal StatusBarViewModel StatusBarViewModel { private get; set; }
+        private readonly ApplicationState state;
+        private readonly StatusBarViewModel statusBarViewModel;
 
-        private bool primaryOnly = false;
         private string primaryDirectory = "";
         private string secondaryDirectory = "";
-        private ApplicationState state;
 
         public bool IsGUIEnabled {
             get => state.IsGUIEnabled;
         }
 
         public bool PrimaryOnly {
-            get => primaryOnly;
+            get => state.PrimaryOnly;
             set {
-                if (primaryOnly != value) {
-                    primaryOnly = value;
-                    /// later change this in settingsVM and use it from settings in MainTabControlViewModel
-                    MainTabControlViewModel.PrimaryOnly = value;
-                    StatusBarViewModel.State = "Ready";
-                    OnPropertyChanged("PrimaryOnly");
+                if (state.PrimaryOnly != value) {
+                    state.PrimaryOnly = value;
+                    statusBarViewModel.State = "Ready";
+                    OnPropertyChanged(nameof(PrimaryOnly));
                 }
             }
         }
@@ -33,27 +28,28 @@ namespace FileDuplicateFinder.ViewModel {
             set {
                 if (primaryDirectory != value) {
                     primaryDirectory = Utility.NormalizePath(value);
-                    StatusBarViewModel.State = "Ready";
-                    OnPropertyChanged("PrimaryDirectory");
+                    statusBarViewModel.State = "Ready";
+                    OnPropertyChanged(nameof(PrimaryDirectory));
                 }
             }
         }
-
-        internal void OnUpdateGUIEnabled() => OnPropertyChanged("IsGUIEnabled");
 
         public string SecondaryDirectory {
             get => secondaryDirectory;
             set {
                 if (secondaryDirectory != value) {
                     secondaryDirectory = Utility.NormalizePath(value);
-                    StatusBarViewModel.State = "Ready";
-                    OnPropertyChanged("SecondaryDirectory");
+                    statusBarViewModel.State = "Ready";
+                    OnPropertyChanged(nameof(SecondaryDirectory));
                 }
             }
         }
 
-        public DirectoryPickerViewModel(ApplicationState state) {
+        public DirectoryPickerViewModel(ApplicationState state, StatusBarViewModel statusBarViewModel) {
             this.state = state;
+            this.statusBarViewModel = statusBarViewModel;
         }
+
+        internal void OnUpdateGUIEnabled() => OnPropertyChanged(nameof(IsGUIEnabled));
     }
 }

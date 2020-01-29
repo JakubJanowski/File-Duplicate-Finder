@@ -13,7 +13,7 @@
 	 add watermark text after removing files from list because they don't have a duplicate saying something like "Files that did not have a duplicate after your operation were removed from this list" OR gray out the name of alone file
 	config file with ignored directories in search and mayby open last checked
 	start progressbar when started searching for duplicates, during initialization make progressbar shift green area constantly
-	dont store names as guids but as normal name but make sure the names don't collide easiest way - add guid at the end, can use some base64 number of files in this directory past max or etc
+	dont store names as guids but as normal name but make sure the names don't collide easiest way - add id at the end, can use some static number and eventually store it in application state
 	do something with hiding list elements on remove all, the <= 1 is bad as default as it's scary to see all elements disappear, maybe add an information, make them collapse into subgroup or make a checkbox to make it an opitonal feature
 	don't always steal focus with logs
 	change GetFileLength() < 0 with other wrapping function

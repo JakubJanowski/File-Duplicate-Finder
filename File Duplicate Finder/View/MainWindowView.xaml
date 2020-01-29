@@ -18,6 +18,9 @@
         <DataTemplate DataType="{x:Type vm:MainTabControlViewModel}">
             <view:MainTabControlView />
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:StatusBarViewModel}">
+            <view:StatusBarView />
+        </DataTemplate>
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -34,7 +37,7 @@
                     <ColumnDefinition Width="auto"/>
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0">
-                    <CheckBox x:Name="basePathsCheckBox" IsEnabled="{Binding IsGUIEnabled}" Checked="basePathsCheckBox_Checked" Unchecked="basePathsCheckBox_Unchecked">Show base paths</CheckBox>
+                    <CheckBox x:Name="basePathsCheckBox" IsEnabled="{Binding IsGUIEnabled}" IsChecked="{Binding ShowBasePaths}">Show base paths</CheckBox>
                     <CheckBox x:Name="backupFilesCheckBox" IsChecked="{Binding BackupFiles}">Store backup files</CheckBox>
                     <CheckBox x:Name="askLargeCheckBox" IsChecked="{Binding AskLarge}">Ask when deleting large files without backup</CheckBox>
                     <Grid>
@@ -51,6 +54,6 @@
             </Grid>
         </StackPanel>
         <ContentControl x:Name="mainTabControlView" Content="{Binding MainTabControlViewModel}" Grid.Row="1" Margin="5"/>
-        <view:StatusBarView x:Name="statusBarView" Grid.Row="2" Height="21" />
+        <ContentControl x:Name="statusBarView" Content="{Binding StatusBarViewModel}" Grid.Row="2" Height="21"/>
     </Grid>
 </Window>

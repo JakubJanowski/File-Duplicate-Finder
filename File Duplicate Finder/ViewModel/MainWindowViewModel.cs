@@ -8,27 +8,48 @@ using FileDuplicateFinder.Models;
 using Prism.Commands;
 
 namespace FileDuplicateFinder.ViewModel {
-    class MainWindowViewModel: ObjectBase {
-        public DirectoryPickerViewModel DirectoryPickerViewModel { get; private set; }
-        public MainTabControlViewModel MainTabControlViewModel { get; private set; }
-        public StatusBarViewModel StatusBarViewModel { private get; set; }
+    internal class MainWindowViewModel: ObjectBase {
+        public DirectoryPickerViewModel DirectoryPickerViewModel { get; }
+        public MainTabControlViewModel MainTabControlViewModel { get; }
+        public StatusBarViewModel StatusBarViewModel { get; }
 
-        internal string tmpDirectory;
+        /// add to settings only and make modifiable
+        private readonly string tmpDirectory = AppDomain.CurrentDomain.BaseDirectory + "tmp/";
 
         private volatile bool stopTask = false;
         private string primaryDirectory;
         private string secondaryDirectory;
 
-        private ApplicationState state = new ApplicationState();
+        private readonly ApplicationState state = new ApplicationState();
         private bool isRestorePossible = false;
-        private bool showBasePaths = false;
-        private bool backupFiles = true;
-        private bool askLarge = true;
 
         public bool SortBySize { get; set; } = true;
         public bool SortBySizePrimaryOnly { get; set; } = true;
 
-        /// make isGUIEnabled common model
+        public bool AskLarge {
+            get => state.AskLarge;
+            set {
+                if (state.AskLarge != value) {
+                    state.AskLarge = value;
+                    if (value)
+                        BackupFiles = true;
+                    OnPropertyChanged(nameof(AskLarge));
+                }
+            }
+        }
+
+        public bool BackupFiles {
+            get => state.BackupFiles;
+            set {
+                if (state.BackupFiles != value) {
+                    state.BackupFiles = value;
+                    if (!value)
+                        AskLarge = false;
+                    OnPropertyChanged(nameof(BackupFiles));
+                }
+            }
+        }
+
         public bool IsGUIEnabled {
             get => state.IsGUIEnabled;
             set {
@@ -36,7 +57,7 @@ namespace FileDuplicateFinder.ViewModel {
                     state.IsGUIEnabled = value;
                     DirectoryPickerViewModel.OnUpdateGUIEnabled();
                     MainTabControlViewModel.OnUpdateGUIEnabled();
-                    OnPropertyChanged("IsGUIEnabled");
+                    OnPropertyChanged(nameof(IsGUIEnabled));
                 }
             }
         }
@@ -46,49 +67,22 @@ namespace FileDuplicateFinder.ViewModel {
             set {
                 if (isRestorePossible != value) {
                     isRestorePossible = value;
-                    OnPropertyChanged("IsRestorePossible");
+                    OnPropertyChanged(nameof(IsRestorePossible));
                 }
             }
         }
 
-        ///get this from settings 
         public bool ShowBasePaths {
-            get => showBasePaths;
+            get => state.ShowBasePaths;
             set {
-                if (showBasePaths != value) {
-                    showBasePaths = value;
+                if (state.ShowBasePaths != value) {
+                    state.ShowBasePaths = value;
                     if (value)
                         ShowFileBasePaths();
                     else
                         HideFileBasePaths();
-                    MainTabControlViewModel.ShowBasePaths = value;
-                    OnPropertyChanged("ShowBasePaths");
-                }
-            }
-        }
-
-        ///get this from settings 
-        public bool BackupFiles {
-            get => backupFiles;
-            set {
-                if (backupFiles != value) {
-                    backupFiles = value;
-                    if (!value)
-                        AskLarge = false;
-                    OnPropertyChanged("BackupFiles");
-                }
-            }
-        }
-
-        ///get this from settings 
-        public bool AskLarge {
-            get => askLarge;
-            set {
-                if (askLarge != value) {
-                    askLarge = value;
-                    if (value)
-                        BackupFiles = true;
-                    OnPropertyChanged("AskLarge");
+                    MainTabControlViewModel.OnUpdateShowBasePaths();
+                    OnPropertyChanged(nameof(ShowBasePaths));
                 }
             }
         }
@@ -97,15 +91,23 @@ namespace FileDuplicateFinder.ViewModel {
             FindDuplicatedFilesCommand = new DelegateCommand<object>(FindDuplicatedFiles, (o) => IsGUIEnabled).ObservesProperty(() => IsGUIEnabled);
             RestoreFilesCommand = new DelegateCommand<object>(RestoreFiles, (o) => IsRestorePossible).ObservesProperty(() => IsRestorePossible);
             StopTaskCommand = new DelegateCommand<object>(StopTask, (o) => !IsGUIEnabled).ObservesProperty(() => IsGUIEnabled);
-            DirectoryPickerViewModel = new DirectoryPickerViewModel(state);
-            MainTabControlViewModel = new MainTabControlViewModel(state);
-            DirectoryPickerViewModel.MainTabControlViewModel = MainTabControlViewModel;
-            MainTabControlViewModel.DirectoryPickerViewModel = DirectoryPickerViewModel;
-            //MainTabControlViewModel.StatusBarViewModel = StatusBarViewModel;///
-            MainTabControlViewModel.MainWindowViewModel = this;
-        }
 
-       
+            StatusBarViewModel = new StatusBarViewModel();
+            DirectoryPickerViewModel = new DirectoryPickerViewModel(state, StatusBarViewModel);
+            MainTabControlViewModel = new MainTabControlViewModel(new MainTabControlViewModelParameters() {
+                State = state,
+                DirectoryPickerViewModel = DirectoryPickerViewModel,
+                MainWindowViewModel = this,
+                StatusBarViewModel = StatusBarViewModel
+            });
+            DirectoryPickerViewModel.Bind(nameof(DirectoryPickerViewModel.PrimaryOnly), () => MainTabControlViewModel.OnUpdatePrimaryOnly());
+
+
+            Utility.statusBarViewModel = StatusBarViewModel;
+            FileManager.statusBarViewModel = StatusBarViewModel;
+            FileManager.tmpDirectory = tmpDirectory;
+            Directory.CreateDirectory(tmpDirectory);
+        }
 
         private void ShowFileBasePaths() {
             /// in different thread maybe? then also in view + pass specific listview to update first (sender)
@@ -210,21 +212,21 @@ namespace FileDuplicateFinder.ViewModel {
             }
 
             if (error) {
-                Utility.BeginInvoke((Action)(() => {
+                Utility.BeginInvoke(() => {
                     StatusBarViewModel.State = "Failed";
                     StatusBarViewModel.ShowProgress = false;
                     UnlockGUI();
-                }));
+                });
                 return;
             }
 
             FileManager.FindDuplicatedFiles(primaryDirectory, ShowBasePaths);
 
-            Utility.BeginInvoke((Action)(() => {
+            Utility.BeginInvoke(() => {
                 if (!SortBySizePrimaryOnly)
-                    FileManager.duplicatedFilesPrimaryOnly.Sort(Comparer<ObservableRangeCollection<FileEntry>>.Create((a, b) => a[0].Path.CompareTo(b[0].Path)));
+                    FileManager.duplicatedFilesPrimaryOnly.Sort(Comparer<ObservableRangeCollection<FileEntry>>.Create((a, b) => string.Compare(a[0].Path, b[0].Path, StringComparison.InvariantCultureIgnoreCase))); // a[0].Path.CompareTo(b[0].Path)
                 FinalizeDuplicateFinding();
-            }));
+            });
         }
 
 
@@ -247,21 +249,21 @@ namespace FileDuplicateFinder.ViewModel {
             }
 
             if (error) {
-                Utility.BeginInvoke((Action)(() => {
+                Utility.BeginInvoke(() => {
                     StatusBarViewModel.State = "Failed";
                     StatusBarViewModel.ShowProgress = false;
                     UnlockGUI();
-                }));
+                });
                 return;
             }
 
             FileManager.FindDuplicatedFiles(primaryDirectory, secondaryDirectory, ShowBasePaths);
 
-            Utility.BeginInvoke((Action)(() => {
+            Utility.BeginInvoke(() => {
                 if (!SortBySize)
-                    FileManager.duplicatedFiles.Sort(Comparer<Tuple<ObservableRangeCollection<FileEntry>, ObservableRangeCollection<FileEntry>>>.Create((a, b) => a.Item1[0].Path.CompareTo(b.Item1[0].Path)));
+                    FileManager.duplicatedFiles.Sort(Comparer<Tuple<ObservableRangeCollection<FileEntry>, ObservableRangeCollection<FileEntry>>>.Create((a, b) => string.Compare(a.Item1[0].Path, b.Item1[0].Path, StringComparison.InvariantCultureIgnoreCase)));  // a.Item1[0].Path.CompareTo(b.Item1[0].Path)
                 FinalizeDuplicateFinding();
-            }));
+            });
         }
 
         private void FinalizeDuplicateFinding() {
@@ -279,7 +281,7 @@ namespace FileDuplicateFinder.ViewModel {
             if (!ShowBasePaths)
                 path = baseDirectory + path;
             /// try catch log here
-            if (FileManager.RemoveFile(path, backupFiles, askLarge))
+            if (FileManager.RemoveFile(path, BackupFiles, AskLarge))
                 IsRestorePossible = true;
         }
 

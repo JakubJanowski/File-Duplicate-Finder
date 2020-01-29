@@ -9,10 +9,6 @@ namespace FileDuplicateFinder.View {
             duplicatedFilesPrimaryOnlyListView.ItemsSource = FileManager.duplicatedFilesPrimaryOnly;
         }
 
-        public void Refresh() {
-            duplicatedFilesPrimaryOnlyListView.Items.Refresh();
-        }
-
         public void ShowButtons(object sender, System.Windows.Input.MouseEventArgs e) {
             (DataContext as PrimaryOnlyDuplicatedFilesTabViewModel).ShowButtons(sender);
         }

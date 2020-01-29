@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 
 namespace FileDuplicateFinder {
     public abstract class ObjectBase: INotifyPropertyChanged {
@@ -8,6 +9,11 @@ namespace FileDuplicateFinder {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        //public abstract void Initialize();
+        public void Bind(string propertyName, Action action) {
+            PropertyChanged += (s, e) => {
+                if (e.PropertyName.Equals(propertyName, StringComparison.Ordinal))
+                    action();
+            };
+        }
     }
 }

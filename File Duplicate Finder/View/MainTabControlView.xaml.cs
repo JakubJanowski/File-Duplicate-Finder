@@ -3,6 +3,8 @@ using System.Windows.Controls;
 
 namespace FileDuplicateFinder.View {
     public partial class MainTabControlView: UserControl {
+        private MainTabControlViewModel ViewModel { get => DataContext as MainTabControlViewModel; }
+
         public MainTabControlView() {
             InitializeComponent();
 
@@ -12,26 +14,12 @@ namespace FileDuplicateFinder.View {
             //logListView.ItemsSource too
         }
 
-        internal void RefreshListViews() {
-            ///from applcation state
-            //if (directoryPickerView.PrimaryOnly) {
-            if ((DataContext as MainTabControlViewModel).PrimaryOnly) {
-                //primaryOnlyDuplicatedFilesTabView.Refresh();
-                //primaryOnlyEmptyDirectoriesTabView.Refresh();
-                //primaryOnlyEmptyFilesTabView.Refresh();
-            } else {
-                //duplicatedFilesTabView.Refresh();
-                //emptyDirectoriesTabControlView.Refresh();
-                //emptyFilesTabControlView.Refresh();
-            }
-        }
-
         private void ShowButtons(object sender, System.Windows.Input.MouseEventArgs e) {
-            (DataContext as MainTabControlViewModel).ShowButtons(sender);
+            ViewModel.ShowButtons(sender);
         }
 
         private void HideButtons(object sender, System.Windows.Input.MouseEventArgs e) {
-            (DataContext as MainTabControlViewModel).HideButtons(sender);
+            ViewModel.HideButtons(sender);
         }
     }
 }
