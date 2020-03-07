@@ -1,4 +1,5 @@
-﻿using FileDuplicateFinder.ViewModel;
+﻿using FileDuplicateFinder.Services;
+using FileDuplicateFinder.ViewModel;
 using System.Windows.Controls;
 
 namespace FileDuplicateFinder.View {

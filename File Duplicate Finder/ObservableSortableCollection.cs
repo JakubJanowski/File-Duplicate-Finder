@@ -10,7 +10,7 @@
 
         public ObservableSortableCollection(IEnumerable<T> collection) : base(collection) { }
 
-        private bool reordering;
+        //private bool reordering;
 
         //protected override void OnCollectionChanged(NotifyCollectionChangedEventArgs e) {
         //    base.OnCollectionChanged(e);
@@ -25,18 +25,18 @@
 
         public void Sort(Comparer<T> comparer, SortDirection sortDirection = SortDirection.Ascending) {
             List<T> sorted = sortDirection == SortDirection.Ascending ? this.OrderBy(x => x, comparer).ToList() : this.OrderByDescending(x => x, comparer).ToList();
-            reordering = true;
+            //reordering = true;
             for (int i = 0; i < sorted.Count; i++)
                 Move(IndexOf(sorted[i]), i);
-            reordering = false;
+            //reordering = false;
         }
 
         public void Sort(SortDirection sortDirection = SortDirection.Ascending) {
             List<T> sorted = sortDirection == SortDirection.Ascending ? this.OrderBy(x => x).ToList() : this.OrderByDescending(x => x).ToList();
-            reordering = true;
+            //reordering = true;
             for (int i = 0; i < sorted.Count; i++)
                 Move(IndexOf(sorted[i]), i);
-            reordering = false;
+            //reordering = false;
         }
     }
 }

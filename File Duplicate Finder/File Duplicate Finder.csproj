@@ -166,9 +166,10 @@
     <Compile Include="Converters\NotBooleanToVisibilityCollapsedConverter.cs" />
     <Compile Include="Converters\NotBooleanToVisibilityHiddenConverter.cs" />
     <Compile Include="Converters\BooleanToVisibilityCollapsedConverter.cs" />
-    <Compile Include="File Manager\FileEntry.cs" />
-    <Compile Include="File Manager\FileManager.cs" />
-    <Compile Include="File Manager\IconReader.cs" />
+    <Compile Include="Models\SearchDirectoryType.cs" />
+    <Compile Include="Services\File Manager\FileEntry.cs" />
+    <Compile Include="Services\File Manager\FileManager.cs" />
+    <Compile Include="Services\File Manager\IconReader.cs" />
     <Compile Include="Models\ApplicationState.cs" />
     <Compile Include="ObjectBase.cs" />
     <Compile Include="ObservableRangeCollection.cs" />
@@ -176,9 +177,9 @@
     <Compile Include="RestoreFileDialog.xaml.cs">
       <DependentUpon>RestoreFileDialog.xaml</DependentUpon>
     </Compile>
-    <Compile Include="File Manager\SortException.cs" />
-    <Compile Include="File Manager\TaskAbortedException.cs" />
-    <Compile Include="Utility.cs" />
+    <Compile Include="Services\File Manager\SortException.cs" />
+    <Compile Include="Services\File Manager\TaskAbortedException.cs" />
+    <Compile Include="Utilities.cs" />
     <Compile Include="ViewModel\DirectoryPickerViewModel.cs" />
     <Compile Include="ViewModel\MainTabControlViewModel.cs" />
     <Compile Include="ViewModel\MainWindowViewModel.cs" />

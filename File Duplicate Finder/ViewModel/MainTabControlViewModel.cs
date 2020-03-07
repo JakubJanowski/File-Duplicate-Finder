@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using FileDuplicateFinder.Models;
+using FileDuplicateFinder.Services;
 using Prism.Commands;
 
 namespace FileDuplicateFinder.ViewModel {
@@ -33,8 +34,6 @@ namespace FileDuplicateFinder.ViewModel {
         private readonly DirectoryPickerViewModel directoryPickerViewModel;
         private readonly MainWindowViewModel mainWindowViewModel;
         private readonly StatusBarViewModel statusBarViewModel;
-
-
 
         public bool IsGUIEnabled {
             get => state.IsGUIEnabled;
@@ -103,26 +102,30 @@ namespace FileDuplicateFinder.ViewModel {
             /// set this once per search maybe
             ///string DirectoryPickerViewModel.PrimaryDirectory = DirectoryPickerViewModel.PrimaryDirectory;
             string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[pathChildPosition]).Text;
+            string fullPath = path;
             if (!ShowBasePaths)
-                path = directoryPickerViewModel.PrimaryDirectory + path;
+                fullPath = directoryPickerViewModel.PrimaryDirectory + path;
+
             try {
-                Process.Start(path);
+                Process.Start(fullPath);
             } catch (Win32Exception) {
-                FileManager.emptyDirectoriesPrimary.Remove(((TextBlock)((Grid)((Button)sender).Parent).Children[pathChildPosition]).Text);
-                Utility.Log("Directory \"" + path + "\" no longer exists.");
+                FileManager.emptyDirectoriesPrimary.Remove(path);
+                Utilities.Log("Directory \"" + fullPath + "\" no longer exists.");
             }
         }
 
         public DelegateCommand<object> OpenDirectorySecondaryCommand { get; private set; }
         public void OpenDirectorySecondary(object sender) {
             string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[pathChildPosition]).Text;
+            string fullPath = path;
             if (!ShowBasePaths)
-                path = directoryPickerViewModel.SecondaryDirectory + path;
+                fullPath = directoryPickerViewModel.SecondaryDirectory + path;
+
             try {
-                Process.Start(path);
+                Process.Start(fullPath);
             } catch (Win32Exception) {
-                FileManager.emptyDirectoriesSecondary.Remove(((TextBlock)((Grid)((Button)sender).Parent).Children[pathChildPosition]).Text);
-                Utility.Log("Directory \"" + path + "\" no longer exists.");
+                FileManager.emptyDirectoriesSecondary.Remove(path);
+                Utilities.Log("Directory \"" + fullPath + "\" no longer exists.");
             }
         }
 
@@ -130,59 +133,30 @@ namespace FileDuplicateFinder.ViewModel {
 
         public void OpenFileDirectoryPrimary(object sender) {
             string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[pathChildPosition]).Text;
+            string fullPath = path;
             if (!ShowBasePaths)
-                path = directoryPickerViewModel.PrimaryDirectory + path;
-            if (File.Exists(path))
-                Process.Start("explorer.exe", "/select, \"" + path + "\"");
+                fullPath = directoryPickerViewModel.PrimaryDirectory + path;
+
+            if (File.Exists(fullPath))
+                Process.Start("explorer.exe", "/select, \"" + fullPath + "\"");
             else {
-                path = ((TextBlock)((Grid)((Button)sender).Parent).Children[pathChildPosition]).Text;
-                if (!FileManager.emptyFilesPrimary.Remove(path)) {
-                    for (int i = 0; i < FileManager.duplicatedFilesPrimaryOnly.Count; i++) {
-                        int index = FileManager.duplicatedFilesPrimaryOnly[i].FindIndex(f => f.Path == path);
-                        if (index >= 0) {
-                            FileManager.duplicatedFilesPrimaryOnly[i].RemoveAt(index);
-                            if (FileManager.duplicatedFilesPrimaryOnly[i].Count <= 1)
-                                FileManager.duplicatedFilesPrimaryOnly.RemoveAt(i);
-                            goto OpenFileDirectoryPrimaryFound;
-                        }
-                    }
-                    for (int i = 0; i < FileManager.duplicatedFiles.Count; i++) {
-                        int index = FileManager.duplicatedFiles[i].Item1.FindIndex(f => f.Path == path);
-                        if (index >= 0) {
-                            FileManager.duplicatedFiles[i].Item1.RemoveAt(index);
-                            if (FileManager.duplicatedFiles[i].Item2.Count == 0 && FileManager.duplicatedFiles[i].Item1.Count <= 1)
-                                FileManager.duplicatedFiles.RemoveAt(i);
-                            break;
-                        }
-                    }
-                    OpenFileDirectoryPrimaryFound:
-                    ;
-                }
-                Utility.Log("File \"" + path + "\" no longer exists.");
+                FileManager.RemovePrimaryFileWithPath(path);
+                Utilities.Log("File \"" + fullPath + "\" no longer exists.");
             }
         }
 
         public DelegateCommand<object> OpenFileDirectorySecondaryCommand { get; private set; }
         public void OpenFileDirectorySecondary(object sender) {
             string path = ((TextBlock)((Grid)((Button)sender).Parent).Children[pathChildPosition]).Text;
+            string fullPath = path;
             if (!ShowBasePaths)
-                path = directoryPickerViewModel.SecondaryDirectory + path;
-            if (File.Exists(path))
-                Process.Start("explorer.exe", "/select, \"" + path + "\"");
+                fullPath = directoryPickerViewModel.SecondaryDirectory + path;
+
+            if (File.Exists(fullPath))
+                Process.Start("explorer.exe", "/select, \"" + fullPath + "\"");
             else {
-                path = ((TextBlock)((Grid)((Button)sender).Parent).Children[pathChildPosition]).Text;
-                if (!FileManager.emptyFilesSecondary.Remove(path)) {
-                    for (int i = 0; i < FileManager.duplicatedFiles.Count; i++) {
-                        int index = FileManager.duplicatedFiles[i].Item2.FindIndex(f => f.Path == path);
-                        if (index >= 0) {
-                            FileManager.duplicatedFiles[i].Item2.RemoveAt(index);
-                            if (FileManager.duplicatedFiles[i].Item2.Count == 0 && FileManager.duplicatedFiles[i].Item1.Count <= 1)
-                                FileManager.duplicatedFiles.RemoveAt(i);
-                            break;
-                        }
-                    }
-                }
-                Utility.Log("File \"" + path + "\" no longer exists.");
+                FileManager.RemoveSecondaryFileWithPath(path);
+                Utilities.Log("File \"" + fullPath + "\" no longer exists.");
             }
         }
 
@@ -203,18 +177,17 @@ namespace FileDuplicateFinder.ViewModel {
         public void RemoveAllTemplate(string directory, RemoveAllAction action) {
             if (MessageBox.Show("Are you sure you want to delete all files from " + directory + "? Backup files will not be stored.", "Warning", MessageBoxButton.YesNo) == MessageBoxResult.No)
                 return;
+
             InitRemoveAllProgress("Removing files...");
-            /// temporary solution use parent.lockgui
-            mainWindowViewModel.LockGUI();
+            mainWindowViewModel.IsGUIEnabled = false;
             new Thread(() => {
                 if (ShowBasePaths)
                     action();
                 else
                     action(directory);
-                Utility.BeginInvoke(() => {
+                Utilities.BeginInvoke(() => {
                     FinishProgress("Done");
-                    /// temporary solution
-                    mainWindowViewModel.UnlockGUI();
+                    mainWindowViewModel.IsGUIEnabled = true;
                 });
             }).Start();
         }
@@ -241,8 +214,9 @@ namespace FileDuplicateFinder.ViewModel {
             if (stopTask) {
                 stopTask = false;
                 statusBarViewModel.State = "Stopped";
-            } else
+            } else {
                 statusBarViewModel.State = state;
+            }
         }
     }
 }

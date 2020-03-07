@@ -1,7 +1,6 @@
-﻿using FileDuplicateFinder.ViewModel;
-using System;
+﻿using FileDuplicateFinder.Services;
+using FileDuplicateFinder.ViewModel;
 using System.Globalization;
-using System.IO;
 using System.Threading;
 using System.Windows;
 
@@ -13,7 +12,7 @@ namespace FileDuplicateFinder.View {
             SetCulture();
             InitializeComponent();
 
-            Utility.dispatcher = Dispatcher;
+            Utilities.dispatcher = Dispatcher;
             FileManager.dispatcher = Dispatcher;
         }
 

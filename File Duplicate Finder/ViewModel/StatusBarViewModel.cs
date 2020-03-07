@@ -12,7 +12,7 @@
             set {
                 if (showProgress != value) {
                     showProgress = value;
-                    OnPropertyChanged("ShowProgress");
+                    OnPropertyChanged(nameof(ShowProgress));
                 }
             }
         }
@@ -22,7 +22,7 @@
             set {
                 if (isIndeterminate != value) {
                     isIndeterminate = value;
-                    OnPropertyChanged("IsIndeterminate");
+                    OnPropertyChanged(nameof(IsIndeterminate));
                 }
             }
         }
@@ -32,7 +32,7 @@
             set {
                 if (progress != value) {
                     progress = value;
-                    OnPropertyChanged("Progress");
+                    OnPropertyChanged(nameof(Progress));
                 }
             }
         }
@@ -42,7 +42,7 @@
             set {
                 if (maxProgress != value) {
                     maxProgress = value;
-                    OnPropertyChanged("MaxProgress");
+                    OnPropertyChanged(nameof(MaxProgress));
                 }
             }
         }
@@ -52,7 +52,7 @@
             set {
                 if (state != value) {
                     state = value;
-                    OnPropertyChanged("State");
+                    OnPropertyChanged(nameof(State));
                 }
             }
         }
@@ -62,7 +62,7 @@
             set {
                 if (stateInfo != value) {
                     stateInfo = value;
-                    OnPropertyChanged("StateInfo");
+                    OnPropertyChanged(nameof(StateInfo));
                 }
             }
         }

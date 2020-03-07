@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Drawing;
-using System.Collections;
 using System.ComponentModel;
-using System.Data;
 using System.Runtime.InteropServices;
 using System.Windows.Media;
 using System.Windows.Interop;
@@ -70,7 +68,7 @@ namespace FileDuplicateFinder {
             if (shfi.hIcon != IntPtr.Zero) {
                 // Copy (clone) the returned icon to a new object, thus allowing us to clean-up properly
                 Icon icon = (Icon)Icon.FromHandle(shfi.hIcon).Clone();
-                User32.DestroyIcon(shfi.hIcon);     // Cleanup
+                _ = User32.DestroyIcon(shfi.hIcon);     // Cleanup
                 return icon.ToImageSource();
             }
             
@@ -102,7 +100,7 @@ namespace FileDuplicateFinder {
             // Load the icon from an HICON handle and clone it
             if (shfi.hIcon != IntPtr.Zero) {
                 Icon icon = (Icon)Icon.FromHandle(shfi.hIcon).Clone();
-                User32.DestroyIcon(shfi.hIcon);     // Cleanup
+                _ = User32.DestroyIcon(shfi.hIcon);     // Cleanup
                 return icon.ToImageSource();
             }
 
@@ -139,7 +137,7 @@ namespace FileDuplicateFinder {
 
     // This code has been left largely untouched from that in the CRC example. The main changes have been moving
     // the icon reading code over to the IconReader type.
-    public class Shell32 {
+    public static class Shell32 {
 
         public const int MAX_PATH = 256;
         [StructLayout(LayoutKind.Sequential)]
@@ -216,7 +214,7 @@ namespace FileDuplicateFinder {
         public const uint FILE_ATTRIBUTE_DIRECTORY = 0x00000010;
         public const uint FILE_ATTRIBUTE_NORMAL = 0x00000080;
 
-        [DllImport("Shell32.dll")]
+        [DllImport("Shell32.dll", CharSet = CharSet.Unicode)]
         public static extern IntPtr SHGetFileInfo(
             string pszPath,
             uint dwFileAttributes,

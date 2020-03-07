@@ -1,6 +1,6 @@
 ﻿using FileDuplicateFinder.Models;
+using FileDuplicateFinder.Services;
 using Prism.Commands;
-using System;
 
 namespace FileDuplicateFinder.ViewModel {
     class EmptyDirectoriesTabControlViewModel: ObjectBase {

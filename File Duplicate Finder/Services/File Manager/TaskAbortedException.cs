@@ -3,7 +3,7 @@ using System.Runtime.Serialization;
 
 namespace FileDuplicateFinder {
     [Serializable]
-    internal class TaskAbortedException: Exception {
+    public class TaskAbortedException: Exception {
         public TaskAbortedException() {
         }
 

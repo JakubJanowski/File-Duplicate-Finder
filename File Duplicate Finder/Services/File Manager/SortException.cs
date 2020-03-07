@@ -3,7 +3,7 @@ using System.Runtime.Serialization;
 
 namespace FileDuplicateFinder {
     [Serializable]
-    internal class SortException: Exception {
+    public class SortException: Exception {
         public SortException() {
         }
 

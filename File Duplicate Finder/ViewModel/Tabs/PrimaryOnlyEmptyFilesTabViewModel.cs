@@ -1,4 +1,5 @@
 ﻿using FileDuplicateFinder.Models;
+using FileDuplicateFinder.Services;
 using Prism.Commands;
 
 namespace FileDuplicateFinder.ViewModel {

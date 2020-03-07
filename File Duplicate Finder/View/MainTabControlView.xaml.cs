@@ -8,8 +8,8 @@ namespace FileDuplicateFinder.View {
         public MainTabControlView() {
             InitializeComponent();
 
-            Utility.logListView = logListView;
-            Utility.logTabItem = logTabItem;
+            Utilities.logListView = logListView;
+            Utilities.logTabItem = logTabItem;
 
             //logListView.ItemsSource too
         }

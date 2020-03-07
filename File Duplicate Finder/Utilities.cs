@@ -2,80 +2,100 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Security;
+using System.Security.AccessControl;
 using System.Threading;
 using System.Windows.Controls;
 using System.Windows.Threading;
 
 namespace FileDuplicateFinder {
-    static class Utility {
+    public static class Utilities {
 
         internal static ListView logListView;
         internal static TabItem logTabItem;
         internal static Dispatcher dispatcher;
         internal static StatusBarViewModel statusBarViewModel;
 
-        public static void CheckDirectories(string primaryDirectory, string secondaryDirectory, ref bool error) {
+        public static void CheckDirectory(string directory, SearchDirectoryType searchDirectoryType, ref bool error) {
             try {
-                Directory.GetAccessControl(primaryDirectory);
-            }
-            catch (UnauthorizedAccessException) {
+                DirectorySecurity _ = new DirectorySecurity(directory, AccessControlSections.Owner | AccessControlSections.Group | AccessControlSections.Access);
+                //Directory.GetAccessControl(directory);
+            } catch (UnauthorizedAccessException) {
                 error = true;
-                LogFromNonGUIThread("Primary directory is not accessible.");
-            }
-            catch {
+                LogFromNonGUIThread($"{searchDirectoryType.ToString()} directory is not accessible.");
+            } catch (SystemException e) when (e is ArgumentNullException
+                                           || e is IOException
+                                           || e is PlatformNotSupportedException
+                                           || e is SystemException) {
                 error = true;
-                if (!Directory.Exists(primaryDirectory))
-                    LogFromNonGUIThread("Primary directory does not exist.");
+                if (!Directory.Exists(directory))
+                    LogFromNonGUIThread($"{searchDirectoryType.ToString()} directory does not exist.");
                 else
-                    LogFromNonGUIThread("Unknown error in primary directory.");
-            }
-
-            try {
-                Directory.GetAccessControl(secondaryDirectory);
-            }
-            catch (UnauthorizedAccessException) {
-                error = true;
-                LogFromNonGUIThread("Secondary directory is not accessible.");
-            }
-            catch {
-                error = true;
-                if (!Directory.Exists(secondaryDirectory))
-                    LogFromNonGUIThread("Secondary directory does not exist.");
-                else
-                    LogFromNonGUIThread("Unknown error in secondary directory.");
+                    LogFromNonGUIThread($"Unknown error in {searchDirectoryType.ToString().ToLower(CultureInfo.CurrentCulture)} directory.");
             }
         }
-        public static bool IsSubDirectoryOf(this string candidate, string other) {
-            var isChild = false;
+
+        public static void CheckDirectories(string primaryDirectory, string secondaryDirectory, ref bool error) {
+            CheckDirectory(primaryDirectory, SearchDirectoryType.Primary, ref error);
+            CheckDirectory(secondaryDirectory, SearchDirectoryType.Secondary, ref error);
+        }
+
+        /// <summary>
+        /// Checks whether a path represented by this string is a subdirectory (direct or nested) of specified parent direcory.
+        /// </summary>
+        /// <param name="candidate">path to directory that will be checked</param>
+        /// <param name="parent">parent directory</param>
+        /// <returns><see langword="true"/> if path is a subdirectory of parent, <see langword="false"/> otherwise</returns>
+        /// <exception cref="ArgumentNullException">candidate or parent is null</exception>
+        public static bool IsSubdirectoryOf(this string candidate, string parent) {
+            if (candidate is null)
+                throw new ArgumentNullException(nameof(candidate));
+            if (parent is null)
+                throw new ArgumentNullException(nameof(parent));
+
+            bool isChild = false;
             try {
-                var candidateInfo = new DirectoryInfo(candidate);
-                var otherInfo = new DirectoryInfo(other);
+                DirectoryInfo candidateInfo = new DirectoryInfo(candidate);
+                DirectoryInfo parentInfo = new DirectoryInfo(parent);
 
                 while (candidateInfo.Parent != null) {
-                    if (candidateInfo.Parent.FullName == otherInfo.FullName) {
+                    if (candidateInfo.Parent.FullName == parentInfo.FullName) {
                         isChild = true;
                         break;
-                    }
-                    else candidateInfo = candidateInfo.Parent;
+                    } else
+                        candidateInfo = candidateInfo.Parent;
                 }
-            }
-            catch (Exception error) {
-                var message = String.Format("Unable to check directories {0} and {1}: {2}", candidate, other, error);
-                Trace.WriteLine(message);
+            } catch (Exception error) when (error is ArgumentNullException
+                                         || error is SecurityException
+                                         || error is ArgumentException
+                                         || error is PathTooLongException) {
+                Trace.WriteLine($"Unable to check directories {candidate} and {parent}: {error}");
             }
 
             return isChild;
         }
 
+        /// <summary>
+        /// Normalizes a path, so that all paths that point to the same file or directory will be equal after normalization.
+        /// </summary>
+        /// <param name="path">Path to a file or directory</param>
+        /// <returns>Normalized path</returns>
         public static string NormalizePath(string path) {
             try {
                 path = Path.GetFullPath(new Uri(path).LocalPath).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            } catch (Exception error) when (error is ArgumentException
+                                         || error is ArgumentNullException
+                                         || error is InvalidOperationException
+                                         || error is NotSupportedException
+                                         || error is PathTooLongException
+                                         || error is SecurityException
+                                         || error is UriFormatException) {
             }
-            catch { }
 
-            if (path.Length > 0 && path.Last() == ':')
+            if (path != null && path.Length > 0 && path.Last() == ':')
                 path += '\\';
             return path;
         }
@@ -89,7 +109,7 @@ namespace FileDuplicateFinder {
         public static void LogFromNonGUIThread(string message) {
             dispatcher.BeginInvoke((Action)(() => Log(message)));
         }
-        
+
         public static void BeginInvoke(Action callback) {
             dispatcher.BeginInvoke(callback);
         }
@@ -113,11 +133,11 @@ namespace FileDuplicateFinder {
             string digits;
 
             if (order == 0)
-                digits = String.Format("{0:0}", size);
+                digits = string.Format("{0:0}", size);
             else
-                digits = String.Format("{0:0.00}", size);
+                digits = string.Format("{0:0.00}", size);
 
-            if(digits.Length >= 5) {
+            if (digits.Length >= 5) {
                 if (new string(new char[] { digits[3] }).Equals(Thread.CurrentThread.CurrentCulture.NumberFormat.NumberDecimalSeparator))
                     digits = digits.Substring(0, 3);
                 else
@@ -171,9 +191,11 @@ namespace FileDuplicateFinder {
         }
 
         /// IEnumerable?
+        /// 
+        ///Returns true if an item was removed
         public static bool Remove(this ObservableRangeCollection<FileEntry> collection, string path) {
             for (int i = 0; i < collection.Count; i++) {
-                if (collection[i].Path.Equals(path)) {
+                if (collection[i].Path.Equals(path, StringComparison.Ordinal)) {
                     collection.RemoveAt(i);
                     return true;
                 }
