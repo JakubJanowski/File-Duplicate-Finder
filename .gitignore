@@ -264,4 +264,5 @@ paket-files/
 __pycache__/
 *.pyc
 /pub
-/test/Badania operacyjne
+/test
+/testBackup
