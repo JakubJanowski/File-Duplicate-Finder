@@ -1,1 +1,0 @@
-Conver license to rtf and move it to \File Duplicate Finder Installer\Assets

@@ -1,3 +1,3 @@
-﻿# File Duplicate Finder Licence
+﻿# File Duplicate Finder License
 
 blblblbl ahaha

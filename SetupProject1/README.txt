@@ -1,1 +1,0 @@
-﻿x64 exe has no shield but to run it for the first time it needs to be launched as admin

@@ -4,13 +4,12 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProductVersion>3.10</ProductVersion>
-    <ProjectGuid>c8477420-fe84-42e0-b64e-3f64eb08627a</ProjectGuid>
+    <ProjectGuid>31cfdf79-6ec5-42ca-b902-d7c578a73c79</ProjectGuid>
     <SchemaVersion>2.0</SchemaVersion>
     <OutputName>FileDuplicateFinderInstaller-$(Configuration)-$(Platform)</OutputName>
     <OutputType>Package</OutputType>
     <Name>File Duplicate Finder Installer</Name>
     <Cultures>;</Cultures>
-    <!-- No cultures -->
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <OutputPath>bin\$(Configuration)\</OutputPath>
@@ -70,16 +69,6 @@
     <EmbeddedResource Include="Strings.wxl" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\File Duplicate Finder\File Duplicate Finder.csproj">
-      <Name>File Duplicate Finder</Name>
-      <Project>{f8eced31-975e-4779-8612-60e7722cbf56}</Project>
-      <Private>True</Private>
-      <DoNotHarvest>True</DoNotHarvest>
-      <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
-      <RefTargetDir>APPLICATIONFOLDER</RefTargetDir>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="Assets\Background.bmp" />
     <Content Include="Assets\Banner.bmp" />
     <Content Include="Assets\Complete.ico" />
@@ -104,6 +93,16 @@
       <Name>WixUtilExtension</Name>
     </WixExtension>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\FileDuplicateFinder\FileDuplicateFinder.csproj">
+      <Name>FileDuplicateFinder</Name>
+      <Project>{cee1a245-399e-44df-8154-bb88df7aa715}</Project>
+      <Private>True</Private>
+      <DoNotHarvest>True</DoNotHarvest>
+      <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
+      <RefTargetDir>INSTALLFOLDER</RefTargetDir>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(WixTargetsPath)" Condition=" '$(WixTargetsPath)' != '' " />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets" Condition=" '$(WixTargetsPath)' == '' AND Exists('$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets') " />
   <Target Name="EnsureWixToolsetInstalled" Condition=" '$(WixTargetsImported)' != 'true' ">
@@ -113,7 +112,7 @@
     <!--<Exec Command=""/>  Clean previous publish folder
     <Exec Command=""/>  Build the program-->
     <!-- Get assembly version -->
-    <GetAssemblyIdentity AssemblyFiles="..\File Duplicate Finder\bin\$(Platform)\$(Configuration)\File Duplicate Finder.exe">
+    <GetAssemblyIdentity AssemblyFiles="..\FileDuplicateFinder\bin\$(Platform)\$(Configuration)\FileDuplicateFinder.exe">
       <Output TaskParameter="Assemblies" ItemName="AssemblyVersion" />
     </GetAssemblyIdentity>
     <!-- Define variable for build version-->
