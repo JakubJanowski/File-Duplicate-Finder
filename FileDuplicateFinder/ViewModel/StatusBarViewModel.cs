@@ -1,5 +1,5 @@
 ﻿namespace FileDuplicateFinder.ViewModel {
-    class StatusBarViewModel: ObjectBase {
+    public class StatusBarViewModel: ObjectBase {
         private bool showProgress = false;
         private bool isIndeterminate = false;
         private int progress = 0;

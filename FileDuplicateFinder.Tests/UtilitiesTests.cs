@@ -1,13 +1,30 @@
 ﻿using Xunit;
-//using Moq;
+using Moq;
 using System.IO;
 using System.Reflection;
 using System;
-using System.Windows.Threading;
+using System.Windows;
 
 namespace FileDuplicateFinder.Tests {
-    public class UtilitiesTests {
-        private readonly string testDirectory = Path.Combine(Path.GetDirectoryName(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)), "test\\TEST");
+    public class TestsFixture: IDisposable {
+        public string TestDirectory { get; } = Path.Combine(Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)))))), "test\\TEST");
+
+        public TestsFixture() {
+            if (Application.Current is null)
+                new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
+        }
+
+        public void Dispose() {
+            Application.Current.Shutdown();
+        }
+    }
+
+    public class UtilitiesTests: IClassFixture<TestsFixture> {
+        private readonly string testDirectory;
+
+        public UtilitiesTests(TestsFixture data) {
+            testDirectory = data.TestDirectory;
+        }
 
         #region IsSubDirectoryOf tests
         [Fact]
@@ -91,13 +108,24 @@ namespace FileDuplicateFinder.Tests {
 
         [Fact]
         public void CheckDirectory_ShouldSetErrorToTrue_ForNonexistentDirectory() {
-            //Dispatcher dispatcher = new Mock<Dispatcher>();
             const string directory = "C:\\test\\parent\\directory";
             bool result = false;
 
             Utilities.CheckDirectory(directory, SearchDirectoryType.Primary, ref result);
 
             Assert.True(result);
+        }
+
+        [Fact]
+        public void CheckDirectory_ShouldNotSetError_ForExistingDirectory() {
+            bool result1 = false;
+            bool result2 = true;
+
+            Utilities.CheckDirectory(testDirectory, SearchDirectoryType.Primary, ref result1);
+            Utilities.CheckDirectory(testDirectory, SearchDirectoryType.Primary, ref result2);
+
+            Assert.False(result1);
+            Assert.True(result2);
         }
 
         #endregion

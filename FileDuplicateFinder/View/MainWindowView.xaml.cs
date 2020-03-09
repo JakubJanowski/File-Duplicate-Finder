@@ -11,9 +11,6 @@ namespace FileDuplicateFinder.View {
         public MainWindowView() {
             SetCulture();
             InitializeComponent();
-
-            Utilities.dispatcher = Dispatcher;
-            FileManager.dispatcher = Dispatcher;
         }
 
         private void SetCulture() {

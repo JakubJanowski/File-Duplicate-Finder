@@ -7,7 +7,6 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Media;
-using System.Windows.Threading;
 
 namespace FileDuplicateFinder.Services {
     using FileEntryCollection = ObservableRangeCollection<FileEntry>;
@@ -36,7 +35,6 @@ namespace FileDuplicateFinder.Services {
         public static ObservableRangeCollection<Tuple<string, string>> storedFiles = new ObservableRangeCollection<Tuple<string, string>>();
 
         internal static StatusBarViewModel statusBarViewModel;
-        internal static Dispatcher dispatcher;
 
         static FileManager() {
             ///this or stick to refresh and no use for observable
@@ -72,13 +70,13 @@ namespace FileDuplicateFinder.Services {
             }
 
 
-            dispatcher.BeginInvoke((Action)(() => {
+            Utilities.BeginInvoke(() => {
                 emptyDirectoriesPrimary.AddRange(localEmptyDirectories);
                 emptyFilesPrimary.AddRange(localEmptyFiles);
                 localEmptyDirectories.Clear();
                 localEmptyFiles.Clear();
                 statusBarViewModel.State = "Sorting files by size";
-            }));
+            });
 
             bool sorted = false;
             while (!sorted) {
@@ -323,10 +321,10 @@ namespace FileDuplicateFinder.Services {
                 for (int i = 0; i < localList.Count; i++)
                     for (int j = 0; j < localList[i].Count; j++)
                         localList[i][j].Path = directory + localList[i][j].Path;
-            dispatcher.BeginInvoke((Action)(() => {
+            Utilities.BeginInvoke(() => {
                 duplicatedFilesPrimaryOnly.AddRange(localList);
                 localList.Clear();
-            }));
+            });
         }
 
         public static void FindDuplicatedFiles(string primaryDirectory, string secondaryDirectory, bool showBasePaths) {
@@ -341,13 +339,13 @@ namespace FileDuplicateFinder.Services {
                 return;
             }
 
-            dispatcher.BeginInvoke((Action)(() => {
+            Utilities.BeginInvoke(() => {
                 emptyDirectoriesPrimary.AddRange(localEmptyDirectoriesPrimary);
                 emptyFilesPrimary.AddRange(localEmptyFilesPrimary);
                 statusBarViewModel.State = "Processing secondary directory";
                 localEmptyDirectoriesPrimary.Clear();
                 localEmptyFilesPrimary.Clear();
-            }));
+            });
             List<FileEntry> localEmptyDirectoriesSecondary = new List<FileEntry>();
             List<FileEntry> localEmptyFilesSecondary = new List<FileEntry>();
 
@@ -358,13 +356,13 @@ namespace FileDuplicateFinder.Services {
                 return;
             }
 
-            dispatcher.BeginInvoke((Action)(() => {
+            Utilities.BeginInvoke(() => {
                 emptyDirectoriesSecondary.AddRange(localEmptyDirectoriesSecondary);
                 emptyFilesSecondary.AddRange(localEmptyFilesSecondary);
                 statusBarViewModel.State = "Sorting files by size in primary directory";
                 localEmptyDirectoriesSecondary.Clear();
                 localEmptyFilesSecondary.Clear();
-            }));
+            });
 
             bool sorted = false;
             while (!sorted) {
@@ -553,10 +551,10 @@ namespace FileDuplicateFinder.Services {
                         localList[i].Item2[j].Path = secondaryDirectory + localList[i].Item2[j].Path;
                 }
             }
-            dispatcher.BeginInvoke((Action)(() => {
+            Utilities.BeginInvoke(() => {
                 duplicatedFiles.AddRange(localList);
                 localList.Clear();
-            }));
+            });
         }
 
         private static void ProcessDirectory(string targetDirectory, List<string> fileList, List<FileEntry> emptyDirectories, List<FileEntry> emptyFiles, string originalDirectory, bool showBasePaths) {
@@ -998,49 +996,49 @@ namespace FileDuplicateFinder.Services {
         ///
         private static void SetProgressStatus(int progress) {
             string stateInfo = progress + " / " + statusBarViewModel.MaxProgress;
-            dispatcher.BeginInvoke((Action)(() => {
+            Utilities.BeginInvoke(() => {
                 statusBarViewModel.StateInfo = stateInfo;
                 statusBarViewModel.Progress = progress;
-            }));
+            });
         }
 
         private static void SetProgressStatus(int progress, int maxProgress) {
             string stateInfo = progress + " / " + maxProgress;
-            dispatcher.BeginInvoke((Action)(() => {
+            Utilities.BeginInvoke(() => {
                 statusBarViewModel.StateInfo = stateInfo;
                 statusBarViewModel.MaxProgress = maxProgress;
                 statusBarViewModel.Progress = progress;
-            }));
+            });
         }
 
         private static void SetProgressStatus(string state) {
-            dispatcher.BeginInvoke((Action)(() => {
+            Utilities.BeginInvoke(() => {
                 statusBarViewModel.State = state;
-            }));
+            });
         }
 
         private static void SetProgressStatus(string state, bool isIndeterminate) {
-            dispatcher.BeginInvoke((Action)(() => {
+            Utilities.BeginInvoke(() => {
                 statusBarViewModel.State = state;
                 statusBarViewModel.IsIndeterminate = isIndeterminate;
-            }));
+            });
         }
 
         private static void SetProgressStatus(string state, int progress, int maxProgress) {
             string stateInfo = progress + " / " + maxProgress;
-            dispatcher.BeginInvoke((Action)(() => {
+            Utilities.BeginInvoke(() => {
                 statusBarViewModel.State = state;
                 statusBarViewModel.StateInfo = stateInfo;
                 statusBarViewModel.IsIndeterminate = false;
                 statusBarViewModel.MaxProgress = maxProgress;
                 statusBarViewModel.Progress = progress;
-            }));
+            });
         }
 
         private static void AddRangeToCollection<T>(ObservableRangeCollection<T> collection, List<T> list) {
-            dispatcher.BeginInvoke((Action)(() => {
+            Utilities.BeginInvoke(() => {
                 collection.AddRange(list);
-            }));
+            });
         }
 
         public static ImageSource GetFileIcon(string filePath) {

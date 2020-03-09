@@ -8,16 +8,15 @@ using System.Linq;
 using System.Security;
 using System.Security.AccessControl;
 using System.Threading;
+using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Threading;
 
 namespace FileDuplicateFinder {
     public static class Utilities {
 
-        internal static ListView logListView;
-        internal static TabItem logTabItem;
-        internal static Dispatcher dispatcher;
-        internal static StatusBarViewModel statusBarViewModel;
+        public static ListView logListView;
+        public static TabItem logTabItem;
+        public static StatusBarViewModel statusBarViewModel;
 
         public static void CheckDirectory(string directory, SearchDirectoryType searchDirectoryType, ref bool error) {
             try {
@@ -107,11 +106,11 @@ namespace FileDuplicateFinder {
         }
 
         public static void LogFromNonGUIThread(string message) {
-            dispatcher.BeginInvoke((Action)(() => Log(message)));
+            BeginInvoke(() => Log(message));
         }
 
         public static void BeginInvoke(Action callback) {
-            dispatcher.BeginInvoke(callback);
+            Application.Current.Dispatcher.BeginInvoke(callback);
         }
 
         public static string PrettyPrintSize(long bytes) {
@@ -121,12 +120,12 @@ namespace FileDuplicateFinder {
 
             while (bytes >= 1024 * 1024 && order < sizes.Length - 1) {
                 order++;
-                bytes = bytes / 1024;
+                bytes /= 1024;
             }
             if (bytes >= 1024 && order < sizes.Length - 1) {
                 order++;
                 remainder = (int)bytes % 1024;
-                bytes = bytes / 1024;
+                bytes /= 1024;
             }
 
             double size = bytes + ((double)remainder / 1024);
