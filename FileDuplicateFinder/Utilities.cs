@@ -10,6 +10,7 @@ using System.Security.AccessControl;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Threading;
 
 namespace FileDuplicateFinder {
     public static class Utilities {
@@ -21,7 +22,7 @@ namespace FileDuplicateFinder {
         public static void CheckDirectory(string directory, SearchDirectoryType searchDirectoryType, ref bool error) {
             try {
                 DirectorySecurity _ = new DirectorySecurity(directory, AccessControlSections.Owner | AccessControlSections.Group | AccessControlSections.Access);
-                //Directory.GetAccessControl(directory);
+                ///Directory.GetAccessControl(directory);
             } catch (UnauthorizedAccessException) {
                 error = true;
                 LogFromNonGUIThread($"{searchDirectoryType.ToString()} directory is not accessible.");
@@ -94,7 +95,7 @@ namespace FileDuplicateFinder {
                                          || error is UriFormatException) {
             }
 
-            if (path != null && path.Length > 0 && path.Last() == ':')
+            if (path?.Length > 0 && path.Last() == ':')
                 path += '\\';
             return path;
         }
@@ -109,11 +110,14 @@ namespace FileDuplicateFinder {
             BeginInvoke(() => Log(message));
         }
 
-        public static void BeginInvoke(Action callback) {
-            Application.Current.Dispatcher.BeginInvoke(callback);
+        public static DispatcherOperation BeginInvoke(Action callback) {
+            return Application.Current.Dispatcher.BeginInvoke(callback);
         }
 
         public static string PrettyPrintSize(long bytes) {
+            if (bytes < 0)
+                throw new ArgumentException();
+
             string[] sizes = { "B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB" };
             int order = 0;
             int remainder = 0;
