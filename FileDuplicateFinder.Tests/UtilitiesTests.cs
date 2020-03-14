@@ -10,12 +10,17 @@ namespace FileDuplicateFinder.Tests {
         public string TestDirectory { get; } = Path.Combine(Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)))))), @"test\TEST");
 
         public TestsFixture() {
-            if (Application.Current is null)
-                new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
+            if (Application.Current is null) {
+                try {
+                    new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
+                } catch (InvalidOperationException) { }
+            }
         }
 
         public void Dispose() {
-            Application.Current.Shutdown();
+            try {
+                Application.Current?.Shutdown();
+            } catch(InvalidOperationException) { }
         }
     }
 
@@ -295,7 +300,7 @@ namespace FileDuplicateFinder.Tests {
         public void PrettyPrintSize_ShouldThrowArgumentException_ForNegativeBytes() {
             const long bytes = -123;
 
-            Assert.Throws<ArgumentException>(() =>  Utilities.PrettyPrintSize(bytes));
+            Assert.Throws<ArgumentException>(() => Utilities.PrettyPrintSize(bytes));
         }
         #endregion
     }

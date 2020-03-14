@@ -12,7 +12,7 @@ namespace FileDuplicateFinder.Services {
     using FileEntryCollection = ObservableRangeCollection<FileEntry>;
     using TupleOfFileEntryCollections = Tuple<ObservableRangeCollection<FileEntry>, ObservableRangeCollection<FileEntry>>;
 
-    internal static class FileManager {
+    public static class FileManager {
         public static string tmpDirectory;
         private const int mebiByte = 1048576;
         private volatile static bool stopTask = false;
@@ -34,7 +34,7 @@ namespace FileDuplicateFinder.Services {
         /// should I make storedFiles list ObservableRangeCollection in RestoreFileDialog class too?
         public static ObservableRangeCollection<Tuple<string, string>> storedFiles = new ObservableRangeCollection<Tuple<string, string>>();
 
-        internal static StatusBarViewModel statusBarViewModel;
+        public static StatusBarViewModel statusBarViewModel;
 
         static FileManager() {
             ///this or stick to refresh and no use for observable
@@ -48,7 +48,7 @@ namespace FileDuplicateFinder.Services {
             BindingOperations.EnableCollectionSynchronization(duplicatedFilesPrimaryOnly, new object());
         }
 
-        internal static void StopTask() {
+        public static void StopTask() {
             stopTask = true;
         }
 
@@ -57,26 +57,17 @@ namespace FileDuplicateFinder.Services {
         /// </summary>
         /// <param name="directory">the base directory to start recursive search in</param>
         /// <param name="showBasePaths">flag whether absolute path or relative should be displayed</param>
-        internal static void FindDuplicatedFiles(string directory, bool showBasePaths) {
+        public static void FindDuplicatedFiles(string directory, bool showBasePaths) {
             SetProgressStatus("Processing directory", true);
-            List<FileEntry> localEmptyDirectories = new List<FileEntry>();
-            List<FileEntry> localEmptyFiles = new List<FileEntry>();
 
-            ProcessDirectory(directory, primaryFiles, localEmptyDirectories, localEmptyFiles, directory, showBasePaths);
+            ProcessDirectory(directory, primaryFiles, emptyDirectoriesPrimary, emptyFilesPrimary, directory, showBasePaths);
 
             if (stopTask) {
                 stopTask = false;
                 return;
             }
 
-
-            Utilities.BeginInvoke(() => {
-                emptyDirectoriesPrimary.AddRange(localEmptyDirectories);
-                emptyFilesPrimary.AddRange(localEmptyFiles);
-                localEmptyDirectories.Clear();
-                localEmptyFiles.Clear();
-                statusBarViewModel.State = "Sorting files by size";
-            });
+            SetProgressStatus("Sorting files by size");
 
             bool sorted = false;
             while (!sorted) {
@@ -191,7 +182,7 @@ namespace FileDuplicateFinder.Services {
             stopTask = false;
         }
 
-        internal static void RemoveSecondaryFileWithPath(string path) {
+        public static void RemoveSecondaryFileWithPath(string path) {
             if (!emptyFilesSecondary.Remove(path)) {
                 for (int i = 0; i < duplicatedFiles.Count; i++) {
                     int index = duplicatedFiles[i].Item2.FindIndex(f => f.Path == path);
@@ -205,7 +196,7 @@ namespace FileDuplicateFinder.Services {
             }
         }
 
-        internal static void RemovePrimaryFileWithPath(string path) {
+        public static void RemovePrimaryFileWithPath(string path) {
             if (!emptyFilesPrimary.Remove(path)) {
                 for (int i = 0; i < duplicatedFilesPrimaryOnly.Count; i++) {
                     int index = duplicatedFilesPrimaryOnly[i].FindIndex(f => f.Path == path);
@@ -228,7 +219,7 @@ namespace FileDuplicateFinder.Services {
             }
         }
 
-        internal static void Initialize() {
+        public static void Initialize() {
             primaryFiles.Clear();
             secondaryFiles.Clear();
             emptyDirectoriesPrimary.Clear();
@@ -241,7 +232,7 @@ namespace FileDuplicateFinder.Services {
             storedFiles.Clear();
         }
 
-        internal static void HidePrimaryBasePaths(string primaryDirectory) {
+        public static void HidePrimaryBasePaths(string primaryDirectory) {
             for (int i = 0; i < duplicatedFilesPrimaryOnly.Count; i++)
                 for (int p = 0; p < duplicatedFilesPrimaryOnly[i].Count; p++)
                     duplicatedFilesPrimaryOnly[i][p].Path = new string(duplicatedFilesPrimaryOnly[i][p].Path.Skip(primaryDirectory.Length).ToArray());
@@ -255,7 +246,7 @@ namespace FileDuplicateFinder.Services {
             emptyFilesPrimary.Refresh();
         }
 
-        internal static void HideBasePaths(string primaryDirectory, string secondaryDirectory) {
+        public static void HideBasePaths(string primaryDirectory, string secondaryDirectory) {
             for (int i = 0; i < duplicatedFiles.Count; i++) {
                 for (int p = 0; p < duplicatedFiles[i].Item1.Count; p++)
                     duplicatedFiles[i].Item1[p].Path = new string(duplicatedFiles[i].Item1[p].Path.Skip(primaryDirectory.Length).ToArray());
@@ -278,7 +269,7 @@ namespace FileDuplicateFinder.Services {
             emptyFilesSecondary.Refresh();
         }
 
-        internal static void ShowPrimaryBasePaths(string primaryDirectory) {
+        public static void ShowPrimaryBasePaths(string primaryDirectory) {
             for (int i = 0; i < duplicatedFilesPrimaryOnly.Count; i++)
                 for (int p = 0; p < duplicatedFilesPrimaryOnly[i].Count; p++)
                     duplicatedFilesPrimaryOnly[i][p].Path = primaryDirectory + duplicatedFilesPrimaryOnly[i][p].Path;
@@ -292,7 +283,7 @@ namespace FileDuplicateFinder.Services {
             emptyFilesPrimary.Refresh();
         }
 
-        internal static void ShowBasePaths(string primaryDirectory, string secondaryDirectory) {
+        public static void ShowBasePaths(string primaryDirectory, string secondaryDirectory) {
             for (int i = 0; i < duplicatedFiles.Count; i++) {
                 for (int p = 0; p < duplicatedFiles[i].Item1.Count; p++)
                     duplicatedFiles[i].Item1[p].Path = primaryDirectory + duplicatedFiles[i].Item1[p].Path;
@@ -315,7 +306,7 @@ namespace FileDuplicateFinder.Services {
             emptyFilesSecondary.Refresh();
         }
 
-        private static void AbortFindDuplicateFilesOneDirectory(bool showBasePaths, List<FileEntryCollection> localList, string directory) {
+        public static void AbortFindDuplicateFilesOneDirectory(bool showBasePaths, List<FileEntryCollection> localList, string directory) {
             duplicateIndexingPrimary.Clear();
             if (showBasePaths)
                 for (int i = 0; i < localList.Count; i++)
@@ -441,7 +432,7 @@ namespace FileDuplicateFinder.Services {
             int indexPrimary = 0;
             int indexSecondary = 0;
             long lengthPrimary, lengthSecondary;
-            List<Tuple<FileEntryCollection, FileEntryCollection>> localList = new List<Tuple<FileEntryCollection, FileEntryCollection>>();
+            List<TupleOfFileEntryCollections> localList = new List<TupleOfFileEntryCollections>();
             while (indexPrimary < primaryFiles.Count && indexSecondary < secondaryFiles.Count) {
                 if (stopTask) {
                     stopTask = false;
@@ -505,7 +496,7 @@ namespace FileDuplicateFinder.Services {
                                     string absolutePathSecondary = secondaryDirectory + secondaryFiles[indexSecondary];
                                     duplicateIndexingPrimary[indexPrimary] = localList.Count;
                                     duplicateIndexingSecondary[indexSecondary] = localList.Count;
-                                    Tuple<FileEntryCollection, FileEntryCollection> tuple = Tuple.Create(new FileEntryCollection(), new FileEntryCollection());
+                                    TupleOfFileEntryCollections tuple = Tuple.Create(new FileEntryCollection(), new FileEntryCollection());
 
                                     ///
                                     Utilities.BeginInvoke(() => {
@@ -530,7 +521,7 @@ namespace FileDuplicateFinder.Services {
                                 localList[i].Item2[j].Path = secondaryDirectory + localList[i].Item2[j].Path;
                         }
                     }
-                    AddRangeToCollection(duplicatedFiles, new List<Tuple<FileEntryCollection, FileEntryCollection>>(localList));
+                    AddRangeToCollection(duplicatedFiles, new List<TupleOfFileEntryCollections>(localList));
                     localList.Clear();
                 } else if (lengthPrimary < lengthSecondary)
                     indexPrimary++;
@@ -540,7 +531,7 @@ namespace FileDuplicateFinder.Services {
             stopTask = false;
         }
 
-        private static void AbortFindDuplicateFiles(bool showBasePaths, List<Tuple<FileEntryCollection, FileEntryCollection>> localList, string primaryDirectory, string secondaryDirectory) {
+        private static void AbortFindDuplicateFiles(bool showBasePaths, List<TupleOfFileEntryCollections> localList, string primaryDirectory, string secondaryDirectory) {
             duplicateIndexingPrimary.Clear();
             duplicateIndexingSecondary.Clear();
             if (showBasePaths) {
@@ -557,7 +548,7 @@ namespace FileDuplicateFinder.Services {
             });
         }
 
-        private static void ProcessDirectory(string targetDirectory, List<string> fileList, List<FileEntry> emptyDirectories, List<FileEntry> emptyFiles, string originalDirectory, bool showBasePaths) {
+        private static void ProcessDirectory(string targetDirectory, List<string> fileList, ICollection<FileEntry> emptyDirectories, ICollection<FileEntry> emptyFiles, string originalDirectory, bool showBasePaths) {
             if (stopTask)
                 return;
             string[] files;
@@ -643,23 +634,23 @@ namespace FileDuplicateFinder.Services {
             return true;
         }
 
-        internal static void EmptyDirectoriesPrimaryIgnoreFile(string path) {
+        public static void EmptyDirectoriesPrimaryIgnoreFile(string path) {
             emptyDirectoriesPrimary.Remove(path);
         }
 
-        internal static void EmptyFilesPrimaryIgnoreFile(string path) {
+        public static void EmptyFilesPrimaryIgnoreFile(string path) {
             emptyFilesPrimary.Remove(path);
         }
 
-        internal static void EmptyDirectoriesSecondaryIgnoreFile(string path) {
+        public static void EmptyDirectoriesSecondaryIgnoreFile(string path) {
             emptyDirectoriesSecondary.Remove(path);
         }
 
-        internal static void EmptyFilesSecondaryIgnoreFile(string path) {
+        public static void EmptyFilesSecondaryIgnoreFile(string path) {
             emptyFilesSecondary.Remove(path);
         }
 
-        internal static void DuplicatedFilesPrimaryIgnoreFile(string path) {
+        public static void DuplicatedFilesPrimaryIgnoreFile(string path) {
             for (int i = 0; i < duplicatedFiles.Count; i++) {
                 for (int j = 0; j < duplicatedFiles[i].Item1.Count; j++) {
                     if (stopTask) {
@@ -676,7 +667,7 @@ namespace FileDuplicateFinder.Services {
             }
         }
 
-        internal static void DuplicatedFilesSecondaryIgnoreFile(string path) {
+        public static void DuplicatedFilesSecondaryIgnoreFile(string path) {
             for (int i = 0; i < duplicatedFiles.Count; i++) {
                 for (int j = 0; j < duplicatedFiles[i].Item2.Count; j++) {
                     if (stopTask) {
@@ -693,7 +684,7 @@ namespace FileDuplicateFinder.Services {
             }
         }
 
-        internal static void DuplicatedFilesPrimaryOnlyIgnoreFile(string path) {
+        public static void DuplicatedFilesPrimaryOnlyIgnoreFile(string path) {
             for (int i = 0; i < duplicatedFilesPrimaryOnly.Count; i++) {
                 for (int j = 0; j < duplicatedFilesPrimaryOnly[i].Count; j++) {
                     if (stopTask) {
@@ -716,7 +707,7 @@ namespace FileDuplicateFinder.Services {
         /// <param name="path"></param>
         /// <param name="baseDirectory"></param>
         /// <returns><see langword="true"/> if restoring the file will be possible, <see langword="false"/> otherwise</returns>
-        internal static bool RemoveFile(string path, bool backupFiles = false, bool askLarge = false) {
+        public static bool RemoveFile(string path, bool backupFiles = false, bool askLarge = false) {
             bool canRestoreFiles = false;
             try {
                 if (File.GetAttributes(path).HasFlag(FileAttributes.Directory)) {
@@ -751,7 +742,7 @@ namespace FileDuplicateFinder.Services {
             return canRestoreFiles;
         }
 
-        internal static void ClearDirectory(string path) {
+        public static void ClearDirectory(string path) {
             DirectoryInfo directoryInfo = new DirectoryInfo(path);
             foreach (FileInfo file in directoryInfo.GetFiles())
                 file.Delete();
@@ -761,17 +752,17 @@ namespace FileDuplicateFinder.Services {
 
 
         #region Sorting functions
-        internal static void SortAlphabetically() {
-            duplicatedFiles.Sort(Comparer<Tuple<FileEntryCollection, FileEntryCollection>>.Create((a, b) => string.Compare(a.Item1[0].Path, b.Item1[0].Path, StringComparison.InvariantCultureIgnoreCase)));
+        public static void SortAlphabetically() {
+            duplicatedFiles.Sort(Comparer<TupleOfFileEntryCollections>.Create((a, b) => string.Compare(a.Item1[0].Path, b.Item1[0].Path, StringComparison.InvariantCultureIgnoreCase)));
         }
 
         /// could do simpler sort as follows:
         /// duplicatedFiles.Sort(Comparer<Tuple<List<FileEntry>, List<FileEntry>>>.Create((a, b) => a.Item1[0].Size.CompareTo(b.Item1[0].Size)));
-        internal static void SortBySize(string baseDirectory = "") {
+        public static void SortBySize(string baseDirectory = "") {
             bool sorted = false;
             while (!sorted) {
                 try {
-                    duplicatedFiles.Sort(Comparer<Tuple<FileEntryCollection, FileEntryCollection>>.Create((a, b) => {
+                    duplicatedFiles.Sort(Comparer<TupleOfFileEntryCollections>.Create((a, b) => {
                         long aLength = 0, bLength = 0;
                         if (a.Item1.Count > 0) {
                             aLength = GetFileLength(baseDirectory + a.Item1[0].Path);
@@ -816,11 +807,11 @@ namespace FileDuplicateFinder.Services {
             }
         }
 
-        internal static void SortAlphabeticallyPrimaryOnly() {
+        public static void SortAlphabeticallyPrimaryOnly() {
             duplicatedFilesPrimaryOnly.Sort(Comparer<FileEntryCollection>.Create((a, b) => string.Compare(a[0].Path, b[0].Path, StringComparison.InvariantCultureIgnoreCase)));
         }
 
-        internal static void SortBySizePrimaryOnly(string baseDirectory = "") {
+        public static void SortBySizePrimaryOnly(string baseDirectory = "") {
             bool sorted = false;
             while (!sorted) {
                 try {
@@ -864,7 +855,7 @@ namespace FileDuplicateFinder.Services {
         #endregion
 
 
-        internal static void RemoveAllEmptyDirectoriesPrimary(string baseDirectory = "") {
+        public static void RemoveAllEmptyDirectoriesPrimary(string baseDirectory = "") {
             SetProgressStatus(0, emptyDirectoriesPrimary.Count);
             for (int i = 0; i < emptyDirectoriesPrimary.Count; i++) {
                 if (stopTask) {
@@ -882,7 +873,7 @@ namespace FileDuplicateFinder.Services {
             emptyDirectoriesPrimary.RemoveRange(0, i);
         }
 
-        internal static void RemoveAllEmptyDirectoriesSecondary(string baseDirectory = "") {
+        public static void RemoveAllEmptyDirectoriesSecondary(string baseDirectory = "") {
             SetProgressStatus(0, emptyDirectoriesSecondary.Count);
             for (int i = 0; i < emptyDirectoriesSecondary.Count; i++) {
                 if (stopTask) {
@@ -900,7 +891,7 @@ namespace FileDuplicateFinder.Services {
             emptyDirectoriesSecondary.RemoveRange(0, i);
         }
 
-        internal static void RemoveAllEmptyFilesPrimary(string baseDirectory = "") {
+        public static void RemoveAllEmptyFilesPrimary(string baseDirectory = "") {
             SetProgressStatus(0, emptyFilesPrimary.Count);
             for (int i = 0; i < emptyFilesPrimary.Count; i++) {
                 if (stopTask) {
@@ -918,7 +909,7 @@ namespace FileDuplicateFinder.Services {
             emptyFilesPrimary.RemoveRange(0, i);
         }
 
-        internal static void RemoveAllEmptyFilesSecondary(string baseDirectory = "") {
+        public static void RemoveAllEmptyFilesSecondary(string baseDirectory = "") {
             SetProgressStatus(0, emptyFilesSecondary.Count);
             for (int i = 0; i < emptyFilesSecondary.Count; i++) {
                 if (stopTask) {
@@ -936,7 +927,7 @@ namespace FileDuplicateFinder.Services {
             emptyFilesSecondary.RemoveRange(0, i);
         }
 
-        internal static void RemoveAllPrimary(string baseDirectory = "") {
+        public static void RemoveAllPrimary(string baseDirectory = "") {
             SetProgressStatus(0, duplicatedFiles.Count);
             for (int i = 0, progress = 0; i < duplicatedFiles.Count; progress++) {
                 for (int j = 0; j < duplicatedFiles[i].Item1.Count; j++) {
@@ -964,7 +955,7 @@ namespace FileDuplicateFinder.Services {
                 duplicatedFiles[i].Item1.Clear();
         }
 
-        internal static void RemoveAllSecondary(string baseDirectory = "") {
+        public static void RemoveAllSecondary(string baseDirectory = "") {
             SetProgressStatus(0, duplicatedFiles.Count);
             for (int i = 0, progress = 0; i < duplicatedFiles.Count; progress++) {
                 for (int j = 0; j < duplicatedFiles[i].Item2.Count; j++) {

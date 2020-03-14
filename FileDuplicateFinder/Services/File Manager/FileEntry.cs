@@ -12,10 +12,6 @@ namespace FileDuplicateFinder {
             Icon = icon;
         }
 
-        public FileEntry(string path, ImageSource icon) {
-            Path = path;
-            Size = null;
-            Icon = icon;
-        }
+        public FileEntry(string path, ImageSource icon) : this(path, null, icon) { }
     }
 }
