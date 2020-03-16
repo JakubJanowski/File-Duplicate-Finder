@@ -55,8 +55,8 @@ namespace FileDuplicateFinder.Services {
         /// <summary>
         /// Search for duplicated files in primary directory only
         /// </summary>
-        /// <param name="directory">the base directory to start recursive search in</param>
-        /// <param name="showBasePaths">flag whether absolute path or relative should be displayed</param>
+        /// <param name="directory">The base directory to start recursive search in</param>
+        /// <param name="showBasePaths">A flag specifying whether an absolute or relative path should be displayed</param>
         public static void FindDuplicatedFiles(string directory, bool showBasePaths) {
             SetProgressStatus("Processing directory", true);
 
@@ -111,7 +111,7 @@ namespace FileDuplicateFinder.Services {
             long length;
             long otherLength;
             int groupIndex;
-            List<FileEntryCollection> localList = new List<FileEntryCollection>();
+
             for (; index < primaryFiles.Count - 1; index++) {
                 if (stopTask) {
                     stopTask = false;
@@ -130,51 +130,63 @@ namespace FileDuplicateFinder.Services {
                 }
                 if (length == otherLength) {
                     do {
+                        string absolutePath = directory + primaryFiles[index];
+                        string displayPath, displayPathOther;
+                        if (showBasePaths)
+                            displayPath = absolutePath;
+                        else
+                            displayPath = primaryFiles[index];
+
                         for (otherIndex = index + 1, groupIndex = -1; otherIndex < primaryFiles.Count; otherIndex++) {
                             if (stopTask) {
-                                AbortFindDuplicateFilesOneDirectory(showBasePaths, localList, directory);
+                                duplicateIndexingPrimary.Clear();
                                 stopTask = false;
                                 return;
                             }
-                            long tmpLength = GetFileLength(directory + primaryFiles[otherIndex]);
+
+                            string absolutePathOther = directory + primaryFiles[otherIndex];
+                            long tmpLength = GetFileLength(absolutePathOther);
+
                             if (tmpLength < 0)
                                 continue;
                             else if (tmpLength != length)
                                 break;
 
                             if (groupIndex != -1) {
-                                if (CompareFileContent(directory + primaryFiles[index], directory + primaryFiles[otherIndex], length)) {
-                                    string absolutePath = directory + primaryFiles[otherIndex];
-                                    localList[groupIndex].Add(new FileEntry(primaryFiles[otherIndex], Utilities.PrettyPrintSize(length), GetFileIcon(absolutePath)));
+                                if (CompareFileContent(absolutePath, absolutePathOther, length)) {
+                                    if (showBasePaths)
+                                        displayPathOther = absolutePathOther;
+                                    else
+                                        displayPathOther = primaryFiles[otherIndex];
+
+                                    duplicatedFilesPrimaryOnly[groupIndex].Add(new FileEntry(displayPathOther, Utilities.PrettyPrintSize(length), GetFileIcon(absolutePathOther)));
                                     duplicateIndexingPrimary[otherIndex] = groupIndex;
                                 }
                             } else if (!duplicateIndexingPrimary.ContainsKey(index)) {
-                                if (CompareFileContent(directory + primaryFiles[index], directory + primaryFiles[otherIndex], length)) {
-                                    string absolutePath = directory + primaryFiles[index];
-                                    string absolutePathOther = directory + primaryFiles[otherIndex];
-                                    groupIndex = localList.Count;
-                                    duplicateIndexingPrimary[otherIndex] = localList.Count;
+                                if (CompareFileContent(absolutePath, absolutePathOther, length)) {
+                                    groupIndex = duplicatedFilesPrimaryOnly.Count;
+                                    duplicateIndexingPrimary[otherIndex] = duplicatedFilesPrimaryOnly.Count;
+
+                                    if (showBasePaths)
+                                        displayPathOther = absolutePathOther;
+                                    else
+                                        displayPathOther = primaryFiles[otherIndex];
+
                                     FileEntryCollection list = new FileEntryCollection {
-                                        new FileEntry(primaryFiles[index], Utilities.PrettyPrintSize(length), GetFileIcon(absolutePath)),
-                                        new FileEntry(primaryFiles[otherIndex], Utilities.PrettyPrintSize(length), GetFileIcon(absolutePathOther))
+                                        new FileEntry(displayPath, Utilities.PrettyPrintSize(length), GetFileIcon(absolutePath)),
+                                        new FileEntry(displayPathOther, Utilities.PrettyPrintSize(length), GetFileIcon(absolutePathOther))
                                     };
 
                                     ///
                                     Utilities.BeginInvoke(() => BindingOperations.EnableCollectionSynchronization(list, new object()));
 
-                                    localList.Add(list);
+                                    duplicatedFilesPrimaryOnly.Add(list);
                                 }
                             }
                         }
                         index++;
                     } while (index < otherIndex - 1);
                     duplicateIndexingPrimary.Clear();
-                    if (showBasePaths)
-                        for (int i = 0; i < localList.Count; i++)
-                            for (int j = 0; j < localList[i].Count; j++)
-                                localList[i][j].Path = directory + localList[i][j].Path;
-                    AddRangeToCollection(duplicatedFilesPrimaryOnly, new List<FileEntryCollection>(localList));
-                    localList.Clear();
                 }
 
                 SetProgressStatus(otherIndex);
@@ -228,8 +240,6 @@ namespace FileDuplicateFinder.Services {
             emptyFilesSecondary.Clear();
             duplicatedFiles.Clear();
             duplicatedFilesPrimaryOnly.Clear();
-            ClearDirectory(tmpDirectory);
-            storedFiles.Clear();
         }
 
         public static void HidePrimaryBasePaths(string primaryDirectory) {
@@ -304,18 +314,6 @@ namespace FileDuplicateFinder.Services {
             emptyFilesPrimary.Refresh();
             emptyDirectoriesSecondary.Refresh();
             emptyFilesSecondary.Refresh();
-        }
-
-        public static void AbortFindDuplicateFilesOneDirectory(bool showBasePaths, List<FileEntryCollection> localList, string directory) {
-            duplicateIndexingPrimary.Clear();
-            if (showBasePaths)
-                for (int i = 0; i < localList.Count; i++)
-                    for (int j = 0; j < localList[i].Count; j++)
-                        localList[i][j].Path = directory + localList[i][j].Path;
-            Utilities.BeginInvoke(() => {
-                duplicatedFilesPrimaryOnly.AddRange(localList);
-                localList.Clear();
-            });
         }
 
         public static void FindDuplicatedFiles(string primaryDirectory, string secondaryDirectory, bool showBasePaths) {
@@ -740,6 +738,11 @@ namespace FileDuplicateFinder.Services {
             }
 
             return canRestoreFiles;
+        }
+
+        public static void ClearTmpDirectory() {
+            ClearDirectory(tmpDirectory);
+            storedFiles.Clear();
         }
 
         public static void ClearDirectory(string path) {

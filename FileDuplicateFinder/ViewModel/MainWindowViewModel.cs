@@ -234,6 +234,7 @@ namespace FileDuplicateFinder.ViewModel {
             StatusBarViewModel.IsIndeterminate = false;
             StatusBarViewModel.ShowProgress = true;
             FileManager.Initialize();
+            FileManager.ClearTmpDirectory();
 
             //logListView.Items.Clear();
             /// should be through MainTabControl
