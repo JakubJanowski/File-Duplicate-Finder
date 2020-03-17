@@ -21,8 +21,13 @@ namespace FileDuplicateFinder {
 
         public static void CheckDirectory(string directory, SearchDirectoryType searchDirectoryType, ref bool error) {
             try {
-                DirectorySecurity _ = new DirectorySecurity(directory, AccessControlSections.Owner | AccessControlSections.Group | AccessControlSections.Access);
                 ///Directory.GetAccessControl(directory);
+                if (Directory.Exists(directory)) {
+                    new DirectorySecurity(directory, AccessControlSections.Owner | AccessControlSections.Group | AccessControlSections.Access);
+                } else {
+                    error = true;
+                    LogFromNonGUIThread($"{searchDirectoryType.ToString()} directory does not exist.");
+                }
             } catch (UnauthorizedAccessException) {
                 error = true;
                 LogFromNonGUIThread($"{searchDirectoryType.ToString()} directory is not accessible.");
@@ -31,10 +36,7 @@ namespace FileDuplicateFinder {
                                            || e is PlatformNotSupportedException
                                            || e is SystemException) {
                 error = true;
-                if (!Directory.Exists(directory))
-                    LogFromNonGUIThread($"{searchDirectoryType.ToString()} directory does not exist.");
-                else
-                    LogFromNonGUIThread($"Unknown error in {searchDirectoryType.ToString().ToLower(CultureInfo.CurrentCulture)} directory.");
+                LogFromNonGUIThread($"Unknown error in {searchDirectoryType.ToString().ToLower(CultureInfo.CurrentCulture)} directory.");
             }
         }
 
@@ -79,13 +81,13 @@ namespace FileDuplicateFinder {
         }
 
         /// <summary>
-        /// Normalizes a path, so that all paths that point to the same file or directory will be equal after normalization.
+        /// Normalizes a path, so that all paths that point to the same directory will be equal after normalization.
         /// </summary>
-        /// <param name="path">Path to a file or directory</param>
+        /// <param name="path">Path to a directory</param>
         /// <returns>Normalized path</returns>
-        public static string NormalizePath(string path) {
+        public static string NormalizeDirectoryPath(string path) {
             try {
-                path = Path.GetFullPath(new Uri(path).LocalPath).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+                path = Path.GetFullPath(new Uri(path).LocalPath);
             } catch (Exception error) when (error is ArgumentException
                                          || error is ArgumentNullException
                                          || error is InvalidOperationException
@@ -95,8 +97,8 @@ namespace FileDuplicateFinder {
                                          || error is UriFormatException) {
             }
 
-            if (path?.Length > 0 && path.Last() == ':')
-                path += '\\';
+            if (path?.Length > 0 && path.Last() != Path.DirectorySeparatorChar)
+                path += Path.DirectorySeparatorChar;
             return path;
         }
 

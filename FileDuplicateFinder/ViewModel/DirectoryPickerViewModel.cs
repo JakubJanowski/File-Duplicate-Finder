@@ -27,7 +27,7 @@ namespace FileDuplicateFinder.ViewModel {
             get => primaryDirectory;
             set {
                 if (primaryDirectory != value) {
-                    primaryDirectory = Utilities.NormalizePath(value);
+                    primaryDirectory = Utilities.NormalizeDirectoryPath(value);
                     statusBarViewModel.State = "Ready";
                     OnPropertyChanged(nameof(PrimaryDirectory));
                 }
@@ -38,7 +38,7 @@ namespace FileDuplicateFinder.ViewModel {
             get => secondaryDirectory;
             set {
                 if (secondaryDirectory != value) {
-                    secondaryDirectory = Utilities.NormalizePath(value);
+                    secondaryDirectory = Utilities.NormalizeDirectoryPath(value);
                     statusBarViewModel.State = "Ready";
                     OnPropertyChanged(nameof(SecondaryDirectory));
                 }

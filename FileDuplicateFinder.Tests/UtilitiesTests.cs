@@ -173,9 +173,9 @@ namespace FileDuplicateFinder.Tests {
         }
         #endregion
 
-        #region NormalizePath tests
+        #region NormalizeDirectoryPath tests
         [Fact]
-        public void NormalizePath_ShouldReturnIdenticalStrings_ForDifferentlyFormatedPathsToTheSameFile() {
+        public void NormalizeDirectoryPath_ShouldReturnIdenticalStrings_ForDifferentlyFormatedPathsToTheSameFile() {
             string[] paths = new string[] {
                 @"C:\test\parent\directory\file.txt",
                 @"C:/test/parent/directory/file.txt",
@@ -185,13 +185,13 @@ namespace FileDuplicateFinder.Tests {
                 @"C:/test/parent/../parent/./directory/file.txt"
             };
 
-            string[] results = paths.Select(p => Utilities.NormalizePath(p)).ToArray();
+            string[] results = paths.Select(p => Utilities.NormalizeDirectoryPath(p)).ToArray();
 
             Assert.Single(results.Distinct());
         }
 
         [Fact]
-        public void NormalizePath_ShouldReturnIdenticalStrings_ForDifferentlyFormatedPathsToTheSameDirectory() {
+        public void NormalizeDirectoryPath_ShouldReturnIdenticalStrings_ForDifferentlyFormatedPathsToTheSameDirectory() {
             string[] paths = new string[] {
                 @"C:\test\parent\directory",
                 @"C:/test/parent/directory",
@@ -205,13 +205,13 @@ namespace FileDuplicateFinder.Tests {
                 @"C:\test\parent\directory\subdirectory\..\",
             };
 
-            string[] results = paths.Select(p => Utilities.NormalizePath(p)).ToArray();
+            string[] results = paths.Select(p => Utilities.NormalizeDirectoryPath(p)).ToArray();
 
             Assert.Single(results.Distinct());
         }
 
         [Fact]
-        public void NormalizePath_ShouldReturnDifferentStrings_ForDifferentPaths() {
+        public void NormalizeDirectoryPath_ShouldReturnDifferentStrings_ForDifferentPaths() {
             string[] paths = new string[] {
                 @"C:\test\parent\directory",
                 @"C:\test\parent\directory\file.txt",
@@ -221,47 +221,45 @@ namespace FileDuplicateFinder.Tests {
                 @"C:\test\parent\otherdirectory\file.txt",
             };
 
-            string[] results = paths.Select(p => Utilities.NormalizePath(p)).ToArray();
+            string[] results = paths.Select(p => Utilities.NormalizeDirectoryPath(p)).ToArray();
 
             Assert.Equal(results.Length, results.Distinct().Count());
         }
 
         [Fact]
-        public void NormalizePath_ShouldReturnTheSameString_ForIncorrectlyFormattedPaths() {
+        public void NormalizeDirectoryPath_ShouldReturnTheSameString_ForIncorrectlyFormattedPaths() {
             string[] paths = new string[] {
                 null,
                 @"",
                 @"\\",
-                @"\\.",
-                @"\\..",
-                @"\\file.txt",
-                @"directory\\file.txt"
+                @"\\.\",
+                @"\\..\",
+                @"\\file.txt\",
+                @"directory\\file.txt\"
             };
 
-            string[] results = paths.Select(p => Utilities.NormalizePath(p)).ToArray();
+            string[] results = paths.Select(p => Utilities.NormalizeDirectoryPath(p)).ToArray();
 
             for (int i = 0; i < results.Length; i++)
                 Assert.Equal(paths[i], results[i]);
         }
 
         [Fact]
-        public void NormalizePath_ShouldEnsureTrailingSlash_ForDrivePath() {
+        public void NormalizePath_ShouldEnsureTrailingSlash() {
             string[] pathsWithoutSlash = new string[] {
                 @"A:",
                 @"C:",
-                @"D:",
-                @"V:"
+                @"C:\directory\subdirectory",
             };
 
             string[] pathsWithSlash = new string[] {
-                @"B:\",
-                @"E:\",
-                @"S:\",
-                @"Z:\"
+                @"D:\",
+                @"Z:\",
+                @"C:\directory\subdirectory\"
             };
 
-            string[] results1 = pathsWithoutSlash.Select(p => Utilities.NormalizePath(p)).ToArray();
-            string[] results2 = pathsWithSlash.Select(p => Utilities.NormalizePath(p)).ToArray();
+            string[] results1 = pathsWithoutSlash.Select(p => Utilities.NormalizeDirectoryPath(p)).ToArray();
+            string[] results2 = pathsWithSlash.Select(p => Utilities.NormalizeDirectoryPath(p)).ToArray();
 
             for (int i = 0; i < results1.Length; i++)
                 Assert.Equal(pathsWithoutSlash[i] + @"\", results1[i]);
