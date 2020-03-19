@@ -1,5 +1,4 @@
-﻿using FileDuplicateFinder.ViewModel;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -31,10 +30,13 @@ namespace FileDuplicateFinder.Services {
         public static FileEntryCollection emptyDirectoriesSecondary = new FileEntryCollection();
         public static FileEntryCollection emptyFilesPrimary = new FileEntryCollection();
         public static FileEntryCollection emptyFilesSecondary = new FileEntryCollection();
-        /// should I make storedFiles list ObservableRangeCollection in RestoreFileDialog class too?
+        /// should storedFiles list be made as ObservableRangeCollection in RestoreFileDialog class too?
         public static ObservableRangeCollection<Tuple<string, string>> storedFiles = new ObservableRangeCollection<Tuple<string, string>>();
 
-        public static StatusBarViewModel statusBarViewModel;
+        public delegate void SearchProgressUpdatedEventHandler(DuplicateSearchProgress progress);
+        public static event SearchProgressUpdatedEventHandler SearchProgressUpdated;
+        public delegate void RemoveProgressUpdatedEventHandler(RemoveProgress progress);
+        public static event RemoveProgressUpdatedEventHandler RemoveProgressUpdated;
 
         static FileManager() {
             ///this or stick to refresh and no use for observable
@@ -58,7 +60,10 @@ namespace FileDuplicateFinder.Services {
         /// <param name="directory">The base directory to start recursive search in</param>
         /// <param name="showBasePaths">A flag specifying whether an absolute or relative path should be displayed</param>
         public static void FindDuplicatedFiles(string directory, bool showBasePaths) {
-            SetProgressStatus("Processing directory", true);
+            SearchProgressUpdated?.Invoke(new DuplicateSearchProgress() {
+                Description = "Processing directory",
+                State = DuplicateSearchProgressState.Processing
+            });
 
             ProcessDirectory(directory, primaryFiles, emptyDirectoriesPrimary, emptyFilesPrimary, directory, showBasePaths);
 
@@ -67,7 +72,10 @@ namespace FileDuplicateFinder.Services {
                 return;
             }
 
-            SetProgressStatus("Sorting files by size");
+            SearchProgressUpdated?.Invoke(new DuplicateSearchProgress() {
+                Description = "Sorting files by size",
+                State = DuplicateSearchProgressState.Sorting
+            });
 
             bool sorted = false;
             while (!sorted) {
@@ -104,7 +112,16 @@ namespace FileDuplicateFinder.Services {
                 sorted = true;
             }
 
-            SetProgressStatus("Searching for duplicates...", 0, primaryFiles.Count);
+            SearchProgressUpdated?.Invoke(new DuplicateSearchProgress() {
+                Description = "Searching for duplicates...",
+                MaxProgress = primaryFiles.Count,
+                State = DuplicateSearchProgressState.StartingSearch
+            });
+
+            DuplicateSearchProgress progress = new DuplicateSearchProgress() {
+                MaxProgress = primaryFiles.Count,
+                State = DuplicateSearchProgressState.Searching
+            };
 
             int index = 0;
             int otherIndex;
@@ -189,7 +206,8 @@ namespace FileDuplicateFinder.Services {
                     duplicateIndexingPrimary.Clear();
                 }
 
-                SetProgressStatus(otherIndex);
+                progress.Progress = otherIndex;
+                SearchProgressUpdated?.Invoke(progress);
             }
             stopTask = false;
         }
@@ -317,40 +335,33 @@ namespace FileDuplicateFinder.Services {
         }
 
         public static void FindDuplicatedFiles(string primaryDirectory, string secondaryDirectory, bool showBasePaths) {
-            SetProgressStatus("Processing primary directory", true);
-            List<FileEntry> localEmptyDirectoriesPrimary = new List<FileEntry>();
-            List<FileEntry> localEmptyFilesPrimary = new List<FileEntry>();
-
-            ProcessDirectory(primaryDirectory, primaryFiles, localEmptyDirectoriesPrimary, localEmptyFilesPrimary, primaryDirectory, showBasePaths);
-
-            if (stopTask) {
-                stopTask = false;
-                return;
-            }
-
-            Utilities.BeginInvoke(() => {
-                emptyDirectoriesPrimary.AddRange(localEmptyDirectoriesPrimary);
-                emptyFilesPrimary.AddRange(localEmptyFilesPrimary);
-                statusBarViewModel.State = "Processing secondary directory";
-                localEmptyDirectoriesPrimary.Clear();
-                localEmptyFilesPrimary.Clear();
+            SearchProgressUpdated?.Invoke(new DuplicateSearchProgress() {
+                Description = "Processing primary directory",
+                State = DuplicateSearchProgressState.Processing
             });
-            List<FileEntry> localEmptyDirectoriesSecondary = new List<FileEntry>();
-            List<FileEntry> localEmptyFilesSecondary = new List<FileEntry>();
 
-            ProcessDirectory(secondaryDirectory, secondaryFiles, localEmptyDirectoriesSecondary, localEmptyFilesSecondary, secondaryDirectory, showBasePaths);
+            ProcessDirectory(primaryDirectory, primaryFiles, emptyDirectoriesPrimary, emptyFilesPrimary, primaryDirectory, showBasePaths);
 
             if (stopTask) {
                 stopTask = false;
                 return;
             }
 
-            Utilities.BeginInvoke(() => {
-                emptyDirectoriesSecondary.AddRange(localEmptyDirectoriesSecondary);
-                emptyFilesSecondary.AddRange(localEmptyFilesSecondary);
-                statusBarViewModel.State = "Sorting files by size in primary directory";
-                localEmptyDirectoriesSecondary.Clear();
-                localEmptyFilesSecondary.Clear();
+            SearchProgressUpdated?.Invoke(new DuplicateSearchProgress() {
+                Description = "Processing secondary directory",
+                State = DuplicateSearchProgressState.Processing
+            });
+
+            ProcessDirectory(secondaryDirectory, secondaryFiles, emptyDirectoriesSecondary, emptyFilesSecondary, secondaryDirectory, showBasePaths);
+
+            if (stopTask) {
+                stopTask = false;
+                return;
+            }
+
+            SearchProgressUpdated?.Invoke(new DuplicateSearchProgress() {
+                Description = "Sorting files by size in primary directory",
+                State = DuplicateSearchProgressState.Sorting
             });
 
             bool sorted = false;
@@ -388,7 +399,10 @@ namespace FileDuplicateFinder.Services {
                 sorted = true;
             }
 
-            SetProgressStatus("Sorting files by size in secondary directory");
+            SearchProgressUpdated?.Invoke(new DuplicateSearchProgress() {
+                Description = "Sorting files by size in secondary directory",
+                State = DuplicateSearchProgressState.Sorting
+            });
 
             sorted = false;
             while (!sorted) {
@@ -425,7 +439,17 @@ namespace FileDuplicateFinder.Services {
                 sorted = true;
             }
 
-            SetProgressStatus("Searching for duplicates...", 0, primaryFiles.Count + secondaryFiles.Count);
+            SearchProgressUpdated?.Invoke(new DuplicateSearchProgress() {
+                Description = "Searching for duplicates...",
+                MaxProgress = primaryFiles.Count + secondaryFiles.Count,
+                Progress = 0,
+                State = DuplicateSearchProgressState.StartingSearch
+            });
+
+            DuplicateSearchProgress progress = new DuplicateSearchProgress() {
+                MaxProgress = primaryFiles.Count + secondaryFiles.Count,
+                State = DuplicateSearchProgressState.Searching
+            };
 
             int indexPrimary = 0;
             int indexSecondary = 0;
@@ -437,7 +461,8 @@ namespace FileDuplicateFinder.Services {
                     return;
                 }
 
-                SetProgressStatus(indexPrimary + indexSecondary);
+                progress.Progress = indexPrimary + indexSecondary;
+                SearchProgressUpdated?.Invoke(progress);
 
                 lengthPrimary = GetFileLength(primaryDirectory + primaryFiles[indexPrimary]);
                 if (lengthPrimary < 0) {
@@ -859,7 +884,16 @@ namespace FileDuplicateFinder.Services {
 
 
         public static void RemoveAllEmptyDirectoriesPrimary(string baseDirectory = "") {
-            SetProgressStatus(0, emptyDirectoriesPrimary.Count);
+            RemoveProgressUpdated?.Invoke(new RemoveProgress() {
+                MaxProgress = emptyDirectoriesPrimary.Count,
+                State = RemoveProgressState.StartingRemoval
+            });
+
+            RemoveProgress progress = new RemoveProgress() {
+                MaxProgress = emptyDirectoriesPrimary.Count,
+                State = RemoveProgressState.Removing
+            };
+
             for (int i = 0; i < emptyDirectoriesPrimary.Count; i++) {
                 if (stopTask) {
                     AbortRemoveAllEmptyDirectoriesPrimary(i);
@@ -867,7 +901,8 @@ namespace FileDuplicateFinder.Services {
                     return;
                 }
                 RemoveFile(baseDirectory + emptyDirectoriesPrimary[i].Path);
-                SetProgressStatus(i);
+                progress.Progress = i;
+                RemoveProgressUpdated?.Invoke(progress);
             }
             emptyDirectoriesPrimary.Clear();
         }
@@ -877,7 +912,16 @@ namespace FileDuplicateFinder.Services {
         }
 
         public static void RemoveAllEmptyDirectoriesSecondary(string baseDirectory = "") {
-            SetProgressStatus(0, emptyDirectoriesSecondary.Count);
+            RemoveProgressUpdated?.Invoke(new RemoveProgress() {
+                MaxProgress = emptyDirectoriesSecondary.Count,
+                State = RemoveProgressState.StartingRemoval
+            });
+
+            RemoveProgress progress = new RemoveProgress() {
+                MaxProgress = emptyDirectoriesSecondary.Count,
+                State = RemoveProgressState.Removing
+            };
+
             for (int i = 0; i < emptyDirectoriesSecondary.Count; i++) {
                 if (stopTask) {
                     AbortRemoveAllEmptyDirectoriesSecondary(i);
@@ -885,7 +929,8 @@ namespace FileDuplicateFinder.Services {
                     return;
                 }
                 RemoveFile(baseDirectory + emptyDirectoriesSecondary[i].Path);
-                SetProgressStatus(i);
+                progress.Progress = i;
+                RemoveProgressUpdated?.Invoke(progress);
             }
             emptyDirectoriesSecondary.Clear();
         }
@@ -895,7 +940,16 @@ namespace FileDuplicateFinder.Services {
         }
 
         public static void RemoveAllEmptyFilesPrimary(string baseDirectory = "") {
-            SetProgressStatus(0, emptyFilesPrimary.Count);
+            RemoveProgressUpdated?.Invoke(new RemoveProgress() {
+                MaxProgress = emptyFilesPrimary.Count,
+                State = RemoveProgressState.StartingRemoval
+            });
+
+            RemoveProgress progress = new RemoveProgress() {
+                MaxProgress = emptyFilesPrimary.Count,
+                State = RemoveProgressState.Removing
+            };
+
             for (int i = 0; i < emptyFilesPrimary.Count; i++) {
                 if (stopTask) {
                     AbortRemoveAllEmptyFilesPrimary(i);
@@ -903,7 +957,8 @@ namespace FileDuplicateFinder.Services {
                     return;
                 }
                 RemoveFile(baseDirectory + emptyFilesPrimary[i].Path);
-                SetProgressStatus(i);
+                progress.Progress = i;
+                RemoveProgressUpdated?.Invoke(progress);
             }
             emptyFilesPrimary.Clear();
         }
@@ -913,7 +968,16 @@ namespace FileDuplicateFinder.Services {
         }
 
         public static void RemoveAllEmptyFilesSecondary(string baseDirectory = "") {
-            SetProgressStatus(0, emptyFilesSecondary.Count);
+            RemoveProgressUpdated?.Invoke(new RemoveProgress() {
+                MaxProgress = emptyFilesSecondary.Count,
+                State = RemoveProgressState.StartingRemoval
+            });
+
+            RemoveProgress progress = new RemoveProgress() {
+                MaxProgress = emptyFilesSecondary.Count,
+                State = RemoveProgressState.Removing
+            };
+
             for (int i = 0; i < emptyFilesSecondary.Count; i++) {
                 if (stopTask) {
                     AbortRemoveAllEmptyFilesSecondary(i);
@@ -921,7 +985,8 @@ namespace FileDuplicateFinder.Services {
                     return;
                 }
                 RemoveFile(baseDirectory + emptyFilesSecondary[i].Path);
-                SetProgressStatus(i);
+                progress.Progress = i;
+                RemoveProgressUpdated?.Invoke(progress);
             }
             emptyFilesSecondary.Clear();
         }
@@ -931,8 +996,17 @@ namespace FileDuplicateFinder.Services {
         }
 
         public static void RemoveAllPrimary(string baseDirectory = "") {
-            SetProgressStatus(0, duplicatedFiles.Count);
-            for (int i = 0, progress = 0; i < duplicatedFiles.Count; progress++) {
+            RemoveProgressUpdated?.Invoke(new RemoveProgress() {
+                MaxProgress = duplicatedFiles.Count,
+                State = RemoveProgressState.StartingRemoval
+            });
+
+            RemoveProgress progress = new RemoveProgress() {
+                MaxProgress = duplicatedFiles.Count,
+                State = RemoveProgressState.Removing
+            };
+
+            for (int i = 0, progressIndex = 0; i < duplicatedFiles.Count; progressIndex++) {
                 for (int j = 0; j < duplicatedFiles[i].Item1.Count; j++) {
                     if (stopTask) {
                         AbortRemoveAllPrimary(i);
@@ -947,7 +1021,8 @@ namespace FileDuplicateFinder.Services {
                     duplicatedFiles[i].Item1.Clear();
                     i++;
                 }
-                SetProgressStatus(progress);
+                progress.Progress = progressIndex;
+                RemoveProgressUpdated?.Invoke(progress);
             }
         }
 
@@ -959,8 +1034,17 @@ namespace FileDuplicateFinder.Services {
         }
 
         public static void RemoveAllSecondary(string baseDirectory = "") {
-            SetProgressStatus(0, duplicatedFiles.Count);
-            for (int i = 0, progress = 0; i < duplicatedFiles.Count; progress++) {
+            RemoveProgressUpdated?.Invoke(new RemoveProgress() {
+                MaxProgress = duplicatedFiles.Count,
+                State = RemoveProgressState.StartingRemoval
+            });
+
+            RemoveProgress progress = new RemoveProgress() {
+                MaxProgress = duplicatedFiles.Count,
+                State = RemoveProgressState.Removing
+            };
+
+            for (int i = 0, progressIndex = 0; i < duplicatedFiles.Count; progressIndex++) {
                 for (int j = 0; j < duplicatedFiles[i].Item2.Count; j++) {
                     if (stopTask) {
                         AbortRemoveAllSecondary(i);
@@ -975,7 +1059,8 @@ namespace FileDuplicateFinder.Services {
                     duplicatedFiles[i].Item2.Clear();
                     i++;
                 }
-                SetProgressStatus(progress);
+                progress.Progress = progressIndex;
+                RemoveProgressUpdated?.Invoke(progress);
             }
         }
 
@@ -985,48 +1070,6 @@ namespace FileDuplicateFinder.Services {
                 duplicatedFiles.RemoveAt(i);
             else
                 duplicatedFiles[i].Item2.Clear();
-        }
-
-        ///
-        private static void SetProgressStatus(int progress) {
-            string stateInfo = progress + " / " + statusBarViewModel.MaxProgress;
-            Utilities.BeginInvoke(() => {
-                statusBarViewModel.StateInfo = stateInfo;
-                statusBarViewModel.Progress = progress;
-            });
-        }
-
-        private static void SetProgressStatus(int progress, int maxProgress) {
-            string stateInfo = progress + " / " + maxProgress;
-            Utilities.BeginInvoke(() => {
-                statusBarViewModel.StateInfo = stateInfo;
-                statusBarViewModel.MaxProgress = maxProgress;
-                statusBarViewModel.Progress = progress;
-            });
-        }
-
-        private static void SetProgressStatus(string state) {
-            Utilities.BeginInvoke(() => {
-                statusBarViewModel.State = state;
-            });
-        }
-
-        private static void SetProgressStatus(string state, bool isIndeterminate) {
-            Utilities.BeginInvoke(() => {
-                statusBarViewModel.State = state;
-                statusBarViewModel.IsIndeterminate = isIndeterminate;
-            });
-        }
-
-        private static void SetProgressStatus(string state, int progress, int maxProgress) {
-            string stateInfo = progress + " / " + maxProgress;
-            Utilities.BeginInvoke(() => {
-                statusBarViewModel.State = state;
-                statusBarViewModel.StateInfo = stateInfo;
-                statusBarViewModel.IsIndeterminate = false;
-                statusBarViewModel.MaxProgress = maxProgress;
-                statusBarViewModel.Progress = progress;
-            });
         }
 
         private static void AddRangeToCollection<T>(ObservableRangeCollection<T> collection, List<T> list) {

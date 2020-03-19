@@ -2,6 +2,7 @@ using FileDuplicateFinder.Services;
 using FileDuplicateFinder.ViewModel;
 using Moq;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -40,7 +41,6 @@ namespace FileDuplicateFinder.Tests {
                 @"\1\dir\empty file.txt",
                 @"\2\empty file.bmp"
             };
-            FileManager.statusBarViewModel = new Mock<StatusBarViewModel>().Object;
 
             FileManager.Initialize();
             FileManager.FindDuplicatedFiles(testDirectory, false);
@@ -56,7 +56,6 @@ namespace FileDuplicateFinder.Tests {
                 @"\1\dir\empty dir",
                 @"\2\empty dir"
             };
-            FileManager.statusBarViewModel = new Mock<StatusBarViewModel>().Object;
 
             FileManager.Initialize();
             FileManager.FindDuplicatedFiles(testDirectory, false);
@@ -75,11 +74,14 @@ namespace FileDuplicateFinder.Tests {
                     @"\2\text.doc"
                 },
                 new string[] {
+                    @"\1\1MiB.dat",
+                    @"\2\1MiB.dat"
+                },
+                new string[] {
                     @"\1\dir\2MiB1.bin",
                     @"\2\2MiB1.bin"
                 }
             };
-            FileManager.statusBarViewModel = new Mock<StatusBarViewModel>().Object;
 
             FileManager.Initialize();
             FileManager.FindDuplicatedFiles(testDirectory, false);
@@ -92,6 +94,52 @@ namespace FileDuplicateFinder.Tests {
                 for (int i = 0; i < paths[group].Length; i++)
                     Assert.Equal(paths[group][i], FileManager.duplicatedFilesPrimaryOnly[group][i].Path);
             }
+        }
+
+        [Fact]
+        public void FindDuplicatedFiles_ShouldReportProgressStates() {
+            Mock<FileManager.SearchProgressUpdatedEventHandler> handler = new Mock<FileManager.SearchProgressUpdatedEventHandler>();
+            FileManager.SearchProgressUpdated += handler.Object;
+
+            FileManager.Initialize();
+            FileManager.FindDuplicatedFiles(testDirectory, false);
+
+            handler.Verify(h => h(It.Is<DuplicateSearchProgress>(p => p.State == DuplicateSearchProgressState.Processing)));
+            handler.Verify(h => h(It.Is<DuplicateSearchProgress>(p => p.State == DuplicateSearchProgressState.Sorting)));
+            handler.Verify(h => h(It.Is<DuplicateSearchProgress>(p => p.State == DuplicateSearchProgressState.StartingSearch)), Times.Once);
+            handler.Verify(h => h(It.Is<DuplicateSearchProgress>(p => p.State == DuplicateSearchProgressState.Searching)));
+        }
+
+        [Fact]
+        public void FindDuplicatedFiles_ShouldReportNumberOfFiles_ForStartingSearchState() {
+            Mock<FileManager.SearchProgressUpdatedEventHandler> handler = new Mock<FileManager.SearchProgressUpdatedEventHandler>();
+            FileManager.SearchProgressUpdated += handler.Object;
+
+            FileManager.Initialize();
+            FileManager.FindDuplicatedFiles(testDirectory, false);
+
+            handler.Verify(h => h(It.Is<DuplicateSearchProgress>(p => p.State == DuplicateSearchProgressState.StartingSearch && p.MaxProgress > 0)), Times.Once);
+        }
+
+        [Fact]
+        public void FindDuplicatedFiles_ShouldReportGrowingProgress_ForSearchingState() {
+            Mock<FileManager.SearchProgressUpdatedEventHandler> handler = new Mock<FileManager.SearchProgressUpdatedEventHandler>();
+            List<int> progressList = new List<int>();
+            int maxProgress = 0;
+            handler.Setup(h => h(It.IsAny<DuplicateSearchProgress>())).Callback<DuplicateSearchProgress>(p => {
+                if (p.State == DuplicateSearchProgressState.StartingSearch)
+                    maxProgress = p.MaxProgress;
+                else if (p.State == DuplicateSearchProgressState.Searching)
+                    progressList.Add(p.Progress);
+            });
+            FileManager.SearchProgressUpdated += handler.Object;
+
+            FileManager.Initialize();
+            FileManager.FindDuplicatedFiles(testDirectory, false);
+
+            Assert.True(progressList.Zip(progressList.Skip(1), (a, b) => a < b).All(a => a));
+            Assert.True(progressList.First() > 0);
+            Assert.True(progressList.Last() <= maxProgress);
         }
         #endregion
     }

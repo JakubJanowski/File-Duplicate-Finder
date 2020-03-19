@@ -76,8 +76,25 @@ namespace FileDuplicateFinder.ViewModel {
             PrimaryOnlyDuplicatedFilesTabViewModel = new PrimaryOnlyDuplicatedFilesTabViewModel(state, directoryPickerViewModel, this, mainWindowViewModel);
             PrimaryOnlyEmptyDirectoriesTabViewModel = new PrimaryOnlyEmptyDirectoriesTabViewModel(state, directoryPickerViewModel, this);
             PrimaryOnlyEmptyFilesTabViewModel = new PrimaryOnlyEmptyFilesTabViewModel(state, directoryPickerViewModel, this);
+
+            FileManager.RemoveProgressUpdated += RemoveProgerssUpdatedHandler;
         }
 
+        private void RemoveProgerssUpdatedHandler(RemoveProgress progress) {
+            Utilities.BeginInvoke(() => {
+                switch (progress.State) {
+                    case RemoveProgressState.StartingRemoval:
+                        statusBarViewModel.StateInfo = "0 / " + progress.MaxProgress;
+                        statusBarViewModel.MaxProgress = progress.MaxProgress;
+                        statusBarViewModel.Progress = 0;
+                        break;
+                    case RemoveProgressState.Removing:
+                        statusBarViewModel.StateInfo = progress.Progress + " / " + progress.MaxProgress;
+                        statusBarViewModel.Progress = progress.Progress;
+                        break;
+                }
+            });
+        }
 
         public void ShowButtons(object sender) {
             Border border = sender as Border;

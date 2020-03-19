@@ -288,7 +288,7 @@ namespace FileDuplicateFinder.Tests {
         [InlineData(549755813888000, "500 TiB")]
         [InlineData(1125899906842624000, "1000 PiB")]
         [InlineData(long.MaxValue, "8,00 EiB")]
-        public void PrettyPrintSize_ShouldReturnCOrrectStrings(long bytes, string expectedResult) {
+        public void PrettyPrintSize_ShouldReturnCorrectStrings(long bytes, string expectedResult) {
             string result = Utilities.PrettyPrintSize(bytes);
 
             Assert.Equal(expectedResult, result);

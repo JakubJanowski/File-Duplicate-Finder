@@ -103,9 +103,31 @@ namespace FileDuplicateFinder.ViewModel {
             DirectoryPickerViewModel.Bind(nameof(DirectoryPickerViewModel.PrimaryOnly), () => MainTabControlViewModel.OnUpdatePrimaryOnly());
 
             Utilities.statusBarViewModel = StatusBarViewModel;
-            FileManager.statusBarViewModel = StatusBarViewModel;
+            FileManager.SearchProgressUpdated += ProgressUpdatedHandler;
             FileManager.tmpDirectory = tmpDirectory;
             Directory.CreateDirectory(tmpDirectory);
+        }
+
+        private void ProgressUpdatedHandler(DuplicateSearchProgress progress) {
+            Utilities.BeginInvoke(() => {
+                switch (progress.State) {
+                    case DuplicateSearchProgressState.Processing:
+                    case DuplicateSearchProgressState.Sorting:
+                        StatusBarViewModel.State = progress.Description;
+                        break;
+                    case DuplicateSearchProgressState.StartingSearch:
+                        StatusBarViewModel.State = progress.Description;
+                        StatusBarViewModel.StateInfo = "0 / " + progress.MaxProgress;
+                        StatusBarViewModel.IsIndeterminate = false;
+                        StatusBarViewModel.MaxProgress = progress.MaxProgress;
+                        StatusBarViewModel.Progress = 0;
+                        break;
+                    case DuplicateSearchProgressState.Searching:
+                        StatusBarViewModel.StateInfo = progress.Progress + " / " + progress.MaxProgress;
+                        StatusBarViewModel.Progress = progress.Progress;
+                        break;
+                }
+            });
         }
 
         private void ShowFileBasePaths() {
@@ -231,7 +253,7 @@ namespace FileDuplicateFinder.ViewModel {
             IsGUIEnabled = false;
             StatusBarViewModel.State = "Initializing";
             StatusBarViewModel.Progress = 0;
-            StatusBarViewModel.IsIndeterminate = false;
+            StatusBarViewModel.IsIndeterminate = true;
             StatusBarViewModel.ShowProgress = true;
             FileManager.Initialize();
             FileManager.ClearTmpDirectory();
