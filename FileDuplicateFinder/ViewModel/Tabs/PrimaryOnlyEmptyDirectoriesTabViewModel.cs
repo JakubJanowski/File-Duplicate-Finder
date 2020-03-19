@@ -8,20 +8,21 @@ namespace FileDuplicateFinder.ViewModel {
         private readonly DirectoryPickerViewModel directoryPickerViewModel;
         private readonly MainTabControlViewModel mainTabControlViewModel;
 
+        public bool IsGUIEnabled {
+            get => state.IsGUIEnabled;
+        }
+
         public PrimaryOnlyEmptyDirectoriesTabViewModel(ApplicationState state, DirectoryPickerViewModel directoryPickerViewModel, MainTabControlViewModel mainTabControlViewModel) {
             EmptyDirectoriesPrimaryRemoveFileCommand = new DelegateCommand<object>(EmptyDirectoriesPrimaryRemoveFile);
             EmptyDirectoriesPrimaryIgnoreFileCommand = new DelegateCommand<object>(EmptyDirectoriesPrimaryIgnoreFile);
             OpenDirectoryPrimaryCommand = new DelegateCommand<object>(mainTabControlViewModel.OpenDirectoryPrimary);
-            RemoveAllEmptyDirectoriesPrimaryCommand = new DelegateCommand<object>(RemoveAllEmptyDirectoriesPrimary, (o) => IsGUIEnabled).ObservesProperty(() => IsGUIEnabled);
+            RemoveAllEmptyDirectoriesPrimaryCommand = new DelegateCommand<object>(RemoveAllEmptyDirectoriesPrimary, (o) => IsGUIEnabled && FileManager.emptyDirectoriesPrimary.Count > 0).ObservesProperty(() => IsGUIEnabled);
 
             this.state = state;
             this.directoryPickerViewModel = directoryPickerViewModel;
             this.mainTabControlViewModel = mainTabControlViewModel;
         }
 
-        public bool IsGUIEnabled {
-            get => state.IsGUIEnabled;
-        }
         internal void OnUpdateGUIEnabled() => OnPropertyChanged(nameof(IsGUIEnabled));
 
         public void ShowButtons(object sender) {

@@ -11,11 +11,6 @@ namespace FileDuplicateFinder.View {
             emptyDirectoriesSecondaryListView.ItemsSource = FileManager.emptyDirectoriesSecondary;
         }
 
-        public void Refresh() {
-            emptyDirectoriesPrimaryListView.Items.Refresh();
-            emptyDirectoriesSecondaryListView.Items.Refresh();
-        }
-
         public void ShowButtons(object sender, System.Windows.Input.MouseEventArgs e) {
             (DataContext as EmptyDirectoriesTabControlViewModel).ShowButtons(sender);
         }

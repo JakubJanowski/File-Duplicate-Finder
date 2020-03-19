@@ -11,10 +11,6 @@ namespace FileDuplicateFinder.View {
             duplicatedFilesListView.ItemsSource = FileManager.duplicatedFiles;
         }
 
-        public void Refresh() {
-            duplicatedFilesListView.Items.Refresh();
-        }
-
         public void ShowButtons(object sender, System.Windows.Input.MouseEventArgs e) {
             (DataContext as DuplicatedFilesTabViewModel).ShowButtons(sender);
         }

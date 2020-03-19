@@ -8,11 +8,15 @@ namespace FileDuplicateFinder.ViewModel {
         private readonly DirectoryPickerViewModel directoryPickerViewModel;
         private readonly MainTabControlViewModel mainTabControlViewModel;
 
+        public bool IsGUIEnabled {
+            get => state.IsGUIEnabled;
+        }
+
         public EmptyFilesTabControlViewModel(ApplicationState state, DirectoryPickerViewModel directoryPickerViewModel, MainTabControlViewModel mainTabControlViewModel) {
-            EmptyFilesPrimaryRemoveAllCommand = new DelegateCommand<object>(RemoveAllEmptyFilesPrimary, (o) => IsGUIEnabled).ObservesProperty(() => IsGUIEnabled);
+            EmptyFilesPrimaryRemoveAllCommand = new DelegateCommand<object>(RemoveAllEmptyFilesPrimary, (o) => IsGUIEnabled && FileManager.emptyFilesPrimary.Count > 0).ObservesProperty(() => IsGUIEnabled);
             EmptyFilesPrimaryRemoveFileCommand = new DelegateCommand<object>(EmptyFilesPrimaryRemoveFile);
             EmptyFilesPrimaryIgnoreFileCommand = new DelegateCommand<object>(EmptyFilesPrimaryIgnoreFile);
-            EmptyFilesSecondaryRemoveAllCommand = new DelegateCommand<object>(RemoveAllEmptyFilesSecondary, (o) => IsGUIEnabled).ObservesProperty(() => IsGUIEnabled);
+            EmptyFilesSecondaryRemoveAllCommand = new DelegateCommand<object>(RemoveAllEmptyFilesSecondary, (o) => IsGUIEnabled && FileManager.emptyFilesSecondary.Count > 0).ObservesProperty(() => IsGUIEnabled);
             EmptyFilesSecondaryRemoveFileCommand = new DelegateCommand<object>(EmptyFilesSecondaryRemoveFile);
             EmptyFilesSecondaryIgnoreFileCommand = new DelegateCommand<object>(EmptyFilesSecondaryIgnoreFile);
             OpenFileDirectoryPrimaryCommand = new DelegateCommand<object>(mainTabControlViewModel.OpenFileDirectoryPrimary);
@@ -21,10 +25,6 @@ namespace FileDuplicateFinder.ViewModel {
             this.state = state;
             this.directoryPickerViewModel = directoryPickerViewModel;
             this.mainTabControlViewModel = mainTabControlViewModel;
-        }
-
-        public bool IsGUIEnabled {
-            get => state.IsGUIEnabled;
         }
 
         internal void OnUpdateGUIEnabled() => OnPropertyChanged(nameof(IsGUIEnabled));

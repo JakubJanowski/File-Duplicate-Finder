@@ -1,6 +1,7 @@
 ﻿using FileDuplicateFinder.Models;
 using FileDuplicateFinder.Services;
 using Prism.Commands;
+using System.Linq;
 
 namespace FileDuplicateFinder.ViewModel {
     class DuplicatedFilesTabViewModel: ObjectBase {
@@ -10,6 +11,13 @@ namespace FileDuplicateFinder.ViewModel {
         private readonly MainTabControlViewModel mainTabControlViewModel;
         private readonly MainWindowViewModel mainWindowViewModel;
 
+        public bool IsGUIEnabled {
+            get => state.IsGUIEnabled;
+        }
+
+        public bool ShowBasePaths {
+            get => state.ShowBasePaths;
+        }
 
         public DuplicatedFilesTabViewModel(ApplicationState state, DirectoryPickerViewModel directoryPickerViewModel, MainTabControlViewModel mainTabControlViewModel, MainWindowViewModel mainWindowViewModel) {
             DuplicatedFilesPrimaryRemoveFileCommand = new DelegateCommand<object>(DuplicatedFilesPrimaryRemoveFile);
@@ -18,8 +26,8 @@ namespace FileDuplicateFinder.ViewModel {
             DuplicatedFilesSecondaryIgnoreFileCommand = new DelegateCommand<object>(DuplicatedFilesSecondaryIgnoreFile);
             OpenFileDirectoryPrimaryCommand = new DelegateCommand<object>(mainTabControlViewModel.OpenFileDirectoryPrimary);
             OpenFileDirectorySecondaryCommand = new DelegateCommand<object>(mainTabControlViewModel.OpenFileDirectorySecondary);
-            RemoveAllPrimaryCommand = new DelegateCommand<object>(RemoveAllPrimary, (o) => IsGUIEnabled).ObservesProperty(() => IsGUIEnabled);
-            RemoveAllSecondaryCommand = new DelegateCommand<object>(RemoveAllSecondary, (o) => IsGUIEnabled).ObservesProperty(() => IsGUIEnabled);
+            RemoveAllPrimaryCommand = new DelegateCommand<object>(RemoveAllPrimary, (o) => IsGUIEnabled && FileManager.duplicatedFiles.Any(t => t.Item1.Count > 0)).ObservesProperty(() => IsGUIEnabled);
+            RemoveAllSecondaryCommand = new DelegateCommand<object>(RemoveAllSecondary, (o) => IsGUIEnabled && FileManager.duplicatedFiles.Any(t => t.Item2.Count > 0)).ObservesProperty(() => IsGUIEnabled);
             SortAlphabeticallyCommand = new DelegateCommand<object>(SortAlphabetically);
             SortBySizeCommand = new DelegateCommand<object>(SortBySize);
 
@@ -29,17 +37,9 @@ namespace FileDuplicateFinder.ViewModel {
             this.mainWindowViewModel = mainWindowViewModel;
         }
 
-
-        public bool ShowBasePaths {
-            get => state.ShowBasePaths;
-        }
-
         internal void OnUpdateGUIEnabled() => OnPropertyChanged(nameof(IsGUIEnabled));
-        internal void OnUpdateShowBasePaths() => OnPropertyChanged(nameof(ShowBasePaths));
 
-        public bool IsGUIEnabled {
-            get => state.IsGUIEnabled;
-        }
+        internal void OnUpdateShowBasePaths() => OnPropertyChanged(nameof(ShowBasePaths));
 
         public void ShowButtons(object sender) {
             mainTabControlViewModel.ShowButtons(sender);
@@ -51,7 +51,7 @@ namespace FileDuplicateFinder.ViewModel {
 
         public DelegateCommand<object> OpenFileDirectoryPrimaryCommand { get; private set; }
         public DelegateCommand<object> OpenFileDirectorySecondaryCommand { get; private set; }
-        
+
         ///check if every remove and ignore function works, also check if the oneliner functions can be put in DelegateCommand definition in constructors
         public DelegateCommand<object> DuplicatedFilesPrimaryIgnoreFileCommand { get; private set; }
         public void DuplicatedFilesPrimaryIgnoreFile(object sender) {

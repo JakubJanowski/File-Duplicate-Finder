@@ -113,7 +113,7 @@ namespace FileDuplicateFinder {
         }
 
         public static DispatcherOperation BeginInvoke(Action callback) {
-            return Application.Current.Dispatcher.BeginInvoke(callback);
+            return Application.Current?.Dispatcher.BeginInvoke(callback);
         }
 
         public static string PrettyPrintSize(long bytes) {

@@ -8,12 +8,16 @@ namespace FileDuplicateFinder.ViewModel {
         private readonly DirectoryPickerViewModel directoryPickerViewModel;
         private readonly MainTabControlViewModel mainTabControlViewModel;
 
+        public bool IsGUIEnabled {
+            get => state.IsGUIEnabled;
+        }
+
         public EmptyDirectoriesTabControlViewModel(ApplicationState state, DirectoryPickerViewModel directoryPickerViewModel, MainTabControlViewModel mainTabControlViewModel) {
             EmptyDirectoriesPrimaryIgnoreCommand = new DelegateCommand<object>(EmptyDirectoriesPrimaryIgnore);
-            EmptyDirectoriesPrimaryRemoveAllCommand = new DelegateCommand<object>(RemoveAllEmptyDirectoriesPrimary, (o) => IsGUIEnabled).ObservesProperty(() => IsGUIEnabled);
+            EmptyDirectoriesPrimaryRemoveAllCommand = new DelegateCommand<object>(RemoveAllEmptyDirectoriesPrimary, (o) => IsGUIEnabled && FileManager.emptyDirectoriesPrimary.Count > 0).ObservesProperty(() => IsGUIEnabled);
             EmptyDirectoriesPrimaryRemoveCommand = new DelegateCommand<object>(EmptyDirectoriesPrimaryRemove);
             EmptyDirectoriesSecondaryIgnoreCommand = new DelegateCommand<object>(EmptyDirectoriesSecondaryIgnore);
-            EmptyDirectoriesSecondaryRemoveAllCommand = new DelegateCommand<object>(RemoveAllEmptyDirectoriesSecondary, (o) => IsGUIEnabled).ObservesProperty(() => IsGUIEnabled);
+            EmptyDirectoriesSecondaryRemoveAllCommand = new DelegateCommand<object>(RemoveAllEmptyDirectoriesSecondary, (o) => IsGUIEnabled && FileManager.emptyDirectoriesSecondary.Count > 0).ObservesProperty(() => IsGUIEnabled);
             EmptyDirectoriesSecondaryRemoveCommand = new DelegateCommand<object>(EmptyDirectoriesSecondaryRemove);
             OpenDirectoryPrimaryCommand = new DelegateCommand<object>(mainTabControlViewModel.OpenDirectoryPrimary);
             OpenDirectorySecondaryCommand = new DelegateCommand<object>(mainTabControlViewModel.OpenDirectorySecondary);
@@ -21,10 +25,6 @@ namespace FileDuplicateFinder.ViewModel {
             this.state = state;
             this.directoryPickerViewModel = directoryPickerViewModel;
             this.mainTabControlViewModel = mainTabControlViewModel;
-        }
-
-        public bool IsGUIEnabled {
-            get => state.IsGUIEnabled;
         }
 
         public void ShowButtons(object sender) {

@@ -10,10 +10,6 @@ namespace FileDuplicateFinder.View {
             emptyFilesPrimaryOnlyListView.ItemsSource = FileManager.emptyFilesPrimary;
         }
 
-        public void Refresh() {
-            emptyFilesPrimaryOnlyListView.Items.Refresh();
-        }
-
         public void ShowButtons(object sender, System.Windows.Input.MouseEventArgs e) {
             (DataContext as PrimaryOnlyEmptyFilesTabViewModel).ShowButtons(sender);
         }
