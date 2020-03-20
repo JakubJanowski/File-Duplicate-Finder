@@ -100,7 +100,6 @@ namespace FileDuplicateFinder.ViewModel {
                 MainWindowViewModel = this,
                 StatusBarViewModel = StatusBarViewModel
             });
-            DirectoryPickerViewModel.Bind(nameof(DirectoryPickerViewModel.PrimaryOnly), () => MainTabControlViewModel.OnUpdatePrimaryOnly());
 
             Utilities.statusBarViewModel = StatusBarViewModel;
             FileManager.SearchProgressUpdated += ProgressUpdatedHandler;
@@ -265,6 +264,7 @@ namespace FileDuplicateFinder.ViewModel {
             primaryDirectory = DirectoryPickerViewModel.PrimaryDirectory;
             secondaryDirectory = DirectoryPickerViewModel.SecondaryDirectory;
             IsRestorePossible = false;
+            MainTabControlViewModel.ShowPrimaryOnlyTabs = DirectoryPickerViewModel.PrimaryOnly;
         }
 
         internal void WindowClosing() {

@@ -41,24 +41,24 @@
         </TabItem>
         
         <!-- Primary and secondary tabs -->
-        <TabItem Header="Empty Directories" Visibility="{Binding PrimaryOnly, Converter={StaticResource NotBoolToVisCollapsed}}">
+        <TabItem Header="Empty Directories" Visibility="{Binding ShowPrimaryOnlyTabs, Converter={StaticResource NotBoolToVisCollapsed}}">
             <ContentControl x:Name="emptyDirectoriesTabControlView" Content="{Binding EmptyDirectoriesTabControlViewModel}" />
         </TabItem>
-        <TabItem Header="Empty Files" Visibility="{Binding PrimaryOnly, Converter={StaticResource NotBoolToVisCollapsed}}">
+        <TabItem Header="Empty Files" Visibility="{Binding ShowPrimaryOnlyTabs, Converter={StaticResource NotBoolToVisCollapsed}}">
             <ContentControl x:Name="emptyFilesTabControlView" Content="{Binding EmptyFilesTabControlViewModel}" />
         </TabItem>
-        <TabItem Header="Duplicated Files" Visibility="{Binding PrimaryOnly, Converter={StaticResource NotBoolToVisCollapsed}}">
+        <TabItem Header="Duplicated Files" Visibility="{Binding ShowPrimaryOnlyTabs, Converter={StaticResource NotBoolToVisCollapsed}}">
             <ContentControl x:Name="duplicatedFilesTabView" Content="{Binding DuplicatedFilesTabViewModel}" />
         </TabItem>
         
         <!-- Primary only tabs -->
-        <TabItem Header="Empty Directories" Visibility="{Binding PrimaryOnly, Converter={StaticResource BoolToVisCollapsed}}">
+        <TabItem Header="Empty Directories" Visibility="{Binding ShowPrimaryOnlyTabs, Converter={StaticResource BoolToVisCollapsed}}">
             <ContentControl x:Name="primaryOnlyEmptyDirectoriesTabView" Content="{Binding PrimaryOnlyEmptyDirectoriesTabViewModel}" />
         </TabItem>
-        <TabItem Header="Empty Files" Visibility="{Binding PrimaryOnly, Converter={StaticResource BoolToVisCollapsed}}">
+        <TabItem Header="Empty Files" Visibility="{Binding ShowPrimaryOnlyTabs, Converter={StaticResource BoolToVisCollapsed}}">
             <ContentControl x:Name="primaryOnlyEmptyFilesTabView" Content="{Binding PrimaryOnlyEmptyFilesTabViewModel}" />
         </TabItem>
-        <TabItem Header="Duplicated Files" Visibility="{Binding PrimaryOnly, Converter={StaticResource BoolToVisCollapsed}}">
+        <TabItem Header="Duplicated Files" Visibility="{Binding ShowPrimaryOnlyTabs, Converter={StaticResource BoolToVisCollapsed}}">
             <ContentControl x:Name="primaryOnlyDuplicatedFilesTabView" Content="{Binding PrimaryOnlyDuplicatedFilesTabViewModel}" />
         </TabItem>
     </TabControl>

@@ -13,13 +13,5 @@ namespace FileDuplicateFinder.View {
 
             //logListView.ItemsSource too
         }
-
-        private void ShowButtons(object sender, System.Windows.Input.MouseEventArgs e) {
-            ViewModel.ShowButtons(sender);
-        }
-
-        private void HideButtons(object sender, System.Windows.Input.MouseEventArgs e) {
-            ViewModel.HideButtons(sender);
-        }
     }
 }

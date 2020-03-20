@@ -27,6 +27,7 @@ namespace FileDuplicateFinder.ViewModel {
         public PrimaryOnlyEmptyDirectoriesTabViewModel PrimaryOnlyEmptyDirectoriesTabViewModel { get; }
         public PrimaryOnlyEmptyFilesTabViewModel PrimaryOnlyEmptyFilesTabViewModel { get; }
 
+        private bool showPrimaryOnlyTabs = true;
         private const int pathChildPosition = 1;
         private volatile bool stopTask = false;
 
@@ -39,13 +40,19 @@ namespace FileDuplicateFinder.ViewModel {
             get => state.IsGUIEnabled;
         }
 
-        public bool PrimaryOnly {
-            get => state.PrimaryOnly;
-        }
-
         public bool ShowBasePaths {
             get => state.ShowBasePaths;
-        }      
+        }
+
+        public bool ShowPrimaryOnlyTabs {
+            get => showPrimaryOnlyTabs;
+            set {
+                if (showPrimaryOnlyTabs != value) {
+                    showPrimaryOnlyTabs = value;
+                    OnPropertyChanged(nameof(ShowPrimaryOnlyTabs));
+                }
+            }
+        }
 
         internal void OnUpdateGUIEnabled() {
             DuplicatedFilesTabViewModel.OnUpdateGUIEnabled();
@@ -55,8 +62,6 @@ namespace FileDuplicateFinder.ViewModel {
             PrimaryOnlyEmptyFilesTabViewModel.OnUpdateGUIEnabled();
             OnPropertyChanged(nameof(IsGUIEnabled));
         }
-
-        internal void OnUpdatePrimaryOnly() => OnPropertyChanged(nameof(PrimaryOnly));
 
         internal void OnUpdateShowBasePaths() {
             DuplicatedFilesTabViewModel.OnUpdateShowBasePaths();
