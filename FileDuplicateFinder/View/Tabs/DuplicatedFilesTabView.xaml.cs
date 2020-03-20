@@ -1,9 +1,12 @@
 ﻿using FileDuplicateFinder.Services;
+using FileDuplicateFinder.Utilities;
 using FileDuplicateFinder.ViewModel;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace FileDuplicateFinder.View {
     public partial class DuplicatedFilesTabView: UserControl {
+        private DuplicatedFilesTabViewModel ViewModel { get => DataContext as DuplicatedFilesTabViewModel; }
 
         public DuplicatedFilesTabView() {
             InitializeComponent();
@@ -11,12 +14,12 @@ namespace FileDuplicateFinder.View {
             duplicatedFilesListView.ItemsSource = FileManager.duplicatedFiles;
         }
 
-        public void ShowButtons(object sender, System.Windows.Input.MouseEventArgs e) {
-            (DataContext as DuplicatedFilesTabViewModel).ShowButtons(sender);
+        public void ShowButtons(object sender, MouseEventArgs e) {
+            ViewUtilities.ShowFileListItemButtons(sender as Border);
         }
 
-        public void HideButtons(object sender, System.Windows.Input.MouseEventArgs e) {
-            (DataContext as DuplicatedFilesTabViewModel).HideButtons(sender);
+        public void HideButtons(object sender, MouseEventArgs e) {
+            ViewUtilities.HideFileListItemButtons(sender as Border);
         }
     }
 }

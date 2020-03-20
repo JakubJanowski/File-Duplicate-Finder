@@ -28,14 +28,6 @@ namespace FileDuplicateFinder.ViewModel {
 
         internal void OnUpdateShowBasePaths() => OnPropertyChanged(nameof(ShowBasePaths));
 
-        public void ShowButtons(object sender) {
-            mainTabControlViewModel.ShowButtons(sender);
-        }
-
-        public void HideButtons(object sender) {
-            mainTabControlViewModel.HideButtons(sender);
-        }
-
         public DelegateCommand<object> OpenFileDirectoryPrimaryCommand { get; private set; }
 
         public DelegateCommand<object> DuplicatedFilesPrimaryOnlyRemoveFileCommand { get; private set; }

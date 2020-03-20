@@ -1,9 +1,13 @@
 ﻿using FileDuplicateFinder.Services;
+using FileDuplicateFinder.Utilities;
 using FileDuplicateFinder.ViewModel;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace FileDuplicateFinder.View {
     public partial class EmptyDirectoriesTabControlView: UserControl {
+        private EmptyDirectoriesTabControlViewModel ViewModel { get => DataContext as EmptyDirectoriesTabControlViewModel; }
+
         public EmptyDirectoriesTabControlView() {
             InitializeComponent();
 
@@ -11,12 +15,12 @@ namespace FileDuplicateFinder.View {
             emptyDirectoriesSecondaryListView.ItemsSource = FileManager.emptyDirectoriesSecondary;
         }
 
-        public void ShowButtons(object sender, System.Windows.Input.MouseEventArgs e) {
-            (DataContext as EmptyDirectoriesTabControlViewModel).ShowButtons(sender);
+        public void ShowButtons(object sender, MouseEventArgs e) {
+            ViewUtilities.ShowFileListItemButtons(sender as Border);
         }
 
-        public void HideButtons(object sender, System.Windows.Input.MouseEventArgs e) {
-            (DataContext as EmptyDirectoriesTabControlViewModel).HideButtons(sender);
+        public void HideButtons(object sender, MouseEventArgs e) {
+            ViewUtilities.HideFileListItemButtons(sender as Border);
         }
     }
 }

@@ -27,14 +27,6 @@ namespace FileDuplicateFinder.ViewModel {
             this.mainTabControlViewModel = mainTabControlViewModel;
         }
 
-        public void ShowButtons(object sender) {
-            mainTabControlViewModel.ShowButtons(sender);
-        }
-
-        public void HideButtons(object sender) {
-            mainTabControlViewModel.HideButtons(sender);
-        }
-
         internal void OnUpdateGUIEnabled() => OnPropertyChanged(nameof(IsGUIEnabled));
 
         public DelegateCommand<object> OpenDirectoryPrimaryCommand { get; private set; }

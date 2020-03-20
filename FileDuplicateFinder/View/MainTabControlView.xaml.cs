@@ -1,4 +1,5 @@
-﻿using FileDuplicateFinder.ViewModel;
+﻿using FileDuplicateFinder.Utilities;
+using FileDuplicateFinder.ViewModel;
 using System.Windows.Controls;
 
 namespace FileDuplicateFinder.View {
@@ -8,8 +9,8 @@ namespace FileDuplicateFinder.View {
         public MainTabControlView() {
             InitializeComponent();
 
-            Utilities.logListView = logListView;
-            Utilities.logTabItem = logTabItem;
+            CommonUtilities.logListView = logListView;
+            CommonUtilities.logTabItem = logTabItem;
 
             //logListView.ItemsSource too
         }

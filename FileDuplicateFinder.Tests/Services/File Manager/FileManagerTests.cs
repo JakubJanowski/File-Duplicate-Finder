@@ -1,36 +1,14 @@
-using FileDuplicateFinder.Services;
-using FileDuplicateFinder.ViewModel;
+using FileDuplicateFinder.Tests;
 using Moq;
-using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Windows;
 using Xunit;
 
-namespace FileDuplicateFinder.Tests {
-    public class FileManagerTestsFixture: IDisposable {
-        public string TestDirectory { get; } = Path.Combine(Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)))))), @"test\TEST");
-        public FileManagerTestsFixture() {
-            if (Application.Current is null) {
-                try {
-                    new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
-                } catch (InvalidOperationException) { }
-            }
-        }
-
-        public void Dispose() {
-            try {
-                Application.Current?.Shutdown();
-            } catch (InvalidOperationException) { }
-        }
-    }
-
-    public class FileManagerTests: IClassFixture<FileManagerTestsFixture> {
+namespace FileDuplicateFinder.Services.Tests {
+    public class FileManagerTests: IClassFixture<TestsFixture> {
         private readonly string testDirectory;
 
-        public FileManagerTests(FileManagerTestsFixture data) {
+        public FileManagerTests(TestsFixture data) {
             testDirectory = data.TestDirectory;
         }
 

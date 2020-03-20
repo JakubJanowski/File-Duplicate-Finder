@@ -1,33 +1,14 @@
 ﻿using Xunit;
 using System.IO;
-using System.Reflection;
 using System;
-using System.Windows;
 using System.Linq;
+using FileDuplicateFinder.Tests;
 
-namespace FileDuplicateFinder.Tests {
-    public class TestsFixture: IDisposable {
-        public string TestDirectory { get; } = Path.Combine(Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)))))), @"test\TEST");
-
-        public TestsFixture() {
-            if (Application.Current is null) {
-                try {
-                    new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
-                } catch (InvalidOperationException) { }
-            }
-        }
-
-        public void Dispose() {
-            try {
-                Application.Current?.Shutdown();
-            } catch(InvalidOperationException) { }
-        }
-    }
-
-    public class UtilitiesTests: IClassFixture<TestsFixture> {
+namespace FileDuplicateFinder.Utilities.Tests {
+    public class FileUtilitiesTests: IClassFixture<TestsFixture> {
         private readonly string testDirectory;
 
-        public UtilitiesTests(TestsFixture data) {
+        public FileUtilitiesTests(TestsFixture data) {
             testDirectory = data.TestDirectory;
         }
 
@@ -105,7 +86,7 @@ namespace FileDuplicateFinder.Tests {
             const string directory = @"C:\test\parent\directory";
 
             Assert.Throws<ArgumentNullException>(() => directory.IsSubdirectoryOf(null));
-            Assert.Throws<ArgumentNullException>(() => Utilities.IsSubdirectoryOf(null, ""));
+            Assert.Throws<ArgumentNullException>(() => FileUtilities.IsSubdirectoryOf(null, ""));
         }
         #endregion
 
@@ -116,7 +97,7 @@ namespace FileDuplicateFinder.Tests {
             const string directory = "C:\\test\\non_existent_path\\directory";
             bool result = false;
 
-            Utilities.CheckDirectory(directory, SearchDirectoryType.Primary, ref result);
+            FileUtilities.CheckDirectory(directory, SearchDirectoryType.Primary, ref result);
 
             Assert.True(result);
         }
@@ -126,8 +107,8 @@ namespace FileDuplicateFinder.Tests {
             bool result1 = false;
             bool result2 = true;
 
-            Utilities.CheckDirectory(testDirectory, SearchDirectoryType.Primary, ref result1);
-            Utilities.CheckDirectory(testDirectory, SearchDirectoryType.Primary, ref result2);
+            FileUtilities.CheckDirectory(testDirectory, SearchDirectoryType.Primary, ref result1);
+            FileUtilities.CheckDirectory(testDirectory, SearchDirectoryType.Primary, ref result2);
 
             Assert.False(result1);
             Assert.True(result2);
@@ -142,7 +123,7 @@ namespace FileDuplicateFinder.Tests {
             string directory2 = Path.Combine(testDirectory, "2");
             bool result = false;
 
-            Utilities.CheckDirectories(directory1, directory2, ref result);
+            FileUtilities.CheckDirectories(directory1, directory2, ref result);
 
             Assert.True(result);
         }
@@ -153,7 +134,7 @@ namespace FileDuplicateFinder.Tests {
             string directory2 = "C:\\test\\non_existent_path\\directory";
             bool result = false;
 
-            Utilities.CheckDirectories(directory1, directory2, ref result);
+            FileUtilities.CheckDirectories(directory1, directory2, ref result);
 
             Assert.True(result);
         }
@@ -165,8 +146,8 @@ namespace FileDuplicateFinder.Tests {
             bool result1 = false;
             bool result2 = true;
 
-            Utilities.CheckDirectories(directory1, directory2, ref result1);
-            Utilities.CheckDirectories(directory1, directory2, ref result2);
+            FileUtilities.CheckDirectories(directory1, directory2, ref result1);
+            FileUtilities.CheckDirectories(directory1, directory2, ref result2);
 
             Assert.False(result1);
             Assert.True(result2);
@@ -185,7 +166,7 @@ namespace FileDuplicateFinder.Tests {
                 @"C:/test/parent/../parent/./directory/file.txt"
             };
 
-            string[] results = paths.Select(p => Utilities.NormalizeDirectoryPath(p)).ToArray();
+            string[] results = paths.Select(p => FileUtilities.NormalizeDirectoryPath(p)).ToArray();
 
             Assert.Single(results.Distinct());
         }
@@ -205,7 +186,7 @@ namespace FileDuplicateFinder.Tests {
                 @"C:\test\parent\directory\subdirectory\..\",
             };
 
-            string[] results = paths.Select(p => Utilities.NormalizeDirectoryPath(p)).ToArray();
+            string[] results = paths.Select(p => FileUtilities.NormalizeDirectoryPath(p)).ToArray();
 
             Assert.Single(results.Distinct());
         }
@@ -221,7 +202,7 @@ namespace FileDuplicateFinder.Tests {
                 @"C:\test\parent\otherdirectory\file.txt",
             };
 
-            string[] results = paths.Select(p => Utilities.NormalizeDirectoryPath(p)).ToArray();
+            string[] results = paths.Select(p => FileUtilities.NormalizeDirectoryPath(p)).ToArray();
 
             Assert.Equal(results.Length, results.Distinct().Count());
         }
@@ -238,7 +219,7 @@ namespace FileDuplicateFinder.Tests {
                 @"directory\\file.txt\"
             };
 
-            string[] results = paths.Select(p => Utilities.NormalizeDirectoryPath(p)).ToArray();
+            string[] results = paths.Select(p => FileUtilities.NormalizeDirectoryPath(p)).ToArray();
 
             for (int i = 0; i < results.Length; i++)
                 Assert.Equal(paths[i], results[i]);
@@ -258,8 +239,8 @@ namespace FileDuplicateFinder.Tests {
                 @"C:\directory\subdirectory\"
             };
 
-            string[] results1 = pathsWithoutSlash.Select(p => Utilities.NormalizeDirectoryPath(p)).ToArray();
-            string[] results2 = pathsWithSlash.Select(p => Utilities.NormalizeDirectoryPath(p)).ToArray();
+            string[] results1 = pathsWithoutSlash.Select(p => FileUtilities.NormalizeDirectoryPath(p)).ToArray();
+            string[] results2 = pathsWithSlash.Select(p => FileUtilities.NormalizeDirectoryPath(p)).ToArray();
 
             for (int i = 0; i < results1.Length; i++)
                 Assert.Equal(pathsWithoutSlash[i] + @"\", results1[i]);
@@ -289,7 +270,7 @@ namespace FileDuplicateFinder.Tests {
         [InlineData(1125899906842624000, "1000 PiB")]
         [InlineData(long.MaxValue, "8,00 EiB")]
         public void PrettyPrintSize_ShouldReturnCorrectStrings(long bytes, string expectedResult) {
-            string result = Utilities.PrettyPrintSize(bytes);
+            string result = CommonUtilities.PrettyPrintSize(bytes);
 
             Assert.Equal(expectedResult, result);
         }
@@ -298,7 +279,7 @@ namespace FileDuplicateFinder.Tests {
         public void PrettyPrintSize_ShouldThrowArgumentException_ForNegativeBytes() {
             const long bytes = -123;
 
-            Assert.Throws<ArgumentException>(() => Utilities.PrettyPrintSize(bytes));
+            Assert.Throws<ArgumentException>(() => CommonUtilities.PrettyPrintSize(bytes));
         }
         #endregion
     }

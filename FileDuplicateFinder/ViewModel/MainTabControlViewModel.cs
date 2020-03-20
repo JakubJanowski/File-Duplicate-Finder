@@ -8,6 +8,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using FileDuplicateFinder.Models;
 using FileDuplicateFinder.Services;
+using FileDuplicateFinder.Utilities;
 using Prism.Commands;
 
 namespace FileDuplicateFinder.ViewModel {
@@ -85,24 +86,6 @@ namespace FileDuplicateFinder.ViewModel {
             FileManager.RemoveProgressUpdated += RemoveProgerssUpdatedHandler;
         }
 
-        public void ShowButtons(object sender) {
-            Border border = sender as Border;
-            Grid grid = border.Child as Grid;
-            border.Background = Brushes.AliceBlue;
-            foreach (var child in grid.Children)
-                if (child is Button)
-                    ((Button)child).Visibility = Visibility.Visible;
-        }
-
-        public void HideButtons(object sender) {
-            Border border = sender as Border;
-            Grid grid = border.Child as Grid;
-            border.Background = Brushes.Transparent;
-            foreach (var child in grid.Children)
-                if (child is Button)
-                    ((Button)child).Visibility = Visibility.Collapsed;
-        }
-
         public DelegateCommand<object> OpenDirectoryPrimaryCommand { get; private set; }
         public void OpenDirectoryPrimary(object sender) {
             /// set this once per search maybe
@@ -116,7 +99,7 @@ namespace FileDuplicateFinder.ViewModel {
                 Process.Start(fullPath);
             } catch (Win32Exception) {
                 FileManager.emptyDirectoriesPrimary.Remove(path);
-                Utilities.Log("Directory \"" + fullPath + "\" no longer exists.");
+                CommonUtilities.Log("Directory \"" + fullPath + "\" no longer exists.");
             }
         }
 
@@ -131,7 +114,7 @@ namespace FileDuplicateFinder.ViewModel {
                 Process.Start(fullPath);
             } catch (Win32Exception) {
                 FileManager.emptyDirectoriesSecondary.Remove(path);
-                Utilities.Log("Directory \"" + fullPath + "\" no longer exists.");
+                CommonUtilities.Log("Directory \"" + fullPath + "\" no longer exists.");
             }
         }
 
@@ -147,7 +130,7 @@ namespace FileDuplicateFinder.ViewModel {
                 Process.Start("explorer.exe", "/select, \"" + fullPath + "\"");
             else {
                 FileManager.RemovePrimaryFileWithPath(path);
-                Utilities.Log("File \"" + fullPath + "\" no longer exists.");
+                CommonUtilities.Log("File \"" + fullPath + "\" no longer exists.");
             }
         }
 
@@ -162,7 +145,7 @@ namespace FileDuplicateFinder.ViewModel {
                 Process.Start("explorer.exe", "/select, \"" + fullPath + "\"");
             else {
                 FileManager.RemoveSecondaryFileWithPath(path);
-                Utilities.Log("File \"" + fullPath + "\" no longer exists.");
+                CommonUtilities.Log("File \"" + fullPath + "\" no longer exists.");
             }
         }
 
@@ -191,7 +174,7 @@ namespace FileDuplicateFinder.ViewModel {
                     action();
                 else
                     action(directory);
-                Utilities.BeginInvoke(() => {
+                CommonUtilities.BeginInvoke(() => {
                     FinishProgress("Done");
                     mainWindowViewModel.IsGUIEnabled = true;
                 });
@@ -199,7 +182,7 @@ namespace FileDuplicateFinder.ViewModel {
         }
 
         private void RemoveProgerssUpdatedHandler(RemoveProgress progress) {
-            Utilities.BeginInvoke(() => {
+            CommonUtilities.BeginInvoke(() => {
                 switch (progress.State) {
                     case RemoveProgressState.StartingRemoval:
                         statusBarViewModel.StateInfo = "0 / " + progress.MaxProgress;

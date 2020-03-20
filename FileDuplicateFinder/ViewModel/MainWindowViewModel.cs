@@ -5,6 +5,7 @@ using System.IO;
 using System.Threading;
 using FileDuplicateFinder.Models;
 using FileDuplicateFinder.Services;
+using FileDuplicateFinder.Utilities;
 using Prism.Commands;
 
 namespace FileDuplicateFinder.ViewModel {
@@ -101,14 +102,13 @@ namespace FileDuplicateFinder.ViewModel {
                 StatusBarViewModel = StatusBarViewModel
             });
 
-            Utilities.statusBarViewModel = StatusBarViewModel;
             FileManager.SearchProgressUpdated += ProgressUpdatedHandler;
             FileManager.tmpDirectory = tmpDirectory;
             Directory.CreateDirectory(tmpDirectory);
         }
 
         private void ProgressUpdatedHandler(DuplicateSearchProgress progress) {
-            Utilities.BeginInvoke(() => {
+            CommonUtilities.BeginInvoke(() => {
                 switch (progress.State) {
                     case DuplicateSearchProgressState.Processing:
                     case DuplicateSearchProgressState.Sorting:
@@ -158,10 +158,10 @@ namespace FileDuplicateFinder.ViewModel {
             bool error = false;
             ////todo chk empty or null string please specify directory to search in or make field required and button unavailable until filled (add form validation)
 
-            Utilities.CheckDirectory(primaryDirectory, SearchDirectoryType.Primary, ref error);
+            FileUtilities.CheckDirectory(primaryDirectory, SearchDirectoryType.Primary, ref error);
 
             if (error) {
-                Utilities.BeginInvoke(() => {
+                CommonUtilities.BeginInvoke(() => {
                     StatusBarViewModel.State = "Failed";
                     StatusBarViewModel.ShowProgress = false;
                     IsGUIEnabled = true;
@@ -171,7 +171,7 @@ namespace FileDuplicateFinder.ViewModel {
 
             FileManager.FindDuplicatedFiles(primaryDirectory, ShowBasePaths);
 
-            Utilities.BeginInvoke(() => {
+            CommonUtilities.BeginInvoke(() => {
                 if (!SortBySizePrimaryOnly)
                     FileManager.duplicatedFilesPrimaryOnly.Sort(Comparer<ObservableRangeCollection<FileEntry>>.Create((a, b) => string.Compare(a[0].Path, b[0].Path, StringComparison.InvariantCultureIgnoreCase))); // a[0].Path.CompareTo(b[0].Path)
                 FinalizeDuplicateFinding();
@@ -184,21 +184,21 @@ namespace FileDuplicateFinder.ViewModel {
 
             if (primaryDirectory.ToUpperInvariant() == secondaryDirectory.ToUpperInvariant()) {
                 error = true;
-                Utilities.LogFromNonGUIThread("Primary and secondary directories must be different.");
+                CommonUtilities.LogFromNonGUIThread("Primary and secondary directories must be different.");
             }
 
-            Utilities.CheckDirectories(primaryDirectory, secondaryDirectory, ref error);
+            FileUtilities.CheckDirectories(primaryDirectory, secondaryDirectory, ref error);
             if (primaryDirectory.IsSubdirectoryOf(secondaryDirectory)) {
                 error = true;
-                Utilities.LogFromNonGUIThread("Primary directory cannot be a subdirectory of secondary directory.");
+                CommonUtilities.LogFromNonGUIThread("Primary directory cannot be a subdirectory of secondary directory.");
             }
             if (secondaryDirectory.IsSubdirectoryOf(primaryDirectory)) {
                 error = true;
-                Utilities.LogFromNonGUIThread("Secondary directory cannot be a subdirectory of primary directory.");
+                CommonUtilities.LogFromNonGUIThread("Secondary directory cannot be a subdirectory of primary directory.");
             }
 
             if (error) {
-                Utilities.BeginInvoke(() => {
+                CommonUtilities.BeginInvoke(() => {
                     StatusBarViewModel.State = "Failed";
                     StatusBarViewModel.ShowProgress = false;
                     IsGUIEnabled = true;
@@ -208,7 +208,7 @@ namespace FileDuplicateFinder.ViewModel {
 
             FileManager.FindDuplicatedFiles(primaryDirectory, secondaryDirectory, ShowBasePaths);
 
-            Utilities.BeginInvoke(() => {
+            CommonUtilities.BeginInvoke(() => {
                 if (!SortBySize)
                     FileManager.duplicatedFiles.Sort(Comparer<Tuple<ObservableRangeCollection<FileEntry>, ObservableRangeCollection<FileEntry>>>.Create((a, b) => string.Compare(a.Item1[0].Path, b.Item1[0].Path, StringComparison.InvariantCultureIgnoreCase)));  // a.Item1[0].Path.CompareTo(b.Item1[0].Path)
                 FinalizeDuplicateFinding();
@@ -259,7 +259,7 @@ namespace FileDuplicateFinder.ViewModel {
 
             //logListView.Items.Clear();
             /// should be through MainTabControl
-            Utilities.logListView.Items.Clear();
+            CommonUtilities.logListView.Items.Clear();
 
             primaryDirectory = DirectoryPickerViewModel.PrimaryDirectory;
             secondaryDirectory = DirectoryPickerViewModel.SecondaryDirectory;

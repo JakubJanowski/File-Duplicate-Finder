@@ -1,4 +1,5 @@
 ﻿using FileDuplicateFinder.Models;
+using FileDuplicateFinder.Utilities;
 
 namespace FileDuplicateFinder.ViewModel {
     class DirectoryPickerViewModel: ObjectBase {
@@ -27,7 +28,7 @@ namespace FileDuplicateFinder.ViewModel {
             get => primaryDirectory;
             set {
                 if (primaryDirectory != value) {
-                    primaryDirectory = Utilities.NormalizeDirectoryPath(value);
+                    primaryDirectory = FileUtilities.NormalizeDirectoryPath(value);
                     statusBarViewModel.State = "Ready";
                     OnPropertyChanged(nameof(PrimaryDirectory));
                 }
@@ -38,7 +39,7 @@ namespace FileDuplicateFinder.ViewModel {
             get => secondaryDirectory;
             set {
                 if (secondaryDirectory != value) {
-                    secondaryDirectory = Utilities.NormalizeDirectoryPath(value);
+                    secondaryDirectory = FileUtilities.NormalizeDirectoryPath(value);
                     statusBarViewModel.State = "Ready";
                     OnPropertyChanged(nameof(SecondaryDirectory));
                 }
