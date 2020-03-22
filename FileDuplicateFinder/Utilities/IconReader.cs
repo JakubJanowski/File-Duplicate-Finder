@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Drawing;
-using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Windows.Media;
 using System.Windows.Interop;
 using System.Windows;
 using System.Windows.Media.Imaging;
 
-namespace FileDuplicateFinder {
+namespace FileDuplicateFinder.Utilities {
     /// <summary>
     /// Provides static methods to read system icons for both folders and files.
     /// </summary>
@@ -46,19 +45,19 @@ namespace FileDuplicateFinder {
         /// <summary>
         /// Returns an icon for a given file - indicated by the name parameter.
         /// </summary>
-        /// <param name="name">Pathname for file.</param>
+        /// <param name="path">Pathname for file.</param>
         /// <param name="size">Large or small</param>
         /// <param name="linkOverlay">Whether to include the link icon</param>
-        /// <returns>System.Drawing.Icon</returns>
+        /// <returns>System.Windows.Media.ImageSource</returns>
         public static ImageSource GetFileIcon(string path, IconSize size, bool linkOverlay) {
             Shell32.SHFILEINFO shfi = new Shell32.SHFILEINFO();
             uint flags = Shell32.SHGFI_ICON | Shell32.SHGFI_USEFILEATTRIBUTES;
 
-            if (true == linkOverlay)
+            if (linkOverlay)
                 flags |= Shell32.SHGFI_LINKOVERLAY;
 
             /* Check the size specified for return. */
-            if (IconSize.Small == size)
+            if (size == IconSize.Small)
                 flags |= Shell32.SHGFI_SMALLICON;
             else
                 flags |= Shell32.SHGFI_LARGEICON;
@@ -69,15 +68,26 @@ namespace FileDuplicateFinder {
                 // Copy (clone) the returned icon to a new object, thus allowing us to clean-up properly
                 Icon icon = (Icon)Icon.FromHandle(shfi.hIcon).Clone();
                 _ = User32.DestroyIcon(shfi.hIcon);     // Cleanup
-                return icon.ToImageSource();
+                return Imaging.CreateBitmapSourceFromHIcon(icon.Handle, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
             }
-            
+
             return null;
+        }
+
+        /// <summary>
+        /// Returns an icon for a given file - indicated by the name parameter. Show previews for files containing images.
+        /// </summary>
+        /// <param name="path">Pathname for file.</param>
+        /// <returns>System.Windows.Media.ImageSource</returns>
+        public static ImageSource GetFileThumbnail(string path) {
+            Icon icon = Icon.ExtractAssociatedIcon(path);
+            return Imaging.CreateBitmapSourceFromHIcon(icon.Handle, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
         }
 
         /// <summary>
         /// Used to access system folder icons.
         /// </summary>
+        /// <param name="path">Pathname for folder.</param>
         /// <param name="size">Specify large or small icons.</param>
         /// <param name="folderType">Specify open or closed FolderType.</param>
         /// <returns>System.Drawing.Icon</returns>
@@ -88,7 +98,7 @@ namespace FileDuplicateFinder {
             if (FolderType.Open == folderType)
                 flags |= Shell32.SHGFI_OPENICON;
 
-            if (IconSize.Small == size)
+            if (size == IconSize.Small)
                 flags |= Shell32.SHGFI_SMALLICON;
             else
                 flags |= Shell32.SHGFI_LARGEICON;
@@ -101,31 +111,11 @@ namespace FileDuplicateFinder {
             if (shfi.hIcon != IntPtr.Zero) {
                 Icon icon = (Icon)Icon.FromHandle(shfi.hIcon).Clone();
                 _ = User32.DestroyIcon(shfi.hIcon);     // Cleanup
-                return icon.ToImageSource();
+                return Imaging.CreateBitmapSourceFromHIcon(icon.Handle, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
             }
 
             return null;
 
-        }
-
-        [DllImport("gdi32.dll", SetLastError = true)]
-        private static extern bool DeleteObject(IntPtr hObject);
-
-        public static ImageSource ToImageSource(this Icon icon) {
-            Bitmap bitmap = icon.ToBitmap();
-            IntPtr hBitmap = bitmap.GetHbitmap();
-
-            ImageSource wpfBitmap = Imaging.CreateBitmapSourceFromHBitmap(
-                hBitmap,
-                IntPtr.Zero,
-                Int32Rect.Empty,
-                BitmapSizeOptions.FromEmptyOptions());
-
-            if (!DeleteObject(hBitmap)) {
-                throw new Win32Exception();
-            }
-
-            return wpfBitmap;
         }
     }
 
@@ -215,13 +205,7 @@ namespace FileDuplicateFinder {
         public const uint FILE_ATTRIBUTE_NORMAL = 0x00000080;
 
         [DllImport("Shell32.dll", CharSet = CharSet.Unicode)]
-        public static extern IntPtr SHGetFileInfo(
-            string pszPath,
-            uint dwFileAttributes,
-            ref SHFILEINFO psfi,
-            uint cbFileInfo,
-            uint uFlags
-            );
+        public static extern IntPtr SHGetFileInfo(string pszPath, uint dwFileAttributes, ref SHFILEINFO psfi, uint cbFileInfo, uint uFlags);
     }
 
     /// <summary>

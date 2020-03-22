@@ -1060,16 +1060,15 @@ namespace FileDuplicateFinder.Services {
         }
 
         public static ImageSource GetFileIcon(string filePath) {
-            //TODO Hashtable store extenion
-            ImageSource icon = IconReader.GetFileIcon(filePath, IconReader.IconSize.Small, false);
-            icon?.Freeze();
-            return icon;
+            ImageSource imageSource = IconReader.GetFileIcon(filePath, IconReader.IconSize.Small, false);
+            imageSource?.Freeze();
+            return imageSource;
         }
+
         public static ImageSource GetFolderIcon(string filePath) {
-            //TODO Hashtable store
-            ImageSource icon = IconReader.GetFolderIcon(filePath, IconReader.IconSize.Small, IconReader.FolderType.Closed);
-            icon?.Freeze();
-            return icon;
+            ImageSource imageSource = IconReader.GetFolderIcon(filePath, IconReader.IconSize.Small, IconReader.FolderType.Closed);
+            imageSource?.Freeze();
+            return imageSource;
         }
     }
 }
