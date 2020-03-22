@@ -9,12 +9,11 @@
     
     <UserControl.Resources>
         <Style x:Key="duplicatedFilesPrimaryListViewItemWithButtonStyle" TargetType="ListViewItem">
-            <Setter Property="SnapsToDevicePixels" Value="true"/>
             <Setter Property="OverridesDefaultStyle" Value="true"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ListViewItem">
-                        <Border Name="Border" Padding="2" Height="24" SnapsToDevicePixels="true" Background="Transparent" MouseEnter="ShowButtons" MouseLeave="HideButtons">
+                        <Border Name="Border" Padding="2" Height="24" Background="Transparent" MouseEnter="ShowButtons" MouseLeave="HideButtons">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="auto"/>
@@ -42,12 +41,11 @@
             </Setter>
         </Style>
         <Style x:Key="duplicatedFilesSecondaryListViewItemWithButtonStyle" TargetType="ListViewItem">
-            <Setter Property="SnapsToDevicePixels" Value="true"/>
             <Setter Property="OverridesDefaultStyle" Value="true"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ListViewItem">
-                        <Border Name="Border" Padding="2" Height="24" SnapsToDevicePixels="true" Background="Transparent" MouseEnter="ShowButtons" MouseLeave="HideButtons">
+                        <Border Name="Border" Padding="2" Height="24" Background="Transparent" MouseEnter="ShowButtons" MouseLeave="HideButtons">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="auto"/>
@@ -75,12 +73,11 @@
             </Setter>
         </Style>
         <Style x:Key="duplicateFileListViewStyle" TargetType="ListViewItem">
-            <Setter Property="SnapsToDevicePixels" Value="true"/>
             <Setter Property="OverridesDefaultStyle" Value="true"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ListViewItem">
-                        <Border Name="Border" Padding="2" SnapsToDevicePixels="true" Background="Transparent">
+                        <Border Name="Border" Padding="2" Background="Transparent">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>

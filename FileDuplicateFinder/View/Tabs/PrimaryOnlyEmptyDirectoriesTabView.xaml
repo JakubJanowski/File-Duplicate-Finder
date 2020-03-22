@@ -8,12 +8,11 @@
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
         <Style x:Key="emptyDirectoriesPrimaryListViewItemWithButtonStyle" TargetType="ListViewItem">
-            <Setter Property="SnapsToDevicePixels" Value="true"/>
             <Setter Property="OverridesDefaultStyle" Value="true"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ListViewItem">
-                        <Border Name="Border" Padding="2" Height="24" SnapsToDevicePixels="true" Background="Transparent" MouseEnter="ShowButtons" MouseLeave="HideButtons">
+                        <Border Name="Border" Padding="2" Height="24" Background="Transparent" MouseEnter="ShowButtons" MouseLeave="HideButtons">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="auto"/>

@@ -6,8 +6,7 @@
         xmlns:view="clr-namespace:FileDuplicateFinder.View"
         xmlns:vm="clr-namespace:FileDuplicateFinder.ViewModel"
         mc:Ignorable="d"
-        Closing="WindowClosing"
-        Title="File Duplicate Finder" Height="720" Width="1280">
+        Closing="WindowClosing" Title="File Duplicate Finder" UseLayoutRounding="True" Height="720" Width="1280">
     <Window.DataContext>
         <vm:MainWindowViewModel/>
     </Window.DataContext>
