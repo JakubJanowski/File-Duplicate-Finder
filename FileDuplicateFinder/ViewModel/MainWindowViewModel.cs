@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Threading;
+using FileDuplicateFinder.Enums;
 using FileDuplicateFinder.Models;
 using FileDuplicateFinder.Services;
 using FileDuplicateFinder.Utilities;

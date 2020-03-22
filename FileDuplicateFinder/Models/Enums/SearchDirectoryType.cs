@@ -1,4 +1,4 @@
-﻿namespace FileDuplicateFinder {
+﻿namespace FileDuplicateFinder.Enums {
     public enum SearchDirectoryType {
         Primary,
         Secondary

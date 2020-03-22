@@ -1,4 +1,6 @@
-﻿namespace FileDuplicateFinder {
+﻿using FileDuplicateFinder.Enums;
+
+namespace FileDuplicateFinder {
     public class DuplicateSearchProgress {
         public string Description { get; set; }
         public int MaxProgress { get; set; }

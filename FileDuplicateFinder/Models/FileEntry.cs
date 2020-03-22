@@ -1,6 +1,6 @@
 ﻿using System.Windows.Media;
 
-namespace FileDuplicateFinder {
+namespace FileDuplicateFinder.Models {
     public class FileEntry {
         public string Path { get; set; }
         public string Size { get; set; }

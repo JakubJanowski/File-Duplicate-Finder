@@ -1,4 +1,4 @@
-﻿namespace FileDuplicateFinder {
+﻿namespace FileDuplicateFinder.Enums {
     public enum DuplicateSearchProgressState {
         Initializing,
         Processing,

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace FileDuplicateFinder {
+namespace FileDuplicateFinder.Exceptions {
     [Serializable]
     public class TaskAbortedException: Exception {
         public TaskAbortedException() {

@@ -1,4 +1,7 @@
-﻿using FileDuplicateFinder.Utilities;
+﻿using FileDuplicateFinder.Enums;
+using FileDuplicateFinder.Exceptions;
+using FileDuplicateFinder.Models;
+using FileDuplicateFinder.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;

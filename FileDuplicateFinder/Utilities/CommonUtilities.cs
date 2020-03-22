@@ -1,4 +1,5 @@
-﻿using FileDuplicateFinder.ViewModel;
+﻿using FileDuplicateFinder.Models;
+using FileDuplicateFinder.ViewModel;
 using System;
 using System.Collections.ObjectModel;
 using System.Threading;

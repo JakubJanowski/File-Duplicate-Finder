@@ -5,7 +5,7 @@ using System.IO;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
+using FileDuplicateFinder.Enums;
 using FileDuplicateFinder.Models;
 using FileDuplicateFinder.Services;
 using FileDuplicateFinder.Utilities;

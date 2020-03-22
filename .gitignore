@@ -267,3 +267,4 @@ __pycache__/
 /test
 /testBackup
 /FileDuplicateFinder.Installer/Installs
+*.diagsession
