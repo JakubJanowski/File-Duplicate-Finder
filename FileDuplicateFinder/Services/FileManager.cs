@@ -609,28 +609,28 @@ namespace FileDuplicateFinder.Services {
         private static bool CompareFileContent(string filePrimary, string fileSecondary, long fileLength) {
             FileStream fileStreamPrimary = null;
             FileStream fileStreamSecondary = null;
+            ReadOnlySpan<byte> bufferSpanPrimary = bufferPrimary;
+            ReadOnlySpan<byte> bufferSpanSecondary = bufferSecondary;
             try {
                 fileStreamPrimary = File.OpenRead(filePrimary);
                 try {
                     fileStreamSecondary = File.OpenRead(fileSecondary);
 
-                    while (fileLength > 0) {
+                    while (fileLength > mebiByte) {
                         if (stopTask)
                             return false;
 
-                        if (fileLength >= mebiByte) {
-                            fileStreamPrimary.Read(bufferPrimary, 0, mebiByte);
-                            fileStreamSecondary.Read(bufferSecondary, 0, mebiByte);
-                            if (!Enumerable.SequenceEqual(bufferPrimary, bufferSecondary))
-                                return false;
-                        } else {
-                            fileStreamPrimary.Read(bufferPrimary, 0, (int)fileLength);
-                            fileStreamSecondary.Read(bufferSecondary, 0, (int)fileLength);
-                            if (!Enumerable.SequenceEqual(Enumerable.Take(bufferPrimary, (int)fileLength), Enumerable.Take(bufferSecondary, (int)fileLength)))
-                                return false;
-                        }
+                        fileStreamPrimary.Read(bufferPrimary, 0, mebiByte);
+                        fileStreamSecondary.Read(bufferSecondary, 0, mebiByte);
+                        if (!bufferSpanPrimary.SequenceEqual(bufferSpanSecondary))
+                            return false;
                         fileLength -= mebiByte;
                     }
+
+                    fileStreamPrimary.Read(bufferPrimary, 0, (int)fileLength);
+                    fileStreamSecondary.Read(bufferSecondary, 0, (int)fileLength);
+                    if (!bufferSpanPrimary.Slice(0, (int)fileLength).SequenceEqual(bufferSpanSecondary.Slice(0, (int)fileLength)))
+                        return false;
                 } catch (IOException) {
                     CommonUtilities.LogFromNonGUIThread("Could not access file " + fileSecondary + " because it is being used by another process.");
                     return false;
