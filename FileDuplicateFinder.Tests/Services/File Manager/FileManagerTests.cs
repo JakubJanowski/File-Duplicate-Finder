@@ -1,3 +1,4 @@
+using FileDuplicateFinder.Enums;
 using FileDuplicateFinder.Tests;
 using Moq;
 using System.Collections.Generic;
@@ -50,6 +51,14 @@ namespace FileDuplicateFinder.Services.Tests {
                     @"\1\abc - Copy.txt",
                     @"\1\abc.txt",
                     @"\2\text.doc"
+                },
+                new string[] {
+                    @"\1\dir\abc shortcut.txt - Copy.lnk",
+                    @"\1\dir\abc shortcut.txt.lnk"
+                },
+                new string[] {
+                    @"\1\dir\abc shortcut different icon.txt - Copy.lnk",
+                    @"\1\dir\abc shortcut different icon.txt.lnk"
                 },
                 new string[] {
                     @"\1\1MiB.dat",

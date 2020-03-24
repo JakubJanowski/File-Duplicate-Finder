@@ -3,6 +3,7 @@ using System.IO;
 using System;
 using System.Linq;
 using FileDuplicateFinder.Tests;
+using FileDuplicateFinder.Enums;
 
 namespace FileDuplicateFinder.Utilities.Tests {
     public class FileUtilitiesTests: IClassFixture<TestsFixture> {
