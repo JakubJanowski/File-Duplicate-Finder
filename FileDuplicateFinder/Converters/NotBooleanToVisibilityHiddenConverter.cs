@@ -2,7 +2,7 @@
 using System.Windows;
 using System.Windows.Data;
 
-namespace FileDuplicateFinder.Converter {
+namespace FileDuplicateFinder.Converters {
     class NotBooleanToVisibilityHiddenConverter: IValueConverter {
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture) {
             if (value is Boolean && (bool)value)

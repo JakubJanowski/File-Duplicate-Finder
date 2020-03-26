@@ -17,10 +17,10 @@ namespace FileDuplicateFinder.Services {
 
     public static class FileManager {
         public static string tmpDirectory;
-        private const int mebiByte = 1048576;
+        private const int halfMiB = 524288;
         private volatile static bool stopTask = false;
-        private static readonly byte[] bufferPrimary = new byte[mebiByte];
-        private static readonly byte[] bufferSecondary = new byte[mebiByte];
+        private static readonly byte[] bufferPrimary = new byte[halfMiB];
+        private static readonly byte[] bufferSecondary = new byte[halfMiB];
         private static Dictionary<int, int> duplicateIndexingPrimary = new Dictionary<int, int>();
         private static Dictionary<int, int> duplicateIndexingSecondary = new Dictionary<int, int>();
 
@@ -612,19 +612,19 @@ namespace FileDuplicateFinder.Services {
             ReadOnlySpan<byte> bufferSpanPrimary = bufferPrimary;
             ReadOnlySpan<byte> bufferSpanSecondary = bufferSecondary;
             try {
-                fileStreamPrimary = File.OpenRead(filePrimary);
+                fileStreamPrimary = new FileStream(filePrimary, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, FileOptions.SequentialScan);
                 try {
-                    fileStreamSecondary = File.OpenRead(fileSecondary);
+                    fileStreamSecondary = new FileStream(fileSecondary, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, FileOptions.SequentialScan);
 
-                    while (fileLength > mebiByte) {
+                    while (fileLength > halfMiB) {
                         if (stopTask)
                             return false;
 
-                        fileStreamPrimary.Read(bufferPrimary, 0, mebiByte);
-                        fileStreamSecondary.Read(bufferSecondary, 0, mebiByte);
+                        fileStreamPrimary.Read(bufferPrimary, 0, halfMiB);
+                        fileStreamSecondary.Read(bufferSecondary, 0, halfMiB);
                         if (!bufferSpanPrimary.SequenceEqual(bufferSpanSecondary))
                             return false;
-                        fileLength -= mebiByte;
+                        fileLength -= halfMiB;
                     }
 
                     fileStreamPrimary.Read(bufferPrimary, 0, (int)fileLength);
@@ -732,7 +732,7 @@ namespace FileDuplicateFinder.Services {
                     directoryInfo.Delete();
                 } else {  // file
                     FileInfo fileInfo = new FileInfo(path);
-                    if (fileInfo.Length < 2 * mebiByte) {   // don't move large files
+                    if (fileInfo.Length < 2 * halfMiB) {   // don't move large files
                         if (backupFiles) {
                             Guid guid = Guid.NewGuid();
                             fileInfo.MoveTo(tmpDirectory + guid.ToString());
