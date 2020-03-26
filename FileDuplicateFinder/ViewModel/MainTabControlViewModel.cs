@@ -96,7 +96,7 @@ namespace FileDuplicateFinder.ViewModel {
                 fullPath = directoryPickerViewModel.PrimaryDirectory + path;
 
             try {
-                Process.Start(fullPath);
+                Process.Start("explorer.exe", $"\"{fullPath}\"");
             } catch (Win32Exception) {
                 FileManager.emptyDirectoriesPrimary.Remove(path);
                 CommonUtilities.Log("Directory \"" + fullPath + "\" no longer exists.");
@@ -111,7 +111,7 @@ namespace FileDuplicateFinder.ViewModel {
                 fullPath = directoryPickerViewModel.SecondaryDirectory + path;
 
             try {
-                Process.Start(fullPath);
+                Process.Start("explorer.exe", $"\"{fullPath}\"");
             } catch (Win32Exception) {
                 FileManager.emptyDirectoriesSecondary.Remove(path);
                 CommonUtilities.Log("Directory \"" + fullPath + "\" no longer exists.");
@@ -127,7 +127,7 @@ namespace FileDuplicateFinder.ViewModel {
                 fullPath = directoryPickerViewModel.PrimaryDirectory + path;
 
             if (File.Exists(fullPath))
-                Process.Start("explorer.exe", "/select, \"" + fullPath + "\"");
+                Process.Start("explorer.exe", $"/select, \"{fullPath}\"");
             else {
                 FileManager.RemovePrimaryFileWithPath(path);
                 CommonUtilities.Log("File \"" + fullPath + "\" no longer exists.");
